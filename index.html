@@ -26,6 +26,16 @@
   </header>
 
   <main>
+    <!-- Shown instead of the full board when someone opens a shared listing link -->
+    <section id="focus" class="focus" hidden>
+      <p class="focus-label">Shared listing</p>
+      <div id="focus-card"></div>
+      <div class="focus-actions">
+        <button type="button" class="btn btn-primary" id="see-all">See all takeovers</button>
+        <button type="button" class="btn btn-outline" data-open="waitlist-dialog">Get alerts</button>
+      </div>
+    </section>
+
     <section class="hero">
       <h1>Every San Marcos lease takeover, in one place.</h1>
       <p>Taking over a lease is often cheaper than signing a new one, and some people will even pay you to take theirs.</p>

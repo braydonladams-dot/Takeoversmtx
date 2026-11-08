@@ -167,8 +167,16 @@
   function render() {
     const list = filtered();
     $('#listings').innerHTML = list.map(card).join('');
-    // Keep the "2 / 5" photo counter in sync when people swipe or use the arrows.
-    $$('#listings .photos').forEach((strip) =>
+    bindPhotoCounters($('#listings'));
+    $('#empty').hidden = list.length > 0;
+    $('#result-count').textContent = all.length
+      ? `${list.length} of ${all.length} takeover${all.length === 1 ? '' : 's'}`
+      : '';
+  }
+
+  // Keep the "2 / 5" photo counter in sync when people swipe or use the arrows.
+  function bindPhotoCounters(root) {
+    $$('.photos', root).forEach((strip) =>
       strip.addEventListener('scroll', () => {
         const counter = strip.parentElement.querySelector('.photo-counter');
         if (!counter) return;
@@ -177,19 +185,25 @@
         counter.textContent = `${current} / ${total}`;
       }, { passive: true })
     );
-    $('#empty').hidden = list.length > 0;
-    $('#result-count').textContent = all.length
-      ? `${list.length} of ${all.length} takeover${all.length === 1 ? '' : 's'}`
-      : '';
   }
 
+  // Shared listing links (takeoversmtx.com/#l-abc123) show just that listing, with a way to see the rest.
   function focusFromHash() {
     const m = location.hash.match(/^#l-(.+)$/);
-    if (!m) return;
-    const el = document.getElementById('l-' + m[1]);
-    if (!el) return;
-    el.classList.add('highlight');
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!m) return exitFocus();
+    const l = all.find((x) => x.id === m[1]);
+    $('#focus-card').innerHTML = l
+      ? card(l).replace(/ id="l-[^"]*"/, '') // avoid a duplicate id with the board's copy
+      : `<div class="empty"><h3>This listing isn't available anymore.</h3><p>It may have already been taken. See what else is up for takeover.</p></div>`;
+    bindPhotoCounters($('#focus-card'));
+    $('#focus').hidden = false;
+    document.body.classList.add('focus-mode');
+    window.scrollTo(0, 0);
+  }
+
+  function exitFocus() {
+    $('#focus').hidden = true;
+    document.body.classList.remove('focus-mode');
   }
 
   async function share(id) {
@@ -395,6 +409,13 @@
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
 
   window.addEventListener('hashchange', focusFromHash);
+
+  $('#see-all').addEventListener('click', () => {
+    history.pushState('', '', location.pathname + location.search); // drop the #l-... from the address
+    exitFocus();
+    $('#board').scrollIntoView({ behavior: 'smooth' });
+  });
+  window.addEventListener('popstate', focusFromHash);
 
   if (CFG.contactEmail) {
     $('#footer-contact').innerHTML = `Questions? <a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a>`;
