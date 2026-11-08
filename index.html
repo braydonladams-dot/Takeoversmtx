@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611081716">
+  <link rel="stylesheet" href="styles.css?v=202611081719">
 </head>
 <body>
   <div id="demo-banner" class="banner" hidden>
@@ -26,13 +26,13 @@
   </header>
 
   <main>
-    <!-- Shown instead of the full board when someone opens a shared listing link -->
+    <!-- Listing details page: shown when a card is clicked or a shared listing link is opened -->
     <section id="focus" class="focus" hidden>
-      <p class="focus-label">Shared listing</p>
+      <button type="button" class="back-link" data-see-all>&#8592; All takeovers</button>
       <div id="focus-card"></div>
       <div class="focus-actions">
-        <button type="button" class="btn btn-primary" id="see-all">See all takeovers</button>
-        <button type="button" class="btn btn-outline" data-open="waitlist-dialog">Get alerts</button>
+        <button type="button" class="btn btn-outline" data-see-all>See all takeovers</button>
+        <button type="button" class="btn btn-ghost" data-open="waitlist-dialog">Get alerts for new listings</button>
       </div>
     </section>
 
@@ -314,7 +314,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611081716"></script>
-  <script src="app.js?v=202611081716"></script>
+  <script src="config.js?v=202611081719"></script>
+  <script src="app.js?v=202611081719"></script>
 </body>
 </html>

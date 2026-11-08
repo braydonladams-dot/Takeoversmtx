@@ -15,6 +15,7 @@
   ];
 
   let all = [];
+  let loaded = false;
 
   const ARRANGEMENT = {
     takeover: { label: 'Takeover', hint: 'The lease moves into your name' },
@@ -86,6 +87,7 @@
         return;
       }
     }
+    loaded = true;
     render();
     focusFromHash();
   }
@@ -118,48 +120,97 @@
     return list.sort(by);
   }
 
-  function card(l) {
-    const c = contactLink(l);
-    const typeLabel = l.unitType === 'unit' ? 'Whole unit' : 'By the bed';
-    const tags = [
+  const typeLabel = (l) => (l.unitType === 'unit' ? 'Whole unit' : 'Shared unit (by the bed)');
+
+  function tagsHtml(l) {
+    return [
       l.transferConfirmed ? '<span class="tag confirmed" title="We confirmed with the complex that this lease can be transferred">✓ Transfer confirmed with complex</span>' : '',
       l.verified ? '<span class="tag verified" title="We saw proof of this lease">✓ Verified lease</span>' : '',
       ARRANGEMENT[l.arrangement] ? `<span class="tag arrangement" title="${esc(ARRANGEMENT[l.arrangement].hint)}">${ARRANGEMENT[l.arrangement].label}</span>` : '',
       l.incentive > 0 ? `<span class="tag incentive">${money(l.incentive)} incentive</span>` : '',
-      `<span class="tag">${typeLabel}</span>`,
+      `<span class="tag">${l.unitType === 'unit' ? 'Whole unit' : 'By the bed'}</span>`,
       l.bedrooms !== '' ? `<span class="tag">${esc(l.bedrooms)} bd / ${esc(l.bathrooms)} ba</span>` : '',
       l.unitType === 'bed' && l.gender && l.gender !== 'Any' ? `<span class="tag">${esc(l.gender)} roommates</span>` : '',
       l.furnished === 'Yes' ? '<span class="tag">Furnished</span>' : '',
     ].join('');
+  }
 
+  // Swipeable photo strip with arrows + counter. `thumbs` adds a clickable thumbnail row (details page).
+  function photosHtml(l, { thumbs = false } = {}) {
     const n = l.photos.length;
-    const photos = n
-      ? `<div class="photo-wrap">
-          <div class="photos">${l.photos.map((id, i) => `<img src="${esc(photoUrl(id))}" data-fallback="${esc(photoFallbackUrl(id))}" alt="Photo ${i + 1} of ${esc(l.complex)}" loading="lazy">`).join('')}</div>
-          ${n > 1 ? `
-            <button type="button" class="photo-nav prev" data-photo-nav="-1" aria-label="Previous photo">&#8249;</button>
-            <button type="button" class="photo-nav next" data-photo-nav="1" aria-label="Next photo">&#8250;</button>
-            <span class="photo-counter">1 / ${n}</span>` : ''}
-        </div>`
+    if (!n) return '';
+    const strip = `<div class="photo-wrap">
+        <div class="photos">${l.photos.map((id, i) => `<img src="${esc(photoUrl(id))}" data-fallback="${esc(photoFallbackUrl(id))}" alt="Photo ${i + 1} of ${esc(l.complex)}" ${i ? 'loading="lazy"' : ''}>`).join('')}</div>
+        ${n > 1 ? `
+          <button type="button" class="photo-nav prev" data-photo-nav="-1" aria-label="Previous photo">&#8249;</button>
+          <button type="button" class="photo-nav next" data-photo-nav="1" aria-label="Next photo">&#8250;</button>
+          <span class="photo-counter">1 / ${n}</span>` : ''}
+      </div>`;
+    const row = thumbs && n > 1
+      ? `<div class="thumbs">${l.photos.map((id, i) => `<button type="button" class="thumb-btn${i ? '' : ' active'}" data-thumb="${i}" aria-label="Show photo ${i + 1}"><img src="${esc(photoUrl(id).replace('=w1200', '=w300'))}" data-fallback="${esc(photoFallbackUrl(id))}" alt="" loading="lazy"></button>`).join('')}</div>`
       : '';
+    return strip + row;
+  }
 
+  function card(l) {
+    const c = contactLink(l);
     return `
-      <article class="card" id="l-${esc(l.id)}">
-        ${photos}
+      <article class="card clickable" id="l-${esc(l.id)}" data-listing="${esc(l.id)}" tabindex="0" aria-label="View details for ${esc(l.complex)}">
+        ${photosHtml(l)}
         <div class="card-top">
           <h3>${esc(l.complex)}</h3>
           <div class="rent">${money(l.rent)}<small>/mo</small></div>
         </div>
-        <div class="tags">${tags}</div>
+        <div class="tags">${tagsHtml(l)}</div>
         <div class="meta">
           <span>Available <b>${esc(fmtDate(l.availableFrom))}</b> · Lease ends <b>${esc(fmtDate(l.leaseEnds))}</b></span>
-          ${l.takeoverFee ? `<span>Transfer fee: <b>${esc(l.takeoverFee)}</b></span>` : ''}
         </div>
         ${l.description ? `<p class="desc">${esc(l.description)}</p>` : ''}
         <div class="card-actions">
           <a class="btn btn-primary btn-sm" href="${esc(c.href)}" target="_blank" rel="noopener">${esc(c.label)}</a>
-          <button class="btn btn-outline btn-sm" data-share="${esc(l.id)}">Share</button>
-          <button class="link-btn" data-report="${esc(l.id)}">Report</button>
+          <a class="btn btn-outline btn-sm" href="#l-${esc(l.id)}">View details</a>
+        </div>
+      </article>`;
+  }
+
+  // Full details page for one listing.
+  function detail(l) {
+    const c = contactLink(l);
+    const arr = ARRANGEMENT[l.arrangement];
+    const facts = [
+      ['Lease', arr ? `${arr.label}<small>${esc(arr.hint)}</small>` : ''],
+      ['Room', esc(typeLabel(l))],
+      ['Bed / bath', l.bedrooms !== '' ? `${esc(l.bedrooms)} bed · ${esc(l.bathrooms)} bath` : ''],
+      ['Roommates', l.unitType === 'bed' ? esc(l.gender && l.gender !== 'Any' ? `${l.gender} only` : 'Any') : ''],
+      ['Furnished', esc(l.furnished || '')],
+      ['Available', esc(fmtDate(l.availableFrom))],
+      ['Lease ends', esc(fmtDate(l.leaseEnds))],
+      ['Transfer fee', esc(l.takeoverFee && !/^n\/?a$/i.test(l.takeoverFee) ? l.takeoverFee : 'Ask the complex')],
+    ].filter(([, v]) => v);
+
+    return `
+      <article class="detail">
+        ${photosHtml(l, { thumbs: true })}
+        <div class="detail-body">
+          <div class="detail-head">
+            <h1>${esc(l.complex)}</h1>
+            <div class="detail-rent">${money(l.rent)}<small>/mo</small></div>
+          </div>
+          <div class="tags">${tagsHtml(l)}</div>
+
+          ${l.incentive > 0 ? `<div class="callout">💵 The current tenant is offering <b>${money(l.incentive)}</b> to whoever takes over this lease.</div>` : ''}
+
+          <dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+
+          ${l.description ? `<section class="detail-section"><h2>About this place</h2><p class="detail-desc">${esc(l.description)}</p></section>` : ''}
+
+          <div class="detail-actions">
+            <a class="btn btn-primary btn-lg" href="${esc(c.href)}" target="_blank" rel="noopener">${esc(c.label)}</a>
+            <button type="button" class="btn btn-outline btn-lg" data-share="${esc(l.id)}">Share</button>
+          </div>
+
+          <p class="detail-note">Tour before committing, and pay rent and fees to the complex, not a stranger. <a href="how-it-works.html">How takeovers work →</a></p>
+          <p class="detail-note"><button type="button" class="link-btn" data-report="${esc(l.id)}">Report this listing</button></p>
         </div>
       </article>`;
   }
@@ -174,36 +225,65 @@
       : '';
   }
 
-  // Keep the "2 / 5" photo counter in sync when people swipe or use the arrows.
+  // Keep the "2 / 5" counter and active thumbnail in sync when people swipe or use the arrows.
   function bindPhotoCounters(root) {
     $$('.photos', root).forEach((strip) =>
       strip.addEventListener('scroll', () => {
-        const counter = strip.parentElement.querySelector('.photo-counter');
-        if (!counter) return;
         const total = strip.querySelectorAll('img').length;
         const current = Math.min(total, Math.round(strip.scrollLeft / strip.clientWidth) + 1);
-        counter.textContent = `${current} / ${total}`;
+        const counter = strip.parentElement.querySelector('.photo-counter');
+        if (counter) counter.textContent = `${current} / ${total}`;
+        const thumbs = strip.parentElement.nextElementSibling;
+        if (thumbs && thumbs.classList.contains('thumbs')) {
+          $$('.thumb-btn', thumbs).forEach((b, i) => b.classList.toggle('active', i === current - 1));
+        }
       }, { passive: true })
     );
   }
 
-  // Shared listing links (takeoversmtx.com/#l-abc123) show just that listing, with a way to see the rest.
+  // Listing details page: takeoversmtx.com/#l-abc123 (from a card click or a shared link).
+  let boardScroll = null; // where the visitor was on the board, so "back" returns them there
+
   function focusFromHash() {
     const m = location.hash.match(/^#l-(.+)$/);
     if (!m) return exitFocus();
     const l = all.find((x) => x.id === m[1]);
+    if (!loaded) return; // listings still loading; load() calls this again when done
     $('#focus-card').innerHTML = l
-      ? card(l).replace(/ id="l-[^"]*"/, '') // avoid a duplicate id with the board's copy
+      ? detail(l)
       : `<div class="empty"><h3>This listing isn't available anymore.</h3><p>It may have already been taken. See what else is up for takeover.</p></div>`;
     bindPhotoCounters($('#focus-card'));
     $('#focus').hidden = false;
     document.body.classList.add('focus-mode');
+    document.title = l ? `${l.complex} · ${money(l.rent)}/mo | Takeover SMTX` : 'Takeover SMTX';
     window.scrollTo(0, 0);
   }
 
   function exitFocus() {
+    if ($('#focus').hidden) return;
     $('#focus').hidden = true;
     document.body.classList.remove('focus-mode');
+    document.title = 'Takeover SMTX: San Marcos lease takeovers in one place';
+    if (boardScroll !== null) {
+      const y = boardScroll;
+      boardScroll = null;
+      requestAnimationFrame(() => window.scrollTo(0, y));
+    }
+  }
+
+  function openListing(id) {
+    boardScroll = window.scrollY;
+    location.hash = 'l-' + id; // hashchange → focusFromHash
+  }
+
+  function backToBoard() {
+    if (boardScroll !== null) {
+      history.back(); // came from the board: go back to the exact spot
+    } else {
+      history.pushState('', '', location.pathname + location.search); // came from a shared link
+      exitFocus();
+      $('#board').scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   async function share(id) {
@@ -382,8 +462,32 @@
       else strip.scrollBy({ left: dir * strip.clientWidth, behavior: 'smooth' });
       return;
     }
+    const th = e.target.closest('[data-thumb]');
+    if (th) {
+      const strip = th.closest('.thumbs').previousElementSibling.querySelector('.photos');
+      strip.scrollTo({ left: Number(th.dataset.thumb) * strip.clientWidth, behavior: 'smooth' });
+      return;
+    }
+    if (e.target.closest('[data-see-all]')) return backToBoard();
     const rm = e.target.closest('[data-remove-photo]');
-    if (rm) { photos.splice(Number(rm.dataset.removePhoto), 1); renderPhotoPreviews(); }
+    if (rm) { photos.splice(Number(rm.dataset.removePhoto), 1); renderPhotoPreviews(); return; }
+
+    // Clicking anywhere on a listing card opens its details page.
+    // The contact button (text / Instagram / email) still works as normal.
+    const cardEl = e.target.closest('.card.clickable');
+    if (cardEl) {
+      const a = e.target.closest('a');
+      if (a && !a.getAttribute('href').startsWith('#l-')) return;
+      e.preventDefault();
+      openListing(cardEl.dataset.listing);
+    }
+  });
+
+  // Keyboard: Enter on a focused card opens it.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const cardEl = e.target.closest && e.target.closest('.card.clickable');
+    if (cardEl && e.target === cardEl) openListing(cardEl.dataset.listing);
   });
 
   $('#photo-input').addEventListener('change', (e) => {
@@ -410,11 +514,6 @@
 
   window.addEventListener('hashchange', focusFromHash);
 
-  $('#see-all').addEventListener('click', () => {
-    history.pushState('', '', location.pathname + location.search); // drop the #l-... from the address
-    exitFocus();
-    $('#board').scrollIntoView({ behavior: 'smooth' });
-  });
   window.addEventListener('popstate', focusFromHash);
 
   if (CFG.contactEmail) {
