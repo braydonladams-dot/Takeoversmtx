@@ -507,6 +507,9 @@
   function showTip(el) {
     tipShownFor = el;
     tip.innerHTML = "<strong>" + esc(el.dataset.tipTitle || "") + "</strong><span>" + esc(el.dataset.tip) + "</span>";
+    // Inside an open popup (like the listing form), the tip has to live in the popup or it shows behind it.
+    const host = el.closest("dialog[open]") || document.body;
+    if (tip.parentNode !== host) host.appendChild(tip);
     tip.hidden = false; tip.classList.remove("below");
     const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect(), pad = 12;
     let left = r.left + r.width / 2 - t.width / 2;

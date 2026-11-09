@@ -150,6 +150,12 @@ small { color: var(--muted); font-weight: 400; }
 /* Badge tooltips */
 .tag.has-tip { cursor: help; outline: none; transition: box-shadow .15s; }
 .tag.has-tip:hover, .tag.has-tip:focus-visible { box-shadow: 0 0 0 2px currentColor inset; }
+.help-tip {
+  display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: .25rem;
+  padding: 0; border: 0; border-radius: 50%; vertical-align: 1px;
+  background: var(--tag); color: var(--maroon); font: 700 .72rem/1 inherit; cursor: help;
+}
+.help-tip:hover, .help-tip:focus-visible { background: var(--maroon); color: #fff; outline: none; }
 #tip {
   position: fixed; z-index: 1000; max-width: min(260px, calc(100vw - 24px));
   display: grid; gap: .2rem; padding: .65rem .8rem; border-radius: 12px;
