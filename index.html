@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611091228">
+  <link rel="stylesheet" href="styles.css?v=202611091231">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -299,11 +299,12 @@
           <option value="unit">Whole unit</option>
         </select>
       </label>
-      <label>Roommates
-        <select name="roommates">
-          <option value="any">No preference</option>
-          <option value="Female">Girls</option>
-          <option value="Male">Guys</option>
+      <label>I'm a
+        <select name="gender" required>
+          <option value="">Choose…</option>
+          <option value="Female">Girl</option>
+          <option value="Male">Guy</option>
+          <option value="Other">Prefer not to say</option>
         </select>
       </label>
       </div>
@@ -387,7 +388,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611091228"></script>
-  <script src="app.js?v=202611091228"></script>
+  <script src="config.js?v=202611091231"></script>
+  <script src="app.js?v=202611091231"></script>
 </body>
 </html>
