@@ -17,6 +17,13 @@
   // Show takeoversmtx.com instead of takeoversmtx.com/index.html in the address bar.
   if (/\/index\.html$/.test(location.pathname)) history.replaceState(null, '', location.pathname.replace(/index\.html$/, '') + location.search + location.hash);
 
+  // Analytics (GoatCounter): counts an event like "view/abc123". Never breaks the page.
+  function track(path, title) {
+    try {
+      if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: path, title: title || path, event: true });
+    } catch (_) { /* ignore */ }
+  }
+
   let all = [];
   let loaded = false;
   let stats = {};
@@ -187,7 +194,7 @@
         </div>
         ${l.description ? `<p class="desc">${esc(l.description)}</p>` : ''}
         <div class="card-actions">
-          <a class="btn btn-primary btn-sm" href="${esc(c.href)}" target="_blank" rel="noopener">${esc(c.label)}</a>
+          <a class="btn btn-primary btn-sm" href="${esc(c.href)}" target="_blank" rel="noopener" data-contact="${esc(l.id)}">${esc(c.label)}</a>
           <a class="btn btn-outline btn-sm" href="#l-${esc(l.id)}">View details</a>
         </div>
       </article>`;
@@ -226,7 +233,7 @@
           ${l.description ? `<section class="detail-section"><h2>About this place</h2><p class="detail-desc">${esc(l.description)}</p></section>` : ''}
 
           <div class="detail-actions">
-            <a class="btn btn-primary btn-lg" href="${esc(c.href)}" target="_blank" rel="noopener">${esc(c.label)}</a>
+            <a class="btn btn-primary btn-lg" href="${esc(c.href)}" target="_blank" rel="noopener" data-contact="${esc(l.id)}">${esc(c.label)}</a>
             <button type="button" class="btn btn-outline btn-lg" data-share="${esc(l.id)}">Share</button>
           </div>
 
@@ -310,6 +317,7 @@
     $('#focus').hidden = false;
     document.body.classList.add('focus-mode');
     document.title = l ? `${l.complex} · ${money(l.rent)}/mo | Takeover SMTX` : 'Takeover SMTX';
+    if (l) track('view/' + l.id, 'Listing view: ' + l.complex);
     window.scrollTo(0, 0);
   }
 
@@ -342,6 +350,7 @@
 
   async function share(id) {
     const l = all.find((x) => x.id === id);
+    track('share/' + id, 'Share: ' + (l ? l.complex : id));
     const url = location.origin + location.pathname + '#l-' + id;
     const text = l ? `Lease takeover: ${l.complex}, ${money(l.rent)}/mo${l.incentive ? ` + ${money(l.incentive)} incentive` : ''}` : 'Lease takeover';
     if (navigator.share) {
@@ -357,6 +366,7 @@
 
   // ---------- dialogs ----------
   function openDialog(id) {
+    track('open/' + id.replace('-dialog', ''), 'Opened form: ' + id.replace('-dialog', ''));
     const d = document.getElementById(id);
     $('form', d).hidden = false;
     $('.form-success', d).hidden = true;
@@ -481,6 +491,7 @@
       if (type === 'listing') clearPhotos();
       form.hidden = true;
       $('.form-success', form.closest('dialog')).hidden = false;
+      track('submitted/' + type, 'Submitted: ' + type);
     } catch (e) {
       console.error(e);
       err.textContent = 'Something went wrong. Check your connection and try again.';
@@ -497,6 +508,11 @@
   );
 
   document.addEventListener('click', (e) => {
+    const ct = e.target.closest('[data-contact]');
+    if (ct) {
+      const cl = all.find((x) => x.id === ct.dataset.contact);
+      track('contact/' + ct.dataset.contact, 'Contact tap: ' + (cl ? cl.complex : ct.dataset.contact));
+    }
     const open = e.target.closest('[data-open]');
     if (open) return openDialog(open.dataset.open);
     const close = e.target.closest('[data-close]');
