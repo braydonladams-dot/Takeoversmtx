@@ -91,6 +91,26 @@
     }
   }
 
+  // "today", "yesterday", "3 days ago", "2 weeks ago" from a yyyy-mm-dd date.
+  function postedAgo(v) {
+    const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return '';
+    const posted = new Date(+m[1], +m[2] - 1, +m[3]);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = Math.round((today - posted) / 864e5);
+    if (days <= 0) return 'today';
+    if (days === 1) return 'yesterday';
+    if (days < 14) return days + ' days ago';
+    if (days < 60) return Math.floor(days / 7) + ' weeks ago';
+    return Math.floor(days / 30) + ' months ago';
+  }
+  function byLine(l, bold) {
+    const ago = postedAgo(l.submittedAt);
+    const who = l.listedBy ? 'Listed by ' + (bold ? '<b>' + esc(l.listedBy) + '</b>' : esc(l.listedBy)) : 'Listed';
+    return `<p class="by">${who}${ago ? ' · ' + ago : ''}</p>`;
+  }
+
   let all = [];
   let loaded = false;
   let stats = {};
@@ -255,7 +275,7 @@
           <h3>${esc(l.complex)}</h3>
           <div class="rent">${money(l.rent)}<small>/mo</small></div>
         </div>
-        ${l.listedBy ? `<p class="by">Listed by ${esc(l.listedBy)}</p>` : ""}
+        ${byLine(l, false)}
         <div class="tags">${tagsHtml(l)}</div>
         <div class="meta">
           <span>Available <b>${esc(fmtDate(l.availableFrom))}</b> · Lease ends <b>${esc(fmtDate(l.leaseEnds))}</b></span>
@@ -291,7 +311,7 @@
             <h1>${esc(l.complex)}</h1>
             <div class="detail-rent">${money(l.rent)}<small>/mo</small></div>
           </div>
-          ${l.listedBy ? `<p class="by">Listed by <b>${esc(l.listedBy)}</b></p>` : ""}
+          ${byLine(l, true)}
           <div class="tags">${tagsHtml(l)}</div>
 
           ${l.incentive > 0 ? `<div class="callout">💵 The current tenant is offering <b>${money(l.incentive)}</b> to whoever takes over this lease.</div>` : ''}
