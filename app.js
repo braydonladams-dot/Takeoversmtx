@@ -171,6 +171,7 @@
           <h3>${esc(l.complex)}</h3>
           <div class="rent">${money(l.rent)}<small>/mo</small></div>
         </div>
+        ${l.listedBy ? `<p class="by">Listed by ${esc(l.listedBy)}</p>` : ""}
         <div class="tags">${tagsHtml(l)}</div>
         <div class="meta">
           <span>Available <b>${esc(fmtDate(l.availableFrom))}</b> · Lease ends <b>${esc(fmtDate(l.leaseEnds))}</b></span>
@@ -206,6 +207,7 @@
             <h1>${esc(l.complex)}</h1>
             <div class="detail-rent">${money(l.rent)}<small>/mo</small></div>
           </div>
+          ${l.listedBy ? `<p class="by">Listed by <b>${esc(l.listedBy)}</b></p>` : ""}
           <div class="tags">${tagsHtml(l)}</div>
 
           ${l.incentive > 0 ? `<div class="callout">💵 The current tenant is offering <b>${money(l.incentive)}</b> to whoever takes over this lease.</div>` : ''}

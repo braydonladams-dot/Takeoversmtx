@@ -452,3 +452,8 @@ body.focus-mode .how { display: none; }
   .detail-rent { font-size: 1.7rem; }
   .facts { grid-template-columns: 1fr 1fr; }
 }
+
+/* "Listed by Sidney" */
+.by { margin: -.15rem 0 .1rem; font-size: .85rem; color: var(--muted); }
+.by b { color: var(--ink); font-weight: 600; }
+.detail .by { margin: .1rem 0 .6rem; font-size: .95rem; }
