@@ -518,3 +518,10 @@ body.focus-mode .stories { display: none; }
 .feedback-fab:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(60, 20, 25, .3); }
 .feedback-fab:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 @media (max-width: 600px) { .feedback-fab { right: 12px; bottom: 12px; padding: .5rem .8rem; font-size: .82rem; } }
+
+/* Instagram */
+.ig-link { display: inline-flex; align-items: center; gap: .45rem; color: var(--maroon); font-weight: 600; text-decoration: none; padding: .4rem .85rem; border: 1px solid var(--line, #d9cbbd); border-radius: 999px; background: var(--card); }
+.ig-link:hover { border-color: var(--maroon); }
+.ig-note { display: flex; gap: .55rem; align-items: flex-start; background: #f6eef0; border-left: 4px solid var(--maroon); border-radius: 8px; padding: .65rem .9rem; font-size: .92rem; }
+.ig-note svg { flex: none; color: var(--maroon); margin-top: 2px; }
+.ig-note a { color: var(--maroon); }
