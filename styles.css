@@ -507,3 +507,14 @@ body.focus-mode .stories { display: none; }
 .hero .hero-stats > p { margin: 0; max-width: none; font-size: .92rem; }
 .hero .hero-stats > .looking-stat { color: #1d4f91; }
 .hero .hero-stats > .success-stat { color: #1f6b44; }
+
+/* Feedback button */
+.feedback-fab {
+  position: fixed; right: 16px; bottom: 16px; z-index: 50;
+  padding: .55rem .95rem; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--maroon); color: #fff; font: 700 .88rem/1 inherit;
+  box-shadow: 0 6px 18px rgba(60, 20, 25, .25); transition: transform .15s, box-shadow .15s;
+}
+.feedback-fab:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(60, 20, 25, .3); }
+.feedback-fab:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+@media (max-width: 600px) { .feedback-fab { right: 12px; bottom: 12px; padding: .5rem .8rem; font-size: .82rem; } }

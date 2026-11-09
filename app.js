@@ -589,6 +589,7 @@
 
     const data = Object.fromEntries(new FormData(form).entries());
     data.type = type;
+    if (type === 'feedback') data.page = location.pathname + location.hash;
     if (type === 'waitlist') {
       const byEmail = data.notifyBy === 'email';
       $('#waitlist-success-text').textContent = byEmail
@@ -790,6 +791,7 @@
   syncNotifyBy();
   $('#waitlist-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'waitlist'); });
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
+  $('#feedback-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'feedback'); });
 
   window.addEventListener('hashchange', focusFromHash);
 
@@ -802,6 +804,7 @@
   // Links from the How it works page: index.html#list and index.html#alerts open the forms.
   if (location.hash === '#list') openDialog('listing-dialog');
   if (location.hash === '#alerts') openDialog('waitlist-dialog');
+  if (location.hash === '#feedback') openDialog('feedback-dialog');
 
   load();
 })();

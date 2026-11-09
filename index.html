@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611091257">
+  <link rel="stylesheet" href="styles.css?v=202611091338">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -352,6 +352,28 @@
     </div>
   </dialog>
 
+  <!-- Feedback -->
+  <button type="button" class="feedback-fab" data-open="feedback-dialog" aria-label="Send feedback">💬 Feedback</button>
+  <dialog id="feedback-dialog" class="dialog">
+    <form id="feedback-form" class="form" novalidate>
+      <div class="dialog-head">
+        <h2>Send feedback</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+      </div>
+      <p class="muted">Something confusing, broken, or missing? Ideas welcome too. It goes straight to us.</p>
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label>Your feedback<textarea name="message" rows="4" maxlength="1500" required placeholder="What's on your mind?"></textarea></label>
+      <label>Email or phone <small>(optional, if you want a reply)</small><input name="contact" maxlength="120"></label>
+      <p class="form-error" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block">Send</button>
+    </form>
+    <div class="form-success" hidden>
+      <h2>Thanks!</h2>
+      <p>We read every message.</p>
+      <button type="button" class="btn btn-primary" data-close>Done</button>
+    </div>
+  </dialog>
+
   <!-- Report a listing -->
   <dialog id="report-dialog" class="dialog">
     <form id="report-form" class="form" novalidate>
@@ -388,7 +410,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611091257"></script>
-  <script src="app.js?v=202611091257"></script>
+  <script src="config.js?v=202611091338"></script>
+  <script src="app.js?v=202611091338"></script>
 </body>
 </html>
