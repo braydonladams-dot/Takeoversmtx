@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611082147">
+  <link rel="stylesheet" href="styles.css?v=202611090050">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -269,6 +269,7 @@
         <label>Move-in date<input type="date" name="moveIn" required></label>
       </div>
 
+      <div class="row">
       <label>Lease type
         <select name="unitType">
           <option value="either">Either</option>
@@ -276,6 +277,14 @@
           <option value="unit">Whole unit</option>
         </select>
       </label>
+      <label>Roommates
+        <select name="roommates">
+          <option value="any">No preference</option>
+          <option value="Female">Girls</option>
+          <option value="Male">Guys</option>
+        </select>
+      </label>
+      </div>
       <label>Preferred complexes or area <small>(optional)</small><input name="complexes" maxlength="200"></label>
       <label>Anything else? <small>(optional)</small><textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
 
@@ -325,7 +334,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611082147"></script>
-  <script src="app.js?v=202611082147"></script>
+  <script src="config.js?v=202611090050"></script>
+  <script src="app.js?v=202611090050"></script>
 </body>
 </html>
