@@ -525,3 +525,7 @@ body.focus-mode .stories { display: none; }
 .ig-note { display: flex; gap: .55rem; align-items: flex-start; background: #f6eef0; border-left: 4px solid var(--maroon); border-radius: 8px; padding: .65rem .9rem; font-size: .92rem; }
 .ig-note svg { flex: none; color: var(--maroon); margin-top: 2px; }
 .ig-note a { color: var(--maroon); }
+
+/* Edit listing */
+.edit-takedown { background: #f6eef0; border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1rem; font-size: .92rem; }
+.edit-takedown p { margin: 0 0 .5rem; }

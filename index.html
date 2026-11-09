@@ -16,7 +16,7 @@
   <meta name="twitter:image" content="https://takeoversmtx.com/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611091451">
+  <link rel="stylesheet" href="styles.css?v=202611091512">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -147,7 +147,7 @@
   <dialog id="listing-dialog" class="dialog">
     <form id="listing-form" class="form" novalidate>
       <div class="dialog-head">
-        <h2>List your lease</h2>
+        <h2 id="listing-title">List your lease</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
       </div>
       <p class="muted">Most listings go live within a few minutes. Every listing is checked for scams and spam.</p>
@@ -262,7 +262,11 @@
       <button type="submit" class="btn btn-primary btn-block btn-lg">Submit listing</button>
     </form>
     <div class="form-success" hidden>
-      <h2>You're all set.</h2>
+      <div id="edit-takedown" class="edit-takedown" hidden>
+        <p><b>Lease taken or not available anymore?</b> Take your listing down so people stop reaching out.</p>
+        <a id="edit-takedown-link" class="btn btn-outline btn-sm" href="#">Take my listing down</a>
+      </div>
+      <h2 id="listing-success-title">You're all set.</h2>
       <p>Your listing should be on the board within a few minutes. We'll email you your link from <b>team@takeoversmtx.com</b> once it's live.</p>
       <p class="spam-note">📩 Don't see it? Check your <b>spam</b> or <b>promotions</b> folder, and mark it "Not spam" so you get our check-ins too.</p>
       <p>Once it's up, share it everywhere. Every share helps it get taken faster.</p>
@@ -420,7 +424,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611091451"></script>
-  <script src="app.js?v=202611091451"></script>
+  <script src="config.js?v=202611091512"></script>
+  <script src="app.js?v=202611091512"></script>
 </body>
 </html>

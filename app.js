@@ -489,7 +489,8 @@
 
   // ---------- photos ----------
   const MAX_PHOTOS = 8;
-  let photos = []; // [{ dataUrl }]
+  let photos = []; // [{ dataUrl }] new uploads, or [{ existingId, dataUrl }] photos already on the listing
+  let editing = null; // { id, token } while editing an existing listing
 
   // Shrink photos on the device before upload: max 1280px, JPEG. Keeps uploads fast on cell data.
   function compressImage(file, maxDim = 1280, quality = 0.78) {
@@ -516,6 +517,63 @@
       .join('');
     $('#photo-add').hidden = photos.length >= MAX_PHOTOS;
   }
+
+  // ---------- edit an existing listing (private link: #edit-<id>.<token>) ----------
+  async function startEdit(id, token) {
+    const d = $('#listing-dialog');
+    const f = $('#listing-form');
+    openDialog('listing-dialog');
+    $('#listing-title').textContent = 'Loading your listing…';
+    f.hidden = true;
+    try {
+      const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ type: 'editLoad', id, t: token }) });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error || 'failed');
+      editing = { id, token };
+      f.reset();
+      Object.entries(out.listing).forEach(([k, v]) => {
+        const el = f.elements[k];
+        if (!el || v === null || v === undefined) return;
+        el.value = String(v);
+      });
+      syncContactInput();
+      if (out.listing.contactMethod === 'text') f.contact.value = formatPhone(out.listing.contact);
+      photos = (out.photos || []).map((pid) => ({ existingId: pid, dataUrl: photoUrl(pid) }));
+      renderPhotoPreviews();
+      proof = null;
+      renderProof();
+      $('.verify-section').hidden = !!out.verified;
+      $('#listing-title').textContent = 'Edit your listing';
+      $('#edit-takedown').hidden = !out.takeDownUrl;
+      $('#edit-takedown-link').href = out.takeDownUrl || '#';
+      $('button[type=submit]', f).textContent = 'Save changes';
+      f.hidden = false;
+    } catch (e) {
+      console.error(e);
+      editing = null;
+      $('#listing-title').textContent = "This edit link isn't working";
+      const err = $('.form-error', f);
+      f.hidden = false;
+      err.textContent = 'The link may be old or the listing was removed. Reply to any of our emails and we will fix it for you.';
+      err.hidden = false;
+    }
+  }
+
+  function endEdit() {
+    if (!editing) return;
+    editing = null;
+    const f = $('#listing-form');
+    f.reset();
+    clearPhotos();
+    syncContactInput();
+    $('.verify-section').hidden = false;
+    $('#edit-takedown').hidden = true;
+    $('#listing-title').textContent = 'List your lease';
+    $('#listing-success-title').textContent = "You're all set.";
+    $('button[type=submit]', f).textContent = 'Submit listing';
+    if (/^#edit-/.test(location.hash)) history.replaceState(null, '', location.pathname);
+  }
+  $('#listing-dialog').addEventListener('close', endEdit);
 
   async function addPhotos(files) {
     const err = $('#listing-form .form-error');
@@ -596,6 +654,35 @@
         ? "We'll email you as soon as something matching what you want is listed. If anything already fits, it's on its way now."
         : "We'll text you when something matching what you want is listed.";
       $('#waitlist-spam-note').hidden = !byEmail;
+    }
+    if (type === 'listing' && editing) {
+      const err2 = $('.form-error', form);
+      const btn2 = $('button[type=submit]', form);
+      btn2.disabled = true;
+      btn2.textContent = photos.some((p) => !p.existingId) ? 'Uploading photos…' : 'Saving…';
+      try {
+        const body = {
+          type: 'edit', id: editing.id, t: editing.token, fields: data,
+          items: photos.map((p) => (p.existingId ? { id: p.existingId } : { b64: p.dataUrl.split(',')[1] })),
+          proof: proof ? proof.split(',')[1] : '',
+        };
+        const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+        const out = await res.json();
+        if (!out.ok) throw new Error(out.error || 'failed');
+        form.hidden = true;
+        $('#listing-success-title').textContent = out.status === 'pending' ? 'Saved. We will give it a quick look.' : 'Your changes are saved.';
+        $('.form-success', form.closest('dialog')).hidden = false;
+        track('edited/listing', 'Edited listing');
+        load(); // the form resets itself when the dialog closes (endEdit)
+      } catch (e) {
+        console.error(e);
+        err2.textContent = 'Could not save your changes. Check your connection and try again.';
+        err2.hidden = false;
+      } finally {
+        btn2.disabled = false;
+        btn2.textContent = 'Save changes';
+      }
+      return;
     }
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
     if (type === 'listing' && proof) data.proof = proof.split(',')[1];
@@ -805,6 +892,8 @@
   if (location.hash === '#list') openDialog('listing-dialog');
   if (location.hash === '#alerts') openDialog('waitlist-dialog');
   if (location.hash === '#feedback') openDialog('feedback-dialog');
+  const editMatch = location.hash.match(/^#edit-([\w]+)\.([\w]+)$/);
+  if (editMatch) startEdit(editMatch[1], editMatch[2]);
 
   load();
 })();
