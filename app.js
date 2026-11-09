@@ -24,6 +24,73 @@
     } catch (_) { /* ignore */ }
   }
 
+  // Interested visitors: remember their info and the contacts they've unlocked (this device only).
+  const store = {
+    get(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (_) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { /* private mode */ } },
+  };
+  const revealed = () => store.get('tsmtx_revealed', {});
+
+  // The main button on a listing: "I'm interested" until they share their info, then the real contact.
+  function contactBtn(l, size) {
+    const r = revealed()[l.id];
+    if (r && r.contact) {
+      const c = contactLink({ contactMethod: r.contactMethod, contact: r.contact });
+      return `<a class="btn btn-primary btn-${size}" href="${esc(c.href)}" target="_blank" rel="noopener" data-contact="${esc(l.id)}">${esc(c.label)}</a>`;
+    }
+    return `<button type="button" class="btn btn-primary btn-${size}" data-interest="${esc(l.id)}">I'm interested</button>`;
+  }
+
+  function openInterest(id) {
+    const l = all.find((x) => x.id === id);
+    if (!l) return;
+    const f = $('#interest-form');
+    f.reset();
+    const me = store.get('tsmtx_me', {});
+    ['name', 'phone', 'email'].forEach((k) => { if (me[k]) f[k].value = me[k]; });
+    f.listingId.value = id;
+    $$('#interest-dialog .interest-first').forEach((el) => (el.textContent = l.listedBy || 'the lister'));
+    $('#interest-sub').textContent = `${l.complex} · ${money(l.rent)}/mo`;
+    openDialog('interest-dialog');
+  }
+
+  async function submitInterest(form) {
+    const err = $('.form-error', form);
+    const msg = validate(form, 'interest');
+    if (msg) { err.textContent = msg; err.hidden = false; return; }
+    err.hidden = true;
+    const data = Object.fromEntries(new FormData(form).entries());
+    data.type = 'interest';
+    const btn = $('button[type=submit]', form);
+    btn.disabled = true;
+    btn.textContent = 'One sec…';
+    try {
+      const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+      const out = await res.json();
+      if (!out.ok) throw new Error(out.error || 'failed');
+      store.set('tsmtx_me', { name: data.name, phone: data.phone, email: data.email });
+      const rv = revealed();
+      rv[data.listingId] = { contact: out.contact, contactMethod: out.contactMethod };
+      store.set('tsmtx_revealed', rv);
+      const c = contactLink({ contactMethod: out.contactMethod, contact: out.contact });
+      $('#interest-contact').innerHTML = `<a class="btn btn-primary btn-lg btn-block" href="${esc(c.href)}" target="_blank" rel="noopener" data-contact="${esc(data.listingId)}">${esc(c.label)}</a>`;
+      form.hidden = true;
+      $('.form-success', form.closest('dialog')).hidden = false;
+      track('interest/' + data.listingId, 'Interested: ' + ((all.find((x) => x.id === data.listingId) || {}).complex || data.listingId));
+      render();
+      if (!$('#focus').hidden) focusFromHash();
+    } catch (e) {
+      console.error(e);
+      err.textContent = e.message === 'too many' ? "You've checked a lot of listings today. Try again tomorrow."
+        : e.message === 'gone' ? 'This listing was just taken or removed.'
+        : 'Something went wrong. Check your connection and try again.';
+      err.hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Show contact info';
+    }
+  }
+
   let all = [];
   let loaded = false;
   let stats = {};
@@ -194,7 +261,7 @@
         </div>
         ${l.description ? `<p class="desc">${esc(l.description)}</p>` : ''}
         <div class="card-actions">
-          <a class="btn btn-primary btn-sm" href="${esc(c.href)}" target="_blank" rel="noopener" data-contact="${esc(l.id)}">${esc(c.label)}</a>
+          ${contactBtn(l, 'sm')}
           <a class="btn btn-outline btn-sm" href="#l-${esc(l.id)}">View details</a>
         </div>
       </article>`;
@@ -233,7 +300,7 @@
           ${l.description ? `<section class="detail-section"><h2>About this place</h2><p class="detail-desc">${esc(l.description)}</p></section>` : ''}
 
           <div class="detail-actions">
-            <a class="btn btn-primary btn-lg" href="${esc(c.href)}" target="_blank" rel="noopener" data-contact="${esc(l.id)}">${esc(c.label)}</a>
+            ${contactBtn(l, 'lg')}
             <button type="button" class="btn btn-outline btn-lg" data-share="${esc(l.id)}">Share</button>
           </div>
 
@@ -492,6 +559,13 @@
 
     const data = Object.fromEntries(new FormData(form).entries());
     data.type = type;
+    if (type === 'waitlist') {
+      const byEmail = data.notifyBy === 'email';
+      $('#waitlist-success-text').textContent = byEmail
+        ? "We'll email you as soon as something matching what you want is listed. If anything already fits, it's on its way now."
+        : "We'll text you when something matching what you want is listed.";
+      $('#waitlist-spam-note').hidden = !byEmail;
+    }
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
     if (type === 'listing' && proof) data.proof = proof.split(',')[1];
     const btn = $('button[type=submit]', form);
@@ -512,6 +586,7 @@
         });
       }
       form.reset();
+      if (type === 'waitlist') syncNotifyBy();
       if (type === 'listing') clearPhotos();
       form.hidden = true;
       $('.form-success', form.closest('dialog')).hidden = false;
@@ -565,6 +640,8 @@
     }
     if (e.target.closest('[data-see-all]')) return backToBoard();
     if (e.target.closest('[data-remove-proof]')) { proof = null; renderProof(); return; }
+    const iv = e.target.closest('[data-interest]');
+    if (iv) { e.preventDefault(); openInterest(iv.dataset.interest); return; }
     const rm = e.target.closest('[data-remove-photo]');
     if (rm) { photos.splice(Number(rm.dataset.removePhoto), 1); renderPhotoPreviews(); return; }
 
@@ -672,6 +749,15 @@
   );
 
   $('#listing-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'listing'); });
+  $('#interest-form').addEventListener('submit', (e) => { e.preventDefault(); submitInterest(e.target); });
+  function syncNotifyBy() {
+    const f = $('#waitlist-form');
+    const byEmail = f.notifyBy.value === 'email';
+    f.email.required = byEmail;
+    $('#waitlist-email-hint').textContent = byEmail ? '(required for email alerts)' : '(optional)';
+  }
+  $$('#waitlist-form [name=notifyBy]').forEach((r) => r.addEventListener('change', syncNotifyBy));
+  syncNotifyBy();
   $('#waitlist-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'waitlist'); });
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
 

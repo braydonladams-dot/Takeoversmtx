@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611090938">
+  <link rel="stylesheet" href="styles.css?v=202611091225">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -265,7 +265,7 @@
         <h2>Get alerted</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
       </div>
-      <p class="muted">Tell us what you want. When a matching takeover is listed, we'll text you.</p>
+      <p class="muted">Tell us what you want. When a matching takeover is listed, we'll let you know.</p>
 
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
@@ -273,7 +273,14 @@
         <label>Name<input name="name" required maxlength="80"></label>
         <label>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" required maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
       </div>
-      <label>Email <small>(optional)</small><input type="email" name="email" maxlength="120"></label>
+      <fieldset class="field">
+        <legend>Send me alerts by</legend>
+        <div class="choice-cards two compact">
+          <label class="choice"><input type="radio" name="notifyBy" value="text" checked><span>Text</span></label>
+          <label class="choice"><input type="radio" name="notifyBy" value="email"><span>Email</span></label>
+        </div>
+      </fieldset>
+      <label id="waitlist-email-field">Email <small id="waitlist-email-hint">(optional)</small><input type="email" name="email" maxlength="120"></label>
 
       <div class="row">
         <label>Max rent / month<input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="$"></label>
@@ -304,8 +311,39 @@
     </form>
     <div class="form-success" hidden>
       <h2>You're on the list.</h2>
-      <p>We'll text you when something matching what you want is listed.</p>
+      <p id="waitlist-success-text">We'll let you know when something matching what you want is listed.</p>
+      <p class="spam-note" id="waitlist-spam-note" hidden>📩 Our emails come from <b>team@takeoversmtx.com</b>. If you don't see one, check your <b>spam</b> or <b>promotions</b> folder and mark it "Not spam."</p>
       <button type="button" class="btn btn-primary" data-close>Done</button>
+    </div>
+  </dialog>
+
+  <!-- I'm interested: share your info to see the lister's contact -->
+  <dialog id="interest-dialog" class="dialog">
+    <form id="interest-form" class="form" novalidate>
+      <div class="dialog-head">
+        <h2>Contact <span class="interest-first">the lister</span></h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+      </div>
+      <p class="muted" id="interest-sub"></p>
+
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <input type="hidden" name="listingId">
+
+      <div class="row">
+        <label>Your name<input name="name" required maxlength="80" autocomplete="name"></label>
+        <label>Your phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" required maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
+      </div>
+      <label>Email <small>(optional)</small><input type="email" name="email" maxlength="120" autocomplete="email"></label>
+      <p class="hint-text">We'll share your name and number with <span class="interest-first">the lister</span> so they can reach you too. It's never posted on the site.</p>
+
+      <p class="form-error" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Show contact info</button>
+    </form>
+    <div class="form-success" hidden>
+      <h2>Here's how to reach <span class="interest-first">them</span></h2>
+      <p class="muted">We also sent them your info, so they may reach out first. Mention you found it on Takeover SMTX.</p>
+      <div id="interest-contact" class="interest-contact"></div>
+      <button type="button" class="btn btn-outline" data-close>Done</button>
     </div>
   </dialog>
 
@@ -345,7 +383,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611090938"></script>
-  <script src="app.js?v=202611090938"></script>
+  <script src="config.js?v=202611091225"></script>
+  <script src="app.js?v=202611091225"></script>
 </body>
 </html>

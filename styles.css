@@ -489,3 +489,8 @@ body.focus-mode .stories { display: none; }
 
 /* Spam folder reminder after submitting */
 .spam-note { background: #fbf5e6; border-left: 4px solid var(--gold); border-radius: 8px; padding: .65rem .9rem; font-size: .92rem; }
+
+/* I'm interested */
+.hint-text { font-size: .85rem; color: var(--muted); margin: .25rem 0 .5rem; }
+.interest-contact { margin: 1rem 0; }
+.btn-block { display: block; width: 100%; text-align: center; }
