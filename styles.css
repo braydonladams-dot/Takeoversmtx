@@ -146,6 +146,27 @@ small { color: var(--muted); font-weight: 400; }
 .tag.verified { background: var(--gold-soft); color: #8a6512; font-weight: 700; }
 .tag.confirmed { background: #e6effa; color: #1d4f91; font-weight: 700; }
 .tag.arrangement { background: #f3e8ea; color: var(--maroon); font-weight: 600; }
+
+/* Badge tooltips */
+.tag.has-tip { cursor: help; outline: none; transition: box-shadow .15s; }
+.tag.has-tip:hover, .tag.has-tip:focus-visible { box-shadow: 0 0 0 2px currentColor inset; }
+#tip {
+  position: fixed; z-index: 1000; max-width: min(260px, calc(100vw - 24px));
+  display: grid; gap: .2rem; padding: .65rem .8rem; border-radius: 12px;
+  background: #2a1a1d; color: #f5f0e9; font-size: .85rem; line-height: 1.4;
+  box-shadow: 0 10px 30px rgba(42, 26, 29, .28), 0 2px 6px rgba(42, 26, 29, .18);
+  pointer-events: none; opacity: 0; transform: translateY(4px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+#tip.below { transform: translateY(-4px); }
+#tip.show { opacity: 1; transform: translateY(0); }
+#tip strong { color: var(--gold); font-size: .8rem; letter-spacing: .02em; }
+#tip span { color: #e9e2d9; }
+#tip::after {
+  content: ""; position: absolute; left: var(--arrow-x, 50%); top: 100%;
+  transform: translateX(-50%); border: 7px solid transparent; border-top-color: #2a1a1d;
+}
+#tip.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: #2a1a1d; }
 .link-btn { margin-left: auto; background: none; border: 0; padding: 0; font: inherit; font-size: .8rem; color: var(--muted); text-decoration: underline; cursor: pointer; }
 .meta { font-size: .9rem; color: var(--muted); display: grid; gap: .15rem; }
 .meta b { color: var(--ink); font-weight: 600; }

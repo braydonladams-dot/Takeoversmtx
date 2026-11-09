@@ -124,10 +124,10 @@
 
   function tagsHtml(l) {
     return [
-      l.transferConfirmed ? '<span class="tag confirmed" title="We confirmed with the complex that this lease can be transferred">✓ Transfer confirmed with complex</span>' : '',
-      l.verified ? '<span class="tag verified" title="We saw proof of this lease">✓ Verified lease</span>' : '',
-      ARRANGEMENT[l.arrangement] ? `<span class="tag arrangement" title="${esc(ARRANGEMENT[l.arrangement].hint)}">${ARRANGEMENT[l.arrangement].label}</span>` : '',
-      l.incentive > 0 ? `<span class="tag incentive">${money(l.incentive)} incentive</span>` : '',
+      l.transferConfirmed ? '<span class="tag confirmed has-tip" tabindex="0" data-tip-title="Transfer confirmed" data-tip="We checked with the complex that this lease can be transferred to someone new.">✓ Transfer confirmed with complex</span>' : '',
+      l.verified ? '<span class="tag verified has-tip" tabindex="0" data-tip-title="Verified lease" data-tip="We saw proof that this person is really on this lease.">✓ Verified lease</span>' : '',
+      ARRANGEMENT[l.arrangement] ? `<span class="tag arrangement has-tip" tabindex="0" data-tip-title="${esc(ARRANGEMENT[l.arrangement].label)}" data-tip="${esc(ARRANGEMENT[l.arrangement].hint)}.">${ARRANGEMENT[l.arrangement].label}</span>` : '',
+      l.incentive > 0 ? `<span class="tag incentive has-tip" tabindex="0" data-tip-title="Cash incentive" data-tip="The current tenant will pay you this to take over their lease.">${money(l.incentive)} incentive</span>` : '',
       `<span class="tag">${l.unitType === 'unit' ? 'Whole unit' : 'By the bed'}</span>`,
       l.bedrooms !== '' ? `<span class="tag">${esc(l.bedrooms)} bd / ${esc(l.bathrooms)} ba</span>` : '',
       l.unitType === 'bed' && l.gender && l.gender !== 'Any' ? `<span class="tag">${esc(l.gender)} roommates</span>` : '',
@@ -472,6 +472,10 @@
     const rm = e.target.closest('[data-remove-photo]');
     if (rm) { photos.splice(Number(rm.dataset.removePhoto), 1); renderPhotoPreviews(); return; }
 
+    const tipEl = e.target.closest(".has-tip");
+    if (tipEl) { e.preventDefault(); return showTip(tipEl); }
+    if (!e.target.closest("#tip")) hideTip();
+
     // Clicking anywhere on a listing card opens its details page.
     // The contact button (text / Instagram / email) still works as normal.
     const cardEl = e.target.closest('.card.clickable');
@@ -482,6 +486,36 @@
       openListing(cardEl.dataset.listing);
     }
   });
+
+  // ---------- badge tooltips ----------
+  const hoverCapable = window.matchMedia("(hover: hover)").matches;
+  const tip = document.createElement("div");
+  tip.id = "tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let tipShownFor = null;
+  function showTip(el) {
+    tipShownFor = el;
+    tip.innerHTML = "<strong>" + esc(el.dataset.tipTitle || "") + "</strong><span>" + esc(el.dataset.tip) + "</span>";
+    tip.hidden = false; tip.classList.remove("below");
+    const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect(), pad = 12;
+    let left = r.left + r.width / 2 - t.width / 2;
+    left = Math.max(pad, Math.min(left, window.innerWidth - t.width - pad));
+    let top = r.top - t.height - 10;
+    if (top < pad) { top = r.bottom + 10; tip.classList.add("below"); }
+    tip.style.left = left + "px"; tip.style.top = top + "px";
+    tip.style.setProperty("--arrow-x", (r.left + r.width / 2 - left) + "px");
+    requestAnimationFrame(() => tip.classList.add("show"));
+  }
+  function hideTip() { tipShownFor = null; tip.classList.remove("show"); tip.hidden = true; }
+  if (hoverCapable) {
+    document.addEventListener("mouseover", (e) => { const el = e.target.closest(".has-tip"); if (el && el !== tipShownFor) showTip(el); });
+    document.addEventListener("mouseout", (e) => { const el = e.target.closest(".has-tip"); if (el && !el.contains(e.relatedTarget)) hideTip(); });
+  }
+  document.addEventListener("focusin", (e) => { if (e.target.classList && e.target.classList.contains("has-tip")) showTip(e.target); });
+  document.addEventListener("focusout", (e) => { if (e.target === tipShownFor) hideTip(); });
+  window.addEventListener("scroll", hideTip, { passive: true, capture: true });
+  window.addEventListener("resize", hideTip);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(); });
 
   // Keyboard: Enter on a focused card opens it.
   document.addEventListener('keydown', (e) => {
