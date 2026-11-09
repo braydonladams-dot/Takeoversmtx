@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611082057">
+  <link rel="stylesheet" href="styles.css?v=202611082123">
 </head>
 <body>
   <div id="demo-banner" class="banner" hidden>
@@ -44,6 +44,7 @@
         <button class="btn btn-outline btn-lg" data-open="listing-dialog">Get out of my lease</button>
       </div>
       <a class="text-link" href="how-it-works.html">New here? See how it works →</a>
+      <p id="success-stat" class="success-stat" hidden></p>
     </section>
 
     <section id="board" class="board">
@@ -91,6 +92,10 @@
 
       <p id="result-count" class="muted"></p>
       <div id="listings" class="grid"></div>
+      <div id="taken-wrap" hidden>
+        <h2 class="taken-head">Recently taken</h2>
+        <div id="taken-listings" class="grid"></div>
+      </div>
 
       <div id="empty" class="empty" hidden>
         <h3>Nothing matches yet.</h3>
@@ -314,7 +319,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611082057"></script>
-  <script src="app.js?v=202611082057"></script>
+  <script src="config.js?v=202611082123"></script>
+  <script src="app.js?v=202611082123"></script>
 </body>
 </html>

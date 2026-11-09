@@ -16,6 +16,7 @@
 
   let all = [];
   let loaded = false;
+  let stats = {};
 
   const ARRANGEMENT = {
     takeover: { label: 'Takeover', hint: 'The lease moves into your name' },
@@ -51,6 +52,7 @@
       verified: l.verified === true || String(l.verified).toLowerCase() === 'true',
       transferConfirmed: l.transferConfirmed === true || String(l.transferConfirmed).toLowerCase() === 'true',
       photos: Array.isArray(l.photos) ? l.photos.filter(Boolean) : [],
+      taken: l.taken === true,
     };
   }
 
@@ -91,6 +93,7 @@
         const res = await fetch(API);
         const data = await res.json();
         all = (data.listings || []).map(normalize);
+        stats = data.stats || {};
       } catch (err) {
         console.error(err);
         $('#result-count').textContent = "Couldn't load listings. Try refreshing.";
@@ -112,6 +115,7 @@
     const sort = $('#f-sort').value;
 
     const list = all.filter((l) => {
+      if (l.taken) return false;
       if (q && !`${l.complex} ${l.description}`.toLowerCase().includes(q)) return false;
       if (type && l.unitType !== type) return false;
       if (arrangement && l.arrangement !== arrangement) return false;
@@ -229,12 +233,34 @@
 
   function render() {
     const list = filtered();
+    const live = all.filter((l) => !l.taken);
+    const taken = all.filter((l) => l.taken);
     $('#listings').innerHTML = list.map(card).join('');
     bindPhotoCounters($('#listings'));
     $('#empty').hidden = list.length > 0;
-    $('#result-count').textContent = all.length
-      ? `${list.length} of ${all.length} takeover${all.length === 1 ? '' : 's'}`
+    $('#result-count').textContent = live.length
+      ? `${list.length} of ${live.length} takeover${live.length === 1 ? '' : 's'}`
       : '';
+    $('#taken-listings').innerHTML = taken.map(takenCard).join('');
+    $('#taken-wrap').hidden = taken.length === 0;
+    const n = Number(stats.successes) || 0;
+    $('#success-stat').hidden = n === 0;
+    if (n) $('#success-stat').innerHTML = `<b>${n}</b> lease${n === 1 ? '' : 's'} taken over through Takeover SMTX`;
+  }
+
+  // A listing someone already took: stamped, faded, not clickable. Shows the site works.
+  function takenCard(l) {
+    const p = l.photos[0];
+    return `
+      <article class="card taken-card" aria-label="${esc(l.complex)}, taken">
+        ${p ? `<div class="taken-photo"><img src="${esc(photoUrl(p))}" alt="" loading="lazy" data-fallback="${esc(photoFallbackUrl(p))}"></div>` : ''}
+        <span class="taken-stamp">Taken ✓</span>
+        <div class="card-top">
+          <h3>${esc(l.complex)}</h3>
+          <div class="rent">${money(l.rent)}<small>/mo</small></div>
+        </div>
+        <p class="by">${l.unitType === 'unit' ? 'Whole unit' : 'Room'}${l.incentive > 0 ? ` · ${money(l.incentive)} incentive` : ''}</p>
+      </article>`;
   }
 
   // Keep the "2 / 5" counter and active thumbnail in sync when people swipe or use the arrows.
@@ -261,7 +287,9 @@
     if (!m) return exitFocus();
     const l = all.find((x) => x.id === m[1]);
     if (!loaded) return; // listings still loading; load() calls this again when done
-    $('#focus-card').innerHTML = l
+    $('#focus-card').innerHTML = l && l.taken
+      ? `<div class="empty"><h3>This place at ${esc(l.complex)} has been taken. 🎉</h3><p>Someone found it here. See what else is up for takeover, or get alerts when new places are listed.</p></div>`
+      : l
       ? detail(l)
       : `<div class="empty"><h3>This listing isn't available anymore.</h3><p>It may have already been taken. See what else is up for takeover.</p></div>`;
     bindPhotoCounters($('#focus-card'));
