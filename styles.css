@@ -459,7 +459,7 @@ body.focus-mode .how { display: none; }
 .detail .by { margin: .1rem 0 .6rem; font-size: .95rem; }
 
 /* Success stat + recently taken */
-.success-stat { margin: 1rem auto 0; display: inline-block; padding: .4rem .9rem; border-radius: 999px; background: #e3f4ea; color: #1f6b44; font-size: .92rem; }
+.success-stat { margin: 1rem auto 0; display: table; padding: .4rem .9rem; border-radius: 999px; background: #e3f4ea; color: #1f6b44; font-size: .92rem; }
 .success-stat b { font-size: 1.05rem; }
 .taken-head { margin: 2.5rem 0 1rem; font-size: 1.15rem; color: var(--muted); font-weight: 700; }
 .taken-card { position: relative; opacity: .62; filter: grayscale(.5); cursor: default; }
@@ -471,3 +471,13 @@ body.focus-mode .how { display: none; }
   background: var(--maroon); color: #fff; font-weight: 800; font-size: .85rem; letter-spacing: .03em;
   transform: rotate(4deg); box-shadow: 0 2px 8px rgba(0,0,0,.2);
 }
+
+/* What people say */
+.stories { max-width: 1080px; margin: 0 auto 1.5rem; padding: 0 1rem; }
+.stories h2 { font-size: 1.15rem; margin: 0 0 .9rem; }
+.story-list { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.story { margin: 0; padding: 1.1rem 1.2rem; background: var(--card); border: 1px solid var(--line, #d9cbbd); border-radius: 14px; border-left: 4px solid var(--gold); }
+.story blockquote { margin: 0 0 .6rem; font-size: 1.02rem; line-height: 1.5; }
+.story figcaption { font-size: .88rem; color: var(--muted); }
+.story figcaption b { color: var(--ink); }
+body.focus-mode .stories { display: none; }

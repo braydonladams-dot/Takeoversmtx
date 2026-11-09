@@ -17,6 +17,7 @@
   let all = [];
   let loaded = false;
   let stats = {};
+  let stories = [];
 
   const ARRANGEMENT = {
     takeover: { label: 'Takeover', hint: 'The lease moves into your name' },
@@ -94,6 +95,7 @@
         const data = await res.json();
         all = (data.listings || []).map(normalize);
         stats = data.stats || {};
+        stories = Array.isArray(data.stories) ? data.stories : [];
       } catch (err) {
         console.error(err);
         $('#result-count').textContent = "Couldn't load listings. Try refreshing.";
@@ -241,8 +243,17 @@
     $('#result-count').textContent = live.length
       ? `${list.length} of ${live.length} takeover${live.length === 1 ? '' : 's'}`
       : '';
+    // Ones found through us first, newest first.
+    taken.sort((a, b) => (b.viaUs - a.viaUs) || String(b.takenAt || '').localeCompare(String(a.takenAt || '')));
     $('#taken-listings').innerHTML = taken.map(takenCard).join('');
     $('#taken-wrap').hidden = taken.length === 0;
+    $('#taken-wrap .taken-head').textContent = taken.some((l) => l.viaUs) ? 'Taken through Takeover SMTX' : 'Recently taken';
+    $('#story-list').innerHTML = stories.map((s) => `
+      <figure class="story">
+        <blockquote>“${esc(s.quote)}”</blockquote>
+        <figcaption><b>${esc(s.name)}</b>${s.complex ? ` · ${esc(s.complex)}` : ''}${s.daysToTake ? ` · taken in ${esc(s.daysToTake)} day${s.daysToTake == 1 ? '' : 's'}` : ''}</figcaption>
+      </figure>`).join('');
+    $('#stories').hidden = stories.length === 0;
     const n = Number(stats.successes) || 0;
     $('#success-stat').hidden = n === 0;
     if (n) $('#success-stat').innerHTML = `<b>${n}</b> lease${n === 1 ? '' : 's'} taken over through Takeover SMTX`;
@@ -259,7 +270,7 @@
           <h3>${esc(l.complex)}</h3>
           <div class="rent">${money(l.rent)}<small>/mo</small></div>
         </div>
-        <p class="by">${l.unitType === 'unit' ? 'Whole unit' : 'Room'}${l.incentive > 0 ? ` · ${money(l.incentive)} incentive` : ''}</p>
+        <p class="by">${l.daysToTake ? `Taken in <b>${esc(l.daysToTake)} day${l.daysToTake === 1 ? '' : 's'}</b>` : (l.unitType === 'unit' ? 'Whole unit' : 'Room')}${l.listedBy ? ` · ${esc(l.listedBy)}` : ''}</p>
       </article>`;
   }
 
