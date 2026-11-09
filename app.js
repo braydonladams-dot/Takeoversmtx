@@ -58,11 +58,21 @@
   const photoUrl = (id) => `https://lh3.googleusercontent.com/d/${encodeURIComponent(id)}=w1200`;
   const photoFallbackUrl = (id) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1200`;
 
+  // 5125550123 / (512) 555-0123 / +1 512... -> 512-555-0123 (partial input formats as you type)
+  function formatPhone(v) {
+    let d = String(v || '').replace(/\D/g, '');
+    if (d.length === 11 && d[0] === '1') d = d.slice(1);
+    d = d.slice(0, 10);
+    if (d.length > 6) return d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6);
+    if (d.length > 3) return d.slice(0, 3) + '-' + d.slice(3);
+    return d;
+  }
+
   function contactLink(l) {
     const c = String(l.contact || '').trim();
     const handle = c.replace(/^@/, '');
     switch (l.contactMethod) {
-      case 'text': return { href: 'sms:' + c.replace(/[^\d+]/g, ''), label: 'Text ' + c };
+      case 'text': return { href: 'sms:' + c.replace(/[^\d+]/g, ''), label: 'Text ' + (c.replace(/\D/g, '').length >= 10 ? formatPhone(c) : c) };
       case 'instagram': return { href: 'https://instagram.com/' + encodeURIComponent(handle), label: 'Instagram @' + handle };
       case 'snapchat': return { href: 'https://snapchat.com/add/' + encodeURIComponent(handle), label: 'Snapchat ' + handle };
       case 'email': return { href: 'mailto:' + c, label: 'Email' };
@@ -388,6 +398,7 @@
   function validate(form, type) {
     if (!form.checkValidity()) {
       const bad = form.querySelector(':invalid');
+      if (bad.type === 'tel' && bad.value) return 'Please enter a full 10-digit phone number.';
       return `Please fill in "${bad.closest('label')?.childNodes[0]?.textContent.trim() || bad.name}".`;
     }
     if (type === 'listing' && form.availableFrom.value > form.leaseEnds.value) {
@@ -516,6 +527,36 @@
   window.addEventListener("scroll", hideTip, { passive: true, capture: true });
   window.addEventListener("resize", hideTip);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(); });
+
+  // ---------- number-only fields ----------
+  document.addEventListener('input', (e) => {
+    const el = e.target;
+    if (!el.matches) return;
+    if (el.matches('[data-digits]')) el.value = el.value.replace(/\D/g, '');
+    else if (el.matches('[data-decimal]')) el.value = el.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1');
+    else if (el.matches('[data-phone]') && el.type === 'tel') el.value = formatPhone(el.value);
+  }, true);
+
+  // The listing contact box changes with the method: number pad + dashes for Text, normal keyboard otherwise.
+  const contactMethodEl = $('#listing-form [name=contactMethod]');
+  const contactEl = $('#listing-form [name=contact]');
+  const CONTACT_INPUT = {
+    text: { type: 'tel', mode: 'tel', ph: '512-555-0123', ac: 'tel' },
+    instagram: { type: 'text', mode: 'text', ph: '@yourhandle', ac: 'off' },
+    snapchat: { type: 'text', mode: 'text', ph: 'yourusername', ac: 'off' },
+    email: { type: 'email', mode: 'email', ph: 'you@example.com', ac: 'email' },
+  };
+  function syncContactInput() {
+    const cfg = CONTACT_INPUT[contactMethodEl.value] || CONTACT_INPUT.text;
+    const wasPhone = contactEl.type === 'tel';
+    contactEl.type = cfg.type; contactEl.inputMode = cfg.mode;
+    contactEl.placeholder = cfg.ph; contactEl.autocomplete = cfg.ac;
+    if (cfg.type === 'tel') { contactEl.pattern = '[0-9]{3}-[0-9]{3}-[0-9]{4}'; contactEl.value = formatPhone(contactEl.value); }
+    else { contactEl.removeAttribute('pattern'); if (wasPhone) contactEl.value = ''; }
+  }
+  contactMethodEl.addEventListener('change', syncContactInput);
+  $('#listing-form').addEventListener('reset', () => setTimeout(syncContactInput));
+  syncContactInput();
 
   // Keyboard: Enter on a focused card opens it.
   document.addEventListener('keydown', (e) => {

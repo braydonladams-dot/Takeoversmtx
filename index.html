@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611081938">
+  <link rel="stylesheet" href="styles.css?v=202611081940">
 </head>
 <body>
   <div id="demo-banner" class="banner" hidden>
@@ -69,7 +69,7 @@
             </select>
           </label>
           <label class="fl"><span>Max rent</span>
-            <span class="money"><input type="number" id="f-max" min="0" step="25" placeholder="Any"></span>
+            <span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits id="f-max" maxlength="5" placeholder="Any"></span>
           </label>
           <label class="fl"><span>Move in by</span>
             <input type="date" id="f-movein">
@@ -153,8 +153,8 @@
         </fieldset>
 
         <div class="row three">
-          <label>Bedrooms<input type="number" name="bedrooms" min="0" max="10" required placeholder="e.g. 4"></label>
-          <label>Bathrooms<input type="number" name="bathrooms" min="0" max="10" step="0.5" required placeholder="e.g. 4"></label>
+          <label>Bedrooms<input type="text" inputmode="numeric" autocomplete="off" data-digits name="bedrooms" maxlength="2" pattern="[0-9]{1,2}" required placeholder="e.g. 4"></label>
+          <label>Bathrooms<input type="text" inputmode="decimal" autocomplete="off" data-decimal name="bathrooms" maxlength="4" pattern="[0-9]{1,2}(\.5)?" required placeholder="e.g. 4"></label>
           <label id="gender-field">Roommates
             <select name="gender">
               <option value="Any">Any / N/A</option>
@@ -185,8 +185,8 @@
         </fieldset>
 
         <div class="row">
-          <label>Rent per month<span class="money"><input type="number" name="rent" min="1" required placeholder="650"></span></label>
-          <label>Cash incentive <small class="hint">· optional</small><span class="money"><input type="number" name="incentive" min="0" placeholder="0"></span></label>
+          <label>Rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="rent" maxlength="5" pattern="[1-9][0-9]{0,4}" required placeholder="650"></span></label>
+          <label>Cash incentive <small class="hint">· optional</small><span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="incentive" maxlength="5" placeholder="0"></span></label>
         </div>
 
         <div class="row">
@@ -222,7 +222,7 @@
               <option value="email">Email</option>
             </select>
           </label>
-          <label>Number or handle <small class="hint">· shown publicly</small><input name="contact" required maxlength="120"></label>
+          <label>Number or handle <small class="hint">· shown publicly</small><input type="tel" inputmode="tel" autocomplete="tel" data-phone name="contact" required maxlength="120" placeholder="512-555-0123"></label>
         </div>
       </div>
 
@@ -249,12 +249,12 @@
 
       <div class="row">
         <label>Name<input name="name" required maxlength="80"></label>
-        <label>Phone<input type="tel" name="phone" required maxlength="30"></label>
+        <label>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" required maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
       </div>
       <label>Email <small>(optional)</small><input type="email" name="email" maxlength="120"></label>
 
       <div class="row">
-        <label>Max rent / month<input type="number" name="maxRent" min="0" required placeholder="$"></label>
+        <label>Max rent / month<input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="$"></label>
         <label>Move-in date<input type="date" name="moveIn" required></label>
       </div>
 
@@ -314,7 +314,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611081938"></script>
-  <script src="app.js?v=202611081938"></script>
+  <script src="config.js?v=202611081940"></script>
+  <script src="app.js?v=202611081940"></script>
 </body>
 </html>
