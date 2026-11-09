@@ -14,6 +14,9 @@
     { id: 'demo4', submittedAt: '2026-10-30', verified: true, transferConfirmed: false, arrangement: 'unsure', complex: 'Sample Complex C (2x2)', unitType: 'bed', bedrooms: 2, bathrooms: 2, rent: 699, availableFrom: '2027-01-10', leaseEnds: '2027-07-31', gender: 'Any', furnished: 'Yes', incentive: 500, takeoverFee: "Don't know", description: 'Transferring schools. Will cover your first month ($500) if you take it by January.', contactMethod: 'email', contact: 'sample@example.com' },
   ];
 
+  // Show takeoversmtx.com instead of takeoversmtx.com/index.html in the address bar.
+  if (/\/index\.html$/.test(location.pathname)) history.replaceState(null, '', location.pathname.replace(/index\.html$/, '') + location.search + location.hash);
+
   let all = [];
   let loaded = false;
   let stats = {};
@@ -227,7 +230,7 @@
             <button type="button" class="btn btn-outline btn-lg" data-share="${esc(l.id)}">Share</button>
           </div>
 
-          <p class="detail-note">Tour before committing, and pay rent and fees to the complex, not a stranger. <a href="how-it-works.html">How takeovers work →</a></p>
+          <p class="detail-note">Tour before committing, and pay rent and fees to the complex, not a stranger. <a href="/how-it-works">How takeovers work →</a></p>
           <p class="detail-note"><button type="button" class="link-btn" data-report="${esc(l.id)}">Report this listing</button></p>
         </div>
       </article>`;
