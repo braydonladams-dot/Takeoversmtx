@@ -879,6 +879,7 @@
   $('#waitlist-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'waitlist'); });
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
   $('#feedback-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'feedback'); });
+  $('#manage-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'sendEditLinks'); });
 
   window.addEventListener('hashchange', focusFromHash);
 
