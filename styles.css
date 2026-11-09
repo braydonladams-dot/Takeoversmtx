@@ -531,3 +531,8 @@ body.focus-mode .stories { display: none; }
 .edit-takedown p { margin: 0 0 .5rem; }
 
 .footer .link-btn { margin: 0; font-size: .9rem; color: var(--maroon); }
+
+/* "Is this your listing?" */
+.owner-note { margin: 1.25rem 0 .5rem; padding: .75rem 1rem; border-radius: 10px; background: var(--tag); font-size: .92rem; color: var(--ink); }
+.link-btn.owner-link { margin: 0; font-size: inherit; color: var(--maroon); font-weight: 700; }
+.already-listed { font-size: .9rem; margin: -.25rem 0 .75rem; color: var(--muted); }

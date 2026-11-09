@@ -326,6 +326,7 @@
           </div>
 
           <p class="detail-note">Tour before committing, and pay rent and fees to the complex, not a stranger. <a href="/how-it-works">How takeovers work →</a></p>
+          <div class="owner-note">Is this your listing? <button type="button" class="link-btn owner-link" data-open="manage-dialog">Edit it or take it down</button></div>
           <p class="detail-note"><button type="button" class="link-btn" data-report="${esc(l.id)}">Report this listing</button></p>
         </div>
       </article>`;
@@ -758,6 +759,7 @@
     }
     if (e.target.closest('[data-see-all]')) return backToBoard();
     if (e.target.closest('[data-remove-proof]')) { proof = null; renderProof(); return; }
+    if (e.target.closest('[data-switch-manage]')) { $('#listing-dialog').close(); openDialog('manage-dialog'); return; }
     const iv = e.target.closest('[data-interest]');
     if (iv) { e.preventDefault(); openInterest(iv.dataset.interest); return; }
     const rm = e.target.closest('[data-remove-photo]');
