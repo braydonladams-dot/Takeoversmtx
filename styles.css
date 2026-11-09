@@ -486,3 +486,6 @@ body.focus-mode .stories { display: none; }
 .proof-preview { display: flex; align-items: center; gap: .75rem; margin: .4rem 0; }
 .proof-preview .thumb { width: 72px; height: 72px; }
 .proof-ok { color: #1f7a4d; font-weight: 700; font-size: .9rem; }
+
+/* Spam folder reminder after submitting */
+.spam-note { background: #fbf5e6; border-left: 4px solid var(--gold); border-radius: 8px; padding: .65rem .9rem; font-size: .92rem; }
