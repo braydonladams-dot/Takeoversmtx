@@ -94,6 +94,7 @@
   let all = [];
   let loaded = false;
   let stats = {};
+  const MIN_LOOKING_TO_SHOW = 5; // hide the "students looking" count until it's at least this
   let stories = [];
 
   const ARRANGEMENT = {
@@ -331,6 +332,15 @@
         <figcaption><b>${esc(s.name)}</b>${s.complex ? ` · ${esc(s.complex)}` : ''}${s.daysToTake ? ` · taken in ${esc(s.daysToTake)} day${s.daysToTake == 1 ? '' : 's'}` : ''}</figcaption>
       </figure>`).join('');
     $('#stories').hidden = stories.length === 0;
+    // Real demand: only shown once enough people are looking that it means something.
+    const looking = Number(stats.looking) || 0;
+    const showLooking = looking >= MIN_LOOKING_TO_SHOW;
+    $('#looking-stat').hidden = !showLooking;
+    $('#looking-note').hidden = !showLooking;
+    if (showLooking) {
+      $('#looking-stat').innerHTML = `<span class="pulse"></span><b>${looking}</b> students looking for a place right now`;
+      $('#looking-note').innerHTML = `👀 <b>${looking} students</b> are looking for a place right now and get notified when listings like yours go up.`;
+    }
     const n = Number(stats.successes) || 0;
     $('#success-stat').hidden = n === 0;
     if (n) $('#success-stat').innerHTML = `<b>${n}</b> lease${n === 1 ? '' : 's'} taken over through Takeover SMTX`;
