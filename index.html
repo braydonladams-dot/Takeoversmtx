@@ -9,7 +9,7 @@
   <meta property="og:description" content="Find a lease takeover near Texas State, or list yours and get out of your lease.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611090050">
+  <link rel="stylesheet" href="styles.css?v=202611090107">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -222,6 +222,15 @@
         <label>Description<textarea name="description" rows="3" maxlength="800" placeholder="Room size, roommates, parking, utilities, why you're leaving..."></textarea></label>
       </div>
 
+      <div class="form-section verify-section">
+        <h3>Get the Verified badge <small class="hint">· optional</small></h3>
+        <p class="photo-note">Verified listings get more messages. Upload a screenshot of your lease or resident portal that shows <b>your name, the complex, and your lease dates</b>. Only we see it. It's never shown on the site and we delete it after checking.</p>
+        <div id="proof-preview" class="proof-preview" hidden></div>
+        <label class="photo-add btn btn-outline btn-sm" id="proof-add">+ Add lease screenshot
+          <input type="file" id="proof-input" accept="image/*" hidden>
+        </label>
+      </div>
+
       <div class="form-section">
         <h3>How people reach you</h3>
         <div class="row">
@@ -334,7 +343,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611090050"></script>
-  <script src="app.js?v=202611090050"></script>
+  <script src="config.js?v=202611090107"></script>
+  <script src="app.js?v=202611090107"></script>
 </body>
 </html>

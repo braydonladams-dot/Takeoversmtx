@@ -446,7 +446,30 @@
   function clearPhotos() {
     photos = [];
     renderPhotoPreviews();
+    proof = null;
+    renderProof();
   }
+
+  // Lease screenshot for the Verified badge (private; never shown on the site).
+  let proof = null;
+  function renderProof() {
+    const box = $('#proof-preview');
+    box.hidden = !proof;
+    box.innerHTML = proof ? `<div class="thumb"><img src="${proof}" alt="Lease screenshot"><button type="button" data-remove-proof aria-label="Remove screenshot">&times;</button></div><span class="proof-ok">✓ Screenshot added</span>` : '';
+    $('#proof-add').hidden = !!proof;
+  }
+  $('#proof-input').addEventListener('change', async (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try { proof = await compressImage(f, 1800, 0.82); } // bigger so the text stays readable
+    catch (_) {
+      const err = $('#listing-form .form-error');
+      err.textContent = "That image type isn't supported. Try a screenshot (PNG or JPG).";
+      err.hidden = false;
+    }
+    renderProof();
+  });
 
   // ---------- forms ----------
   function validate(form, type) {
@@ -470,6 +493,7 @@
     const data = Object.fromEntries(new FormData(form).entries());
     data.type = type;
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
+    if (type === 'listing' && proof) data.proof = proof.split(',')[1];
     const btn = $('button[type=submit]', form);
     const btnText = btn.textContent;
     btn.disabled = true;
@@ -540,6 +564,7 @@
       return;
     }
     if (e.target.closest('[data-see-all]')) return backToBoard();
+    if (e.target.closest('[data-remove-proof]')) { proof = null; renderProof(); return; }
     const rm = e.target.closest('[data-remove-photo]');
     if (rm) { photos.splice(Number(rm.dataset.removePhoto), 1); renderPhotoPreviews(); return; }
 

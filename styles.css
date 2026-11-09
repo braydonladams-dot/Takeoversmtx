@@ -481,3 +481,8 @@ body.focus-mode .how { display: none; }
 .story figcaption { font-size: .88rem; color: var(--muted); }
 .story figcaption b { color: var(--ink); }
 body.focus-mode .stories { display: none; }
+
+/* Lease screenshot upload */
+.proof-preview { display: flex; align-items: center; gap: .75rem; margin: .4rem 0; }
+.proof-preview .thumb { width: 72px; height: 72px; }
+.proof-ok { color: #1f7a4d; font-weight: 700; font-size: .9rem; }
