@@ -16,7 +16,7 @@
   <meta name="twitter:image" content="https://takeoversmtx.com/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=202611091520">
+  <link rel="stylesheet" href="styles.css?v=1794269141">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -237,12 +237,18 @@
       </div>
 
       <div class="form-section verify-section">
-        <h3>Get the Verified badge <small class="hint">· optional</small></h3>
-        <p class="photo-note">Verified listings get more messages. Upload a screenshot of your lease or resident portal that shows <b>your name, the complex, and your lease dates</b>. Only we see it. It's never shown on the site and we delete it after checking.</p>
-        <div id="proof-preview" class="proof-preview" hidden></div>
-        <label class="photo-add btn btn-outline btn-sm" id="proof-add">+ Add lease screenshot
-          <input type="file" id="proof-input" accept="image/*" hidden>
-        </label>
+        <div class="verify-card">
+          <div class="verify-head">
+            <span class="verify-badge">✓ Verified lease</span>
+            <span class="verify-sub">Verified listings get more messages</span>
+          </div>
+          <p>Add a screenshot of your lease or resident portal showing <b>your name, the complex, and your lease dates</b>. It takes 30 seconds.</p>
+          <div id="proof-preview" class="proof-preview" hidden></div>
+          <label class="btn btn-gold btn-sm" id="proof-add">+ Add lease screenshot
+            <input type="file" id="proof-input" accept="image/*" hidden>
+          </label>
+          <p class="verify-private">🔒 Only we see it. Never shown on the site, deleted after we check.</p>
+        </div>
       </div>
 
       <div class="form-section">
@@ -260,6 +266,13 @@
         </div>
       </div>
 
+      <div id="verify-nudge" class="verify-nudge" hidden>
+        <p><b>Want the Verified badge?</b> Verified listings get more messages. Just add a screenshot of your lease.</p>
+        <div class="verify-nudge-btns">
+          <button type="button" class="btn btn-gold btn-sm" data-nudge-add>+ Add lease screenshot</button>
+          <button type="button" class="link-btn" data-nudge-skip>Submit without it</button>
+        </div>
+      </div>
       <p class="form-error" hidden></p>
       <button type="submit" class="btn btn-primary btn-block btn-lg">Submit listing</button>
     </form>
@@ -446,7 +459,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=202611091520"></script>
-  <script src="app.js?v=202611091520"></script>
+  <script src="config.js?v=1794269141"></script>
+  <script src="app.js?v=1794269141"></script>
 </body>
 </html>

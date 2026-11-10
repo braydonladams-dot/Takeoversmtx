@@ -600,6 +600,7 @@
   }
 
   function clearPhotos() {
+    nudged = false;
     photos = [];
     renderPhotoPreviews();
     proof = null;
@@ -608,7 +609,9 @@
 
   // Lease screenshot for the Verified badge (private; never shown on the site).
   let proof = null;
+  let nudged = false; // asked once at submit if they skipped the screenshot
   function renderProof() {
+    if (proof) $('#verify-nudge').hidden = true;
     const box = $('#proof-preview');
     box.hidden = !proof;
     box.innerHTML = proof ? `<div class="thumb"><img src="${proof}" alt="Lease screenshot"><button type="button" data-remove-proof aria-label="Remove screenshot">&times;</button></div><span class="proof-ok">✓ Screenshot added</span>` : '';
@@ -685,6 +688,15 @@
       }
       return;
     }
+    if (type === 'listing' && !proof && !nudged && !$('.verify-section').hidden) {
+      nudged = true;
+      const n = $('#verify-nudge');
+      n.hidden = false;
+      n.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      track('nudge/verify', 'Verify nudge shown');
+      return;
+    }
+    $('#verify-nudge').hidden = true;
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
     if (type === 'listing' && proof) data.proof = proof.split(',')[1];
     const btn = $('button[type=submit]', form);
@@ -759,6 +771,8 @@
     }
     if (e.target.closest('[data-see-all]')) return backToBoard();
     if (e.target.closest('[data-remove-proof]')) { proof = null; renderProof(); return; }
+    if (e.target.closest('[data-nudge-add]')) { $('#proof-input').click(); return; }
+    if (e.target.closest('[data-nudge-skip]')) { $('#verify-nudge').hidden = true; $('#listing-form').requestSubmit(); return; }
     if (e.target.closest('[data-switch-manage]')) { $('#listing-dialog').close(); openDialog('manage-dialog'); return; }
     const iv = e.target.closest('[data-interest]');
     if (iv) { e.preventDefault(); openInterest(iv.dataset.interest); return; }
