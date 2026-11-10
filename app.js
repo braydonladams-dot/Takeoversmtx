@@ -635,6 +635,7 @@
     if (!form.checkValidity()) {
       const bad = form.querySelector(':invalid');
       if (bad.type === 'tel' && bad.value) return 'Please enter a full 10-digit phone number.';
+      if (bad.type === 'radio') return `Please pick one for "${bad.closest('fieldset')?.querySelector('legend')?.childNodes[0]?.textContent.trim() || bad.name}".`;
       return `Please fill in "${bad.closest('label')?.childNodes[0]?.textContent.trim() || bad.name}".`;
     }
     if (type === 'listing' && form.availableFrom.value > form.leaseEnds.value) {
@@ -888,7 +889,9 @@
     const f = $('#waitlist-form');
     const byEmail = f.notifyBy.value === 'email';
     f.email.required = byEmail;
-    $('#waitlist-email-hint').textContent = byEmail ? '(required for email alerts)' : '(optional)';
+    f.phone.required = !byEmail;
+    $('#waitlist-email-field').hidden = !byEmail;
+    $('#waitlist-phone-field').hidden = byEmail;
   }
   $$('#waitlist-form [name=notifyBy]').forEach((r) => r.addEventListener('change', syncNotifyBy));
   syncNotifyBy();

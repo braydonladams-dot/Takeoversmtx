@@ -16,7 +16,7 @@
   <meta name="twitter:image" content="https://takeoversmtx.com/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=1794269141">
+  <link rel="stylesheet" href="styles.css?v=1794269894">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -297,47 +297,50 @@
         <h2>Get alerted</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
       </div>
-      <p class="muted">Tell us what you want. When a matching takeover is listed, we'll let you know.</p>
+      <p class="muted">Free. We'll send you places that fit your budget and move-in date as soon as they're listed.</p>
 
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <div class="row">
-        <label>Name<input name="name" required maxlength="80"></label>
-        <label>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" required maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
-      </div>
-      <fieldset class="field">
-        <legend>Send me alerts by</legend>
-        <div class="choice-cards two compact">
-          <label class="choice"><input type="radio" name="notifyBy" value="text" checked><span>Text</span></label>
-          <label class="choice"><input type="radio" name="notifyBy" value="email"><span>Email</span></label>
-        </div>
-      </fieldset>
-      <label id="waitlist-email-field">Email <small id="waitlist-email-hint">(optional)</small><input type="email" name="email" maxlength="120"></label>
-
-      <div class="row">
-        <label>Max rent / month<input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="$"></label>
+        <label>Max rent / month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
         <label>Move-in date<input type="date" name="moveIn" required></label>
       </div>
 
-      <div class="row">
-      <label>Lease type
-        <select name="unitType">
-          <option value="either">Either</option>
-          <option value="bed">By the bed (shared unit)</option>
-          <option value="unit">Whole unit</option>
-        </select>
-      </label>
-      <label>I'm a
-        <select name="gender" required>
-          <option value="">Choose…</option>
-          <option value="Female">Girl</option>
-          <option value="Male">Guy</option>
-          <option value="Other">Prefer not to say</option>
-        </select>
-      </label>
-      </div>
-      <label>Preferred complexes or area <small>(optional)</small><input name="complexes" maxlength="200"></label>
-      <label>Anything else? <small>(optional)</small><textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
+      <fieldset class="seg-group">
+        <legend>I'm a <button type="button" class="help-tip has-tip" aria-label="Why we ask" data-tip-title="Why we ask" data-tip="Lots of places are girls-only or guys-only, so this keeps you from getting alerts you can't take.">?</button></legend>
+        <div class="choice-cards three compact">
+          <label class="choice"><input type="radio" name="gender" value="Female" required><span>Girl</span></label>
+          <label class="choice"><input type="radio" name="gender" value="Male"><span>Guy</span></label>
+          <label class="choice"><input type="radio" name="gender" value="Other"><span>Rather not say</span></label>
+        </div>
+      </fieldset>
+
+      <label>Name<input name="name" required maxlength="80" autocomplete="given-name"></label>
+
+      <fieldset class="seg-group">
+        <legend>Send alerts by</legend>
+        <div class="choice-cards two compact">
+          <label class="choice"><input type="radio" name="notifyBy" value="email" checked><span>Email</span></label>
+          <label class="choice"><input type="radio" name="notifyBy" value="text"><span>Text</span></label>
+        </div>
+      </fieldset>
+      <label id="waitlist-email-field">Email<input type="email" name="email" maxlength="120" autocomplete="email" placeholder="you@email.com"></label>
+      <label id="waitlist-phone-field" hidden>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
+
+      <details class="more-prefs">
+        <summary>More preferences <small>(optional)</small></summary>
+        <div class="more-prefs-body">
+          <label>Lease type
+            <select name="unitType">
+              <option value="either">Either</option>
+              <option value="bed">By the bed (shared unit)</option>
+              <option value="unit">Whole unit</option>
+            </select>
+          </label>
+          <label>Preferred complexes or area<input name="complexes" maxlength="200"></label>
+          <label>Anything else?<textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
+        </div>
+      </details>
 
       <p class="form-error" hidden></p>
       <button type="submit" class="btn btn-primary btn-block">Alert me</button>
@@ -459,7 +462,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794269141"></script>
-  <script src="app.js?v=1794269141"></script>
+  <script src="config.js?v=1794269894"></script>
+  <script src="app.js?v=1794269894"></script>
 </body>
 </html>
