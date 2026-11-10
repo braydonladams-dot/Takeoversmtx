@@ -558,3 +558,8 @@ body.focus-mode .stories { display: none; }
 .more-prefs summary small { font-weight: 400; color: var(--muted); }
 .more-prefs-body { display: grid; gap: .9rem; margin-top: .8rem; }
 .choice-cards.three { grid-template-columns: repeat(3, 1fr); }
+
+/* After listing: Instagram repost ask */
+.ig-repost { background: #f6eef0; border-radius: 12px; padding: .9rem 1rem; margin: .8rem 0; display: grid; gap: .5rem; justify-items: start; }
+.ig-repost p { margin: 0; font-size: .92rem; line-height: 1.5; }
+.ig-repost p:first-child { display: flex; align-items: center; gap: .45rem; color: var(--maroon); }
