@@ -563,3 +563,11 @@ body.focus-mode .stories { display: none; }
 .ig-repost { background: #f6eef0; border-radius: 12px; padding: .9rem 1rem; margin: .8rem 0; display: grid; gap: .5rem; justify-items: start; }
 .ig-repost p { margin: 0; font-size: .92rem; line-height: 1.5; }
 .ig-repost p:first-child { display: flex; align-items: center; gap: .45rem; color: var(--maroon); }
+
+/* "One last thing" step after Submit */
+.verify-step { display: grid; gap: 1rem; }
+.verify-step[hidden] { display: none; }
+.verify-actions { display: grid; gap: .6rem; justify-items: center; }
+.verify-actions .btn { width: 100%; }
+.verify-back { margin: .2rem 0 0 !important; font-size: .85rem !important; }
+.verify-slot:empty { display: none; }

@@ -16,7 +16,7 @@
   <meta name="twitter:image" content="https://takeoversmtx.com/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=1794340935">
+  <link rel="stylesheet" href="styles.css?v=1794341315">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -236,20 +236,7 @@
         <label>Description<textarea name="description" rows="3" maxlength="800" placeholder="Room size, roommates, parking, utilities, why you're leaving..."></textarea></label>
       </div>
 
-      <div class="form-section verify-section">
-        <div class="verify-card">
-          <div class="verify-head">
-            <span class="verify-badge">✓ Verified lease</span>
-            <span class="verify-sub">Verified listings get more messages</span>
-          </div>
-          <p>Add a screenshot of your lease or resident portal showing <b>your name, the complex, and your lease dates</b>. It takes 30 seconds.</p>
-          <div id="proof-preview" class="proof-preview" hidden></div>
-          <label class="btn btn-gold btn-sm" id="proof-add">+ Add lease screenshot
-            <input type="file" id="proof-input" accept="image/*" hidden>
-          </label>
-          <p class="verify-private">🔒 Only we see it. Never shown on the site, deleted after we check.</p>
-        </div>
-      </div>
+      <div class="form-section verify-slot" id="verify-slot" hidden></div>
 
       <div class="form-section">
         <h3>How people reach you</h3>
@@ -266,16 +253,32 @@
         </div>
       </div>
 
-      <div id="verify-nudge" class="verify-nudge" hidden>
-        <p><b>Want the Verified badge?</b> Verified listings get more messages. Just add a screenshot of your lease.</p>
-        <div class="verify-nudge-btns">
-          <button type="button" class="btn btn-gold btn-sm" data-nudge-add>+ Add lease screenshot</button>
-          <button type="button" class="link-btn" data-nudge-skip>Submit without it</button>
-        </div>
-      </div>
       <p class="form-error" hidden></p>
       <button type="submit" class="btn btn-primary btn-block btn-lg">Submit listing</button>
     </form>
+    <div id="verify-step" class="form verify-step" hidden>
+      <div class="dialog-head">
+        <h2>One last thing</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+      </div>
+      <div class="verify-card" id="verify-card">
+        <div class="verify-head">
+          <span class="verify-badge">✓ Verified lease</span>
+          <span class="verify-sub">Verified listings get more messages</span>
+        </div>
+        <p>Want the Verified badge on your listing? Add a screenshot of your lease or resident portal showing <b>your name, the complex, and your lease dates</b>. It takes 30 seconds.</p>
+        <div id="proof-preview" class="proof-preview" hidden></div>
+        <label class="btn btn-gold btn-sm" id="proof-add">+ Add lease screenshot
+          <input type="file" id="proof-input" accept="image/*" hidden>
+        </label>
+        <p class="verify-private">🔒 Only we see it. Never shown on the site, deleted after we check.</p>
+      </div>
+      <div class="verify-actions">
+        <button type="button" class="btn btn-primary btn-block btn-lg" id="verify-submit" data-verify-submit hidden>Submit listing</button>
+        <button type="button" class="btn btn-outline btn-block" id="verify-skip" data-verify-submit>Submit without it</button>
+        <button type="button" class="link-btn verify-back" data-verify-back>&larr; Back to my listing</button>
+      </div>
+    </div>
     <div class="form-success" hidden>
       <div id="edit-takedown" class="edit-takedown" hidden>
         <p><b>Lease taken or not available anymore?</b> Take your listing down so people stop reaching out.</p>
@@ -466,7 +469,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794340935"></script>
-  <script src="app.js?v=1794340935"></script>
+  <script src="config.js?v=1794341315"></script>
+  <script src="app.js?v=1794341315"></script>
 </body>
 </html>

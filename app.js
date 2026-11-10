@@ -469,6 +469,7 @@
     $('form', d).hidden = false;
     $('.form-success', d).hidden = true;
     $('.form-error', d).hidden = true;
+    if (id === 'listing-dialog') { $('#verify-step').hidden = true; nudged = false; }
     if (id === 'waitlist-dialog') {
       const f = $('#waitlist-form');
       if ($('#f-max').value && !f.maxRent.value) f.maxRent.value = $('#f-max').value;
@@ -543,7 +544,7 @@
       renderPhotoPreviews();
       proof = null;
       renderProof();
-      $('.verify-section').hidden = !!out.verified;
+      placeVerifyCard(!out.verified); // edit mode: unverified listings get the card right in the form
       $('#listing-title').textContent = 'Edit your listing';
       $('#edit-takedown').hidden = !out.takeDownUrl;
       $('#edit-takedown-link').href = out.takeDownUrl || '#';
@@ -567,7 +568,7 @@
     f.reset();
     clearPhotos();
     syncContactInput();
-    $('.verify-section').hidden = false;
+    placeVerifyCard(false);
     $('#edit-takedown').hidden = true;
     $('#listing-title').textContent = 'List your lease';
     $('#listing-success-title').textContent = "You're all set.";
@@ -609,9 +610,21 @@
 
   // Lease screenshot for the Verified badge (private; never shown on the site).
   let proof = null;
-  let nudged = false; // asked once at submit if they skipped the screenshot
+  let nudged = false; // the "One last thing" step was shown for this listing
+  // The verify card lives in the step after Submit, or inline in the form while editing an unverified listing.
+  function placeVerifyCard(inForm) {
+    const card = $('#verify-card'), slot = $('#verify-slot');
+    if (inForm) slot.appendChild(card); else $('#verify-step').insertBefore(card, $('.verify-actions'));
+    slot.hidden = !inForm;
+  }
+  function showVerifyStep(show) {
+    $('#listing-form').hidden = show;
+    $('#verify-step').hidden = !show;
+    if (show) $('#listing-dialog').scrollTop = 0;
+  }
   function renderProof() {
-    if (proof) $('#verify-nudge').hidden = true;
+    $('#verify-submit').hidden = !proof;
+    $('#verify-skip').hidden = !!proof;
     const box = $('#proof-preview');
     box.hidden = !proof;
     box.innerHTML = proof ? `<div class="thumb"><img src="${proof}" alt="Lease screenshot"><button type="button" data-remove-proof aria-label="Remove screenshot">&times;</button></div><span class="proof-ok">✓ Screenshot added</span>` : '';
@@ -689,15 +702,12 @@
       }
       return;
     }
-    if (type === 'listing' && !proof && !nudged && !$('.verify-section').hidden) {
+    if (type === 'listing' && !proof && !nudged) {
       nudged = true;
-      const n = $('#verify-nudge');
-      n.hidden = false;
-      n.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      track('nudge/verify', 'Verify nudge shown');
+      showVerifyStep(true);
+      track('nudge/verify', 'Verify step shown');
       return;
     }
-    $('#verify-nudge').hidden = true;
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
     if (type === 'listing' && proof) data.proof = proof.split(',')[1];
     const btn = $('button[type=submit]', form);
@@ -772,8 +782,8 @@
     }
     if (e.target.closest('[data-see-all]')) return backToBoard();
     if (e.target.closest('[data-remove-proof]')) { proof = null; renderProof(); return; }
-    if (e.target.closest('[data-nudge-add]')) { $('#proof-input').click(); return; }
-    if (e.target.closest('[data-nudge-skip]')) { $('#verify-nudge').hidden = true; $('#listing-form').requestSubmit(); return; }
+    if (e.target.closest('[data-verify-submit]')) { if (proof) track('verify/added', 'Verify screenshot added'); showVerifyStep(false); $('#listing-form').requestSubmit(); return; }
+    if (e.target.closest('[data-verify-back]')) { nudged = false; showVerifyStep(false); return; }
     if (e.target.closest('[data-switch-manage]')) { $('#listing-dialog').close(); openDialog('manage-dialog'); return; }
     const iv = e.target.closest('[data-interest]');
     if (iv) { e.preventDefault(); openInterest(iv.dataset.interest); return; }
