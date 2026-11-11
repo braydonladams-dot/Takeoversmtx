@@ -571,3 +571,15 @@ body.focus-mode .stories { display: none; }
 .verify-actions .btn { width: 100%; }
 .verify-back { margin: .2rem 0 0 !important; font-size: .85rem !important; }
 .verify-slot:empty { display: none; }
+
+/* "One last thing": Instagram tag */
+.ig-tag-card { background: #f6eef0; border-radius: 14px; padding: 1rem 1.1rem; display: grid; gap: .6rem; }
+.ig-tag-card p { margin: 0; font-size: .92rem; line-height: 1.5; }
+.ig-tag-head { display: flex; align-items: center; gap: .45rem; color: var(--maroon); }
+.ig-tag-input { display: flex; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 0 .8rem; }
+.ig-tag-input span { color: var(--muted); font-weight: 700; }
+.ig-tag-input input { border: 0 !important; outline: none; background: transparent; padding: .7rem .3rem; flex: 1; font: inherit; min-width: 0; }
+.ig-tag-input:focus-within { outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
+.verify-optional { margin: -.3rem 0 0; font-size: .82rem; color: var(--muted); text-align: center; }
+.form label.ig-tag-input { display: flex; flex-direction: row; align-items: center; gap: 0; margin: 0; font-weight: 400; }
+.form .ig-tag-input input { padding: .7rem .3rem; margin-top: 0; box-shadow: none; }

@@ -469,7 +469,11 @@
     $('form', d).hidden = false;
     $('.form-success', d).hidden = true;
     $('.form-error', d).hidden = true;
-    if (id === 'listing-dialog') { $('#verify-step').hidden = true; nudged = false; }
+    if (id === 'listing-dialog') {
+      $('#verify-step').hidden = true;
+      nudged = false;
+      $('#ig-tag').value = '';
+    }
     if (id === 'waitlist-dialog') {
       const f = $('#waitlist-form');
       if ($('#f-max').value && !f.maxRent.value) f.maxRent.value = $('#f-max').value;
@@ -623,8 +627,6 @@
     if (show) $('#listing-dialog').scrollTop = 0;
   }
   function renderProof() {
-    $('#verify-submit').hidden = !proof;
-    $('#verify-skip').hidden = !!proof;
     const box = $('#proof-preview');
     box.hidden = !proof;
     box.innerHTML = proof ? `<div class="thumb"><img src="${proof}" alt="Lease screenshot"><button type="button" data-remove-proof aria-label="Remove screenshot">&times;</button></div><span class="proof-ok">✓ Screenshot added</span>` : '';
@@ -702,14 +704,17 @@
       }
       return;
     }
-    if (type === 'listing' && !proof && !nudged) {
+    if (type === 'listing' && !nudged) {
       nudged = true;
+      // Listed with Instagram as their contact? Pre-fill the tag box.
+      if (!$('#ig-tag').value && form.contactMethod.value === 'instagram') $('#ig-tag').value = form.contact.value.trim().replace(/^@/, '');
       showVerifyStep(true);
       track('nudge/verify', 'Verify step shown');
       return;
     }
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
     if (type === 'listing' && proof) data.proof = proof.split(',')[1];
+    if (type === 'listing') data.tagInstagram = $('#ig-tag').value.trim();
     const btn = $('button[type=submit]', form);
     const btnText = btn.textContent;
     btn.disabled = true;
