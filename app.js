@@ -292,46 +292,53 @@
 
   // Full details page for one listing.
   function detail(l) {
-    const c = contactLink(l);
     const arr = ARRANGEMENT[l.arrangement];
     const facts = [
-      ['Lease', arr ? `${arr.label}<small>${esc(arr.hint)}</small>` : ''],
-      ['Room', esc(typeLabel(l))],
-      ['Bed / bath', l.bedrooms !== '' ? `${esc(l.bedrooms)} bed · ${esc(l.bathrooms)} bath` : ''],
-      ['Roommates', l.unitType === 'bed' ? esc(l.gender && l.gender !== 'Any' ? `${l.gender} only` : 'Any') : ''],
-      ['Furnished', esc(l.furnished || '')],
-      ['Available', esc(fmtDate(l.availableFrom))],
-      ['Lease ends', esc(fmtDate(l.leaseEnds))],
-      ['Transfer fee', esc(l.takeoverFee && !/^n\/?a$/i.test(l.takeoverFee) ? l.takeoverFee : 'Ask the complex')],
-    ].filter(([, v]) => v);
+      ['📝', 'Lease', arr ? `${arr.label}<small>${esc(arr.hint)}</small>` : ''],
+      ['🛏️', 'Room', esc(typeLabel(l))],
+      ['🛁', 'Bed / bath', l.bedrooms !== '' ? `${esc(l.bedrooms)} bed · ${esc(l.bathrooms)} bath` : ''],
+      ['👥', 'Roommates', l.unitType === 'bed' ? esc(l.gender && l.gender !== 'Any' ? `${l.gender} only` : 'Any') : ''],
+      ['🛋️', 'Furnished', esc(l.furnished || '')],
+      ['📅', 'Available', esc(fmtDate(l.availableFrom))],
+      ['🗓️', 'Lease ends', esc(fmtDate(l.leaseEnds))],
+      ['💳', 'Transfer fee', esc(l.takeoverFee && !/^n\/?a$/i.test(l.takeoverFee) ? l.takeoverFee : 'Ask the complex')],
+    ].filter(([, , v]) => v);
 
     return `
       <article class="detail">
-        ${photosHtml(l, { thumbs: true })}
-        <div class="detail-body">
-          <div class="detail-head">
+        <div class="detail-main">
+          <div class="detail-gallery">${photosHtml(l, { thumbs: true })}</div>
+          <div class="detail-intro">
             <h1>${esc(l.complex)}</h1>
-            <div class="detail-rent">${money(l.rent)}<small>/mo</small></div>
+            ${byLine(l, true)}
+            <div class="tags">${tagsHtml(l)}</div>
           </div>
-          ${byLine(l, true)}
-          <div class="tags">${tagsHtml(l)}</div>
-
           ${l.incentive > 0 ? `<div class="callout">💵 The current tenant is offering <b>${money(l.incentive)}</b> to whoever takes over this lease.</div>` : ''}
-
-          <dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
-
+          <section class="detail-section">
+            <h2>The details</h2>
+            <dl class="facts">${facts.map(([ic, k, v]) => `<div class="fact"><span class="fact-ic">${ic}</span><div><dt>${k}</dt><dd>${v}</dd></div></div>`).join('')}</dl>
+          </section>
           ${l.description ? `<section class="detail-section"><h2>About this place</h2><p class="detail-desc">${esc(l.description)}</p></section>` : ''}
-
-          <div class="detail-actions">
-            ${contactBtn(l, 'lg')}
-            <button type="button" class="btn btn-outline btn-lg" data-share="${esc(l.id)}">Share</button>
-          </div>
-
-          <p class="detail-note">Tour before committing, and pay rent and fees to the complex, not a stranger. <a href="/how-it-works">How takeovers work →</a></p>
-          <div class="owner-note">Is this your listing? <button type="button" class="link-btn owner-link" data-open="manage-dialog">Edit it or take it down</button></div>
-          <p class="detail-note"><button type="button" class="link-btn" data-report="${esc(l.id)}">Report this listing</button></p>
+          <p class="detail-note report-line"><button type="button" class="link-btn" data-report="${esc(l.id)}">Report this listing</button></p>
         </div>
-      </article>`;
+        <aside class="detail-side">
+          <div class="action-card">
+            <div class="detail-rent">${money(l.rent)}<small>/mo</small></div>
+            <p class="action-sub">${esc(typeLabel(l))} · available ${esc(fmtDate(l.availableFrom))}</p>
+            ${l.incentive > 0 ? `<p class="action-inc">+ ${money(l.incentive)} cash incentive</p>` : ''}
+            <div class="detail-actions">
+              ${contactBtn(l, 'lg')}
+              <button type="button" class="btn btn-outline btn-lg" data-share="${esc(l.id)}">Share</button>
+            </div>
+            <p class="detail-note">Tour before committing, and pay rent and fees to the complex, not a stranger. <a href="/how-it-works">How takeovers work →</a></p>
+          </div>
+          <div class="owner-note">Is this your listing? <button type="button" class="link-btn owner-link" data-open="manage-dialog">Edit it or take it down</button></div>
+        </aside>
+      </article>
+      <div class="detail-bar">
+        <div class="bar-price"><b>${money(l.rent)}</b><small>/mo</small></div>
+        ${contactBtn(l, 'lg')}
+      </div>`;
   }
 
   function render() {
@@ -486,6 +493,7 @@
     }
     if (id === 'waitlist-dialog') {
       const f = $('#waitlist-form');
+      alertWiz.show(1, true);
       if ($('#f-max').value && !f.maxRent.value) f.maxRent.value = $('#f-max').value;
       if ($('#f-movein').value && !f.moveIn.value) f.moveIn.value = $('#f-movein').value;
       if ($('#f-type').value) f.unitType.value = $('#f-type').value;
@@ -1015,6 +1023,10 @@
     slideSteps($('.wiz-steps', lf), from, to, dir);
   }
   function fieldMsg(bad) {
+    if (bad.type === 'radio') {
+      const lg = bad.closest('fieldset') && bad.closest('fieldset').querySelector('legend');
+      return 'Please pick one for "' + (lg ? lg.childNodes[0].textContent.trim() : bad.name) + '".';
+    }
     if (bad.type === 'tel' && bad.value) return 'Please enter a full 10-digit phone number.';
     if (bad.type === 'email' && bad.value) return 'Please enter a valid email address.';
     const lab = bad.closest('label');
@@ -1059,6 +1071,67 @@
       }
     }
   }, true);
+
+  // ---------- small reusable step-by-step form (used by Get alerts) ----------
+  function makeWizard(form, check) {
+    const steps = [...form.querySelectorAll('.wiz-step')];
+    let cur = 1;
+    const problem = (n) => {
+      const extra = check && check(n);
+      if (extra) return extra;
+      const bad = [...steps[n - 1].querySelectorAll('input, select, textarea')].find((el) => !el.closest('[hidden]') && !el.checkValidity());
+      return bad ? { el: bad, msg: fieldMsg(bad) } : null;
+    };
+    const showErr = (p) => {
+      const err = $('.form-error', form);
+      if (!p) { err.hidden = true; return true; }
+      err.textContent = p.msg;
+      err.hidden = false;
+      if (p.el && p.el.focus) p.el.focus();
+      return false;
+    };
+    function show(n, instant) {
+      const from = steps[cur - 1], to = steps[n - 1];
+      const dir = n >= cur ? 1 : -1;
+      cur = n;
+      $('.wiz-count', form).textContent = 'Step ' + n + ' of ' + steps.length;
+      $('.wiz-progress span', form).style.width = (n / steps.length) * 100 + '%';
+      $('[data-wiz-back]', form).style.visibility = n > 1 ? 'visible' : 'hidden';
+      $('[data-wiz-next]', form).hidden = n === steps.length;
+      $('[data-wiz-submit]', form).hidden = n !== steps.length;
+      $('.form-error', form).hidden = true;
+      if (instant || from === to) { steps.forEach((s) => (s.hidden = s !== to)); return; }
+      const d = form.closest('dialog');
+      if (d && d.scrollTop > 0) d.scrollTo({ top: 0, behavior: 'smooth' });
+      slideSteps($('.wiz-steps', form), from, to, dir);
+    }
+    form.addEventListener('click', (e) => {
+      if (e.target.closest('[data-wiz-next]')) { if (showErr(problem(cur))) show(cur + 1); return; }
+      if (e.target.closest('[data-wiz-back]')) show(Math.max(1, cur - 1));
+    });
+    form.closest('dialog').addEventListener('submit', (e) => {
+      if (e.target !== form) return;
+      if (cur < steps.length) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        if (showErr(problem(cur))) show(cur + 1);
+        return;
+      }
+      for (let i = 1; i <= steps.length; i++) {
+        const p = problem(i);
+        if (p) {
+          e.preventDefault(); e.stopImmediatePropagation();
+          if (i !== cur) { show(i); setTimeout(() => showErr(p), 600); } else showErr(p);
+          return;
+        }
+      }
+    }, true);
+    return { show };
+  }
+  const alertWiz = makeWizard($('#waitlist-form'), (n) => {
+    const f = $('#waitlist-form');
+    if (n === 1 && Number(f.maxRent.value) > 0 && !f.moveIn.value) return { el: f.querySelector('[name=moveWhen]'), msg: 'Please pick when you want to move in.' };
+    return null;
+  });
 
   // ---------- home screen: "I am looking for a place" finder ----------
   const finder = $('#finder-dialog');

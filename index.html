@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794853879">
+  <link rel="stylesheet" href="styles.css?v=1794854380">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -343,61 +343,75 @@
 
   <!-- Waitlist -->
   <dialog id="waitlist-dialog" class="dialog">
-    <form id="waitlist-form" class="form" novalidate>
+    <form id="waitlist-form" class="form wizard" novalidate>
       <div class="dialog-head">
-        <h2>Get alerted</h2>
+        <div class="wiz-head">
+          <h2>Get alerts</h2>
+          <span class="wiz-count">Step 1 of 3</span>
+        </div>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
       </div>
-      <p class="muted">Free. We'll send you places that fit your budget and move-in date as soon as they're listed.</p>
+      <div class="wiz-progress" aria-hidden="true"><span></span></div>
 
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <label>Max rent / month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
-        <fieldset class="seg-group">
-          <legend>When do you want to move in?</legend>
-          <div class="choice-cards compact" id="movein-chips"></div>
-          <label id="movein-date-field" hidden>Move-in date<input type="date" name="moveIn" required></label>
-        </fieldset>
-        <p class="fit-count" id="fit-count" hidden></p>
+      <div class="wiz-steps">
+        <section class="wiz-step" data-wstep="1">
+          <h3 class="wiz-title">Your budget</h3>
+          <p class="wiz-sub">Free. We'll send you places that fit as soon as they're listed.</p>
+          <label>Max rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
+          <fieldset class="seg-group">
+            <legend>When do you want to move in?</legend>
+            <div class="choice-cards compact" id="movein-chips"></div>
+            <label id="movein-date-field" hidden>Move-in date<input type="date" name="moveIn" required></label>
+          </fieldset>
+          <p class="fit-count" id="fit-count" hidden></p>
+        </section>
 
-      <fieldset class="seg-group">
-        <legend>I'm a <button type="button" class="help-tip has-tip" aria-label="Why we ask" data-tip-title="Why we ask" data-tip="Lots of places are girls-only or guys-only, so this keeps you from getting alerts you can't take.">?</button></legend>
-        <div class="choice-cards three compact">
-          <label class="choice"><input type="radio" name="gender" value="Female" required><span>Girl</span></label>
-          <label class="choice"><input type="radio" name="gender" value="Male"><span>Guy</span></label>
-          <label class="choice"><input type="radio" name="gender" value="Other"><span>Rather not say</span></label>
-        </div>
-      </fieldset>
-
-      <label>First name <small class="muted">(optional)</small><input name="name" maxlength="80" autocomplete="given-name"></label>
-
-      <fieldset class="seg-group">
-        <legend>Send alerts by</legend>
-        <div class="choice-cards two compact">
-          <label class="choice"><input type="radio" name="notifyBy" value="email" checked><span>Email</span></label>
-          <label class="choice"><input type="radio" name="notifyBy" value="text"><span>Text</span></label>
-        </div>
-      </fieldset>
-      <label id="waitlist-email-field">Email<input type="email" name="email" maxlength="120" autocomplete="email" placeholder="you@email.com"></label>
-      <label id="waitlist-phone-field" hidden>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
-
-      <details class="more-prefs">
-        <summary>More preferences <small>(optional)</small></summary>
-        <div class="more-prefs-body">
-          <label>Lease type
+        <section class="wiz-step" data-wstep="2" hidden>
+          <h3 class="wiz-title">About you</h3>
+          <p class="wiz-sub">Lots of places are girls-only or guys-only, so this keeps you from getting alerts you can't take.</p>
+          <fieldset class="seg-group">
+            <legend>I'm a</legend>
+            <div class="choice-cards three compact">
+              <label class="choice"><input type="radio" name="gender" value="Female" required><span>Girl</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Male"><span>Guy</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Other"><span>Rather not say</span></label>
+            </div>
+          </fieldset>
+          <label>Room type
             <select name="unitType">
               <option value="either">Either</option>
-              <option value="bed">By the bed (shared unit)</option>
-              <option value="unit">Whole unit</option>
+              <option value="bed">Private room (shared apartment)</option>
+              <option value="unit">Whole place</option>
             </select>
           </label>
-          <label>Preferred complexes or area<input name="complexes" maxlength="200"></label>
-          <label>Anything else?<textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
-        </div>
-      </details>
+          <label>Preferred complexes or area <small class="hint">optional</small><input name="complexes" maxlength="200" placeholder="e.g. Cabana Beach, near campus"></label>
+          <label>Anything else? <small class="hint">optional</small><textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
+        </section>
+
+        <section class="wiz-step" data-wstep="3" hidden>
+          <h3 class="wiz-title">Where should we send them?</h3>
+          <p class="wiz-sub">You'll only hear from us when a place fits.</p>
+          <fieldset class="seg-group">
+            <legend>Send alerts by</legend>
+            <div class="choice-cards two compact">
+              <label class="choice"><input type="radio" name="notifyBy" value="email" checked><span>Email</span></label>
+              <label class="choice"><input type="radio" name="notifyBy" value="text"><span>Text</span></label>
+            </div>
+          </fieldset>
+          <label id="waitlist-email-field">Email<input type="email" name="email" maxlength="120" autocomplete="email" placeholder="you@email.com"></label>
+          <label id="waitlist-phone-field" hidden>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
+          <label>First name <small class="hint">optional</small><input name="name" maxlength="80" autocomplete="given-name"></label>
+        </section>
+      </div>
 
       <p class="form-error" hidden></p>
-      <button type="submit" class="btn btn-primary btn-block">Alert me</button>
+      <div class="wiz-nav">
+        <button type="button" class="btn btn-ghost btn-lg" data-wiz-back>Back</button>
+        <button type="button" class="btn btn-primary btn-lg" data-wiz-next>Next</button>
+        <button type="submit" class="btn btn-primary btn-lg" data-wiz-submit hidden>Alert me</button>
+      </div>
     </form>
     <div class="form-success" hidden>
       <h2>You're on the list.</h2>
@@ -596,7 +610,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794853879"></script>
-  <script src="app.js?v=1794853879"></script>
+  <script src="config.js?v=1794854380"></script>
+  <script src="app.js?v=1794854380"></script>
 </body>
 </html>
