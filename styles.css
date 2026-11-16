@@ -1115,3 +1115,40 @@ body:not(.first-load) .home-copy, body:not(.first-load) .iam-card { animation: n
 .feature-pay p { margin: .3rem 0 .8rem; font-size: .92rem; color: #334155; }
 .ig-tag-input:focus-within, .fo-handle:focus-within { border-color: var(--maroon) !important; box-shadow: 0 0 0 3px var(--accent-soft) !important; outline: none !important; }
 .fo-handle input:focus { outline: none !important; box-shadow: none !important; }
+
+/* Last listing screen: all about the Instagram feature */
+.feature-offer { padding: 1.4rem; gap: 1.1rem; }
+.fo-top { display: grid; grid-template-columns: 1fr 150px; gap: 1.1rem; align-items: center; }
+.fo-kicker { display: inline-block; font-size: .78rem; font-weight: 700; color: var(--maroon); background: #fff; border: 1px solid #dbe3ff; padding: .3rem .65rem; border-radius: 999px; }
+.fo-copy h3 { font-size: 1.35rem; letter-spacing: -.025em; margin: .55rem 0 .4rem; }
+.fo-copy p { margin: 0; font-size: .93rem; color: #334155; line-height: 1.5; }
+.fo-mock { position: relative; aspect-ratio: 4 / 5; border-radius: 16px; padding: .8rem; display: flex; flex-direction: column; justify-content: flex-end; gap: .1rem;
+  background: linear-gradient(160deg, #2f5bea, #1e3a8a); color: #fff; box-shadow: 0 12px 30px rgba(47, 91, 234, .3); transform: rotate(2.5deg); }
+.fo-mock-badge { position: absolute; top: .6rem; left: .6rem; background: #fbbf24; color: #0f172a; font-size: .58rem; font-weight: 800; letter-spacing: .05em; padding: .25rem .45rem; border-radius: 999px; }
+.fo-mock small { font-size: .55rem; font-weight: 700; letter-spacing: .08em; opacity: .8; color: #fff; }
+.fo-mock strong { font-size: .95rem; line-height: 1.15; letter-spacing: -.01em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.fo-mock-price { font-size: 1.35rem; font-weight: 800; color: #fbbf24; line-height: 1.1; }
+.fo-mock-price small { font-size: .6rem; opacity: .85; letter-spacing: 0; }
+.fo-perks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+.fo-perks li { display: flex; gap: .65rem; align-items: flex-start; padding: .75rem .8rem; border-radius: 14px; background: #fff; border: 1px solid var(--line); }
+.fo-perks li > span { width: 32px; height: 32px; border-radius: 10px; background: var(--tag); display: grid; place-items: center; font-size: .95rem; flex: none; }
+.fo-perks b { display: block; font-size: .9rem; }
+.fo-perks small { display: block; color: var(--muted); font-size: .8rem; line-height: 1.35; margin-top: .1rem; }
+.fo-more { justify-self: center; font-size: .88rem; font-weight: 600; color: var(--maroon); text-decoration: none; }
+.fo-more:hover { text-decoration: underline; }
+@media (max-width: 600px) {
+  .fo-top { grid-template-columns: 1fr 110px; gap: .8rem; }
+  .fo-copy h3 { font-size: 1.2rem; }
+  .fo-perks { grid-template-columns: 1fr; }
+}
+
+/* Report link on listing cards */
+.card-report { margin-left: auto; align-self: center; border: 0; background: none; padding: .3rem .4rem; font: inherit; font-size: .8rem; font-weight: 600; color: #94a3b8; cursor: pointer; border-radius: 8px; }
+.card-report:hover { color: #b42318; background: #fef2f2; }
+@media (max-width: 600px) {
+  .fo-perks { grid-template-columns: 1fr 1fr; gap: .45rem; }
+  .fo-perks li { padding: .6rem .65rem; gap: .5rem; }
+  .fo-perks li > span { width: 28px; height: 28px; font-size: .85rem; }
+  .fo-perks small { display: none; }
+  .fo-perks b { font-size: .84rem; line-height: 1.25; }
+}

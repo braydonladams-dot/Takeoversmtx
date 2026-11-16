@@ -296,6 +296,7 @@
         <div class="card-actions">
           ${contactBtn(l, 'sm')}
           <a class="btn btn-outline btn-sm" href="#l-${esc(l.id)}">View details</a>
+          <button type="button" class="card-report" data-report="${esc(l.id)}" aria-label="Report this listing" title="Report this listing">⚑ Report</button>
         </div>
       </article>`;
   }
@@ -583,7 +584,7 @@
       renderPhotoPreviews();
       proof = null;
       renderProof();
-      placeVerifyCard(!out.verified); // edit mode: unverified listings get the card right in the form
+      placeVerifyCard(false); // lease screenshots are turned off
       $('#listing-title').textContent = 'Edit your listing';
       $('#edit-takedown').hidden = !out.takeDownUrl;
       $('#edit-takedown-link').href = out.takeDownUrl || '#';
@@ -658,6 +659,11 @@
   }
   function showVerifyStep(show) {
     $('#listing-dialog').dataset.dir = show ? '1' : '-1';
+    if (show) {
+      const f = $('#listing-form');
+      $('#fo-mock-name').textContent = f.complex.value.trim() || 'Your place';
+      $('#fo-mock-price').innerHTML = (f.rent.value ? money(f.rent.value) : '$—') + '<small>/mo</small>';
+    }
     $('#listing-form').hidden = show;
     $('#verify-step').hidden = !show;
     if (show) $('#listing-dialog').scrollTop = 0;

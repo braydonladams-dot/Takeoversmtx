@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794855430">
+  <link rel="stylesheet" href="styles.css?v=1794855898">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -300,31 +300,44 @@
         <h2>One last thing</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
       </div>
-      <div class="verify-card" id="verify-card">
-        <div class="verify-head">
-          <span class="verify-badge">✓ Verified lease</span>
-          <span class="verify-sub">Verified listings get more messages</span>
-        </div>
-        <p>Add a screenshot of your lease or resident portal showing <b>your name, the complex, and your lease dates</b>. It takes 30 seconds.</p>
+      <!-- Lease screenshot upload is turned off for new listings (kept hidden so editing old listings still works). -->
+      <div class="verify-card" id="verify-card" hidden>
         <div id="proof-preview" class="proof-preview" hidden></div>
         <label class="btn btn-gold btn-sm" id="proof-add">+ Add lease screenshot
           <input type="file" id="proof-input" accept="image/*" hidden>
         </label>
-        <p class="verify-private">🔒 Only we see it. Never shown on the site, deleted after we check.</p>
       </div>
+
       <div class="feature-offer" id="feature-offer">
-        <div class="fo-head">
-          <span class="fo-star">⭐</span>
-          <div><b>Get featured on Instagram</b><small>$10 · your own slide in our weekly Featured places post</small></div>
+        <div class="fo-top">
+          <div class="fo-copy">
+            <span class="fo-kicker">⭐ Optional · $10</span>
+            <h3>Get featured on Instagram</h3>
+            <p>Put your place in front of way more students with its own slide in our weekly <b>Featured places</b> post on <b>@takeoversmtx</b>.</p>
+          </div>
+          <div class="fo-mock" aria-hidden="true">
+            <span class="fo-mock-badge">⭐ FEATURED</span>
+            <small>THIS WEEK</small>
+            <strong id="fo-mock-name">Your place</strong>
+            <span class="fo-mock-price" id="fo-mock-price">$—<small>/mo</small></span>
+          </div>
         </div>
-        <p>More students see your place, and we tag you so it shows up for your friends too. <a href="/get-featured" target="_blank" rel="noopener">See what you get</a></p>
+
+        <ul class="fo-perks">
+          <li><span>🖼️</span><div><b>Your own slide</b><small>Photos, rent and move-in date, front and center.</small></div></li>
+          <li><span>🏷️</span><div><b>Tagged to you</b><small>It shows up for your followers and their friends too.</small></div></li>
+          <li><span>🔗</span><div><b>Links to your listing</b><small>Anyone interested taps straight through to you.</small></div></li>
+          <li><span>✏️</span><div><b>Kept up to date</b><small>Taken before the week's up? We update your slide.</small></div></li>
+        </ul>
+
         <div class="fo-choice">
-          <label><input type="radio" name="wantsFeature" value="true"><span><b>Yes, feature it</b><small>+$10</small></span></label>
+          <label><input type="radio" name="wantsFeature" value="true"><span><b>Yes, feature it</b><small>+$10 for the week</small></span></label>
           <label><input type="radio" name="wantsFeature" value="false" checked><span><b>No thanks</b><small>Just list it free</small></span></label>
         </div>
         <label class="ig-tag-input fo-handle"><span>@</span><input type="text" id="ig-tag" maxlength="31" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="your Instagram, so we can tag you (optional)"></label>
+        <a class="fo-more" href="/get-featured" target="_blank" rel="noopener">More about features →</a>
       </div>
-      <p class="verify-optional">Both are optional.</p>
+
       <div class="verify-actions">
         <button type="button" class="btn btn-primary btn-block btn-lg" id="verify-submit" data-verify-submit>Submit listing</button>
         <button type="button" class="link-btn verify-back" data-verify-back>&larr; Back to my listing</button>
@@ -630,7 +643,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794855430"></script>
-  <script src="app.js?v=1794855430"></script>
+  <script src="config.js?v=1794855898"></script>
+  <script src="app.js?v=1794855898"></script>
 </body>
 </html>
