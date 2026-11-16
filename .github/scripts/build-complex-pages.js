@@ -78,7 +78,7 @@ ${body}
 
   <footer class="footer">
     <p><strong>Takeover SMTX</strong> is an independent listing board. It is not affiliated with Texas State University or any apartment complex. We don't negotiate leases, and every takeover must be approved by the property.</p>
-    <p><a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/how-it-works">How it works</a></p>
+    <p><a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/how-it-works">How it works</a> · <a href="/get-featured">Get featured on Instagram</a></p>
     <p><a class="ig-link" href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener">${ig}<span>Follow <b>@takeoversmtx</b> on Instagram</span></a></p>
   </footer>
   <a class="feedback-fab" href="/#feedback" aria-label="Send feedback">💬 Feedback</a>${scripts}
@@ -201,7 +201,7 @@ ${all.map((c) => `      <a class="panel cp-row" href="/lease-takeover/${c.slug}"
   fs.writeFileSync(path.join(OUT, 'index.html'), indexPage(all, live.length));
   fs.readdirSync(OUT).forEach((f) => { if (!keep.has(f)) fs.rmSync(path.join(OUT, f)); });
 
-  const urls = ['/', '/how-it-works', '/lease-takeover/', ...all.map((c) => '/lease-takeover/' + c.slug)];
+  const urls = ['/', '/how-it-works', '/get-featured', '/lease-takeover/', ...all.map((c) => '/lease-takeover/' + c.slug)];
   fs.writeFileSync(path.join(site, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${ORIGIN}${u}</loc></url>`).join('\n')}

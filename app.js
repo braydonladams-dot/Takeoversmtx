@@ -32,6 +32,13 @@
   const revealed = () => store.get('tsmtx_revealed', {});
 
   // The main button on a listing: "I'm interested" until they share their info, then the real contact.
+  // "👀 3 people interested" (🔥 at 3+). Only shown once someone has tapped it.
+  function interestLine(l, cls) {
+    const n = Number(l.interested) || 0;
+    if (!n) return '';
+    return '<p class="' + cls + (n >= 3 ? ' hot' : '') + '">' + (n >= 3 ? '🔥' : '👀') + ' <b>' + n + '</b> ' + (n === 1 ? 'person' : 'people') + ' interested</p>';
+  }
+
   function contactBtn(l, size) {
     const r = revealed()[l.id];
     if (r && r.contact) {
@@ -70,6 +77,8 @@
       if (!out.ok) throw new Error(out.error || 'failed');
       store.set('tsmtx_me', { name: data.name, phone: data.phone, email: data.email });
       const rv = revealed();
+      const tapped = all.find((x) => x.id === data.listingId);
+      if (tapped && !rv[data.listingId]) tapped.interested = (Number(tapped.interested) || 0) + 1;
       rv[data.listingId] = { contact: out.contact, contactMethod: out.contactMethod };
       store.set('tsmtx_revealed', rv);
       const c = contactLink({ contactMethod: out.contactMethod, contact: out.contact });
@@ -279,6 +288,7 @@
         </div>
         ${byLine(l, false)}
         <div class="tags">${tagsHtml(l)}</div>
+        ${interestLine(l, 'interest-line')}
         <div class="meta">
           <span>Available <b>${esc(fmtDate(l.availableFrom))}</b> · Lease ends <b>${esc(fmtDate(l.leaseEnds))}</b></span>
         </div>
@@ -326,6 +336,7 @@
             <div class="detail-rent">${money(l.rent)}<small>/mo</small></div>
             <p class="action-sub">${esc(typeLabel(l))} · available ${esc(fmtDate(l.availableFrom))}</p>
             ${l.incentive > 0 ? `<p class="action-inc">+ ${money(l.incentive)} cash incentive</p>` : ''}
+            ${interestLine(l, 'interest-line big')}
             <div class="detail-actions">
               ${contactBtn(l, 'lg')}
               <button type="button" class="btn btn-outline btn-lg" data-share="${esc(l.id)}">Share</button>
