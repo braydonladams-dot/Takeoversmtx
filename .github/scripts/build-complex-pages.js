@@ -56,6 +56,7 @@ function layout({ title, desc, canonical, body, jsonld, scripts = '' }) {
   <meta property="og:image" content="${ORIGIN}/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/styles.css?v=${ver}">
+  <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>${jsonld ? `
   <script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ''}
 </head>
