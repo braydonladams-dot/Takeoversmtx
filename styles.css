@@ -1152,3 +1152,9 @@ body:not(.first-load) .home-copy, body:not(.first-load) .iam-card { animation: n
   .fo-perks small { display: none; }
   .fo-perks b { font-size: .84rem; line-height: 1.25; }
 }
+
+/* Progress bar lives in the sticky header so it stays visible while scrolling */
+.dialog-head { position: sticky; }
+.dialog-head .wiz-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 4px; margin: 0; border-radius: 0; background: var(--tag); }
+.dialog-head .wiz-progress span { border-radius: 0 999px 999px 0; }
+.wizard .wiz-steps { padding-top: 1.5rem; }
