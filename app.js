@@ -1871,42 +1871,54 @@
   const STATUS = { approved: ['Live', 'live'], pending: ['In review', 'review'], taken: ['Taken', 'taken'] };
   const WHO = { Female: 'girls', Male: 'guys' };
   function renderMe(d) {
+    const featured = d.featured || [];
+    const nInt = d.listings.reduce((n, l) => n + l.interested.length, 0);
+    const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
     $('#me-email').textContent = d.email;
     $('#me-avatar').textContent = initials(d.email);
+    $('#me-stats').textContent = [plural(d.listings.length, 'listing'), nInt + ' interested', plural(d.alerts.length, 'alert')].join(' · ');
+
     $('#me-listings').innerHTML = d.listings.length ? d.listings.map((l) => {
       const s = STATUS[l.status] || [l.status, ''];
+      const isFeatured = featured.includes(String(l.id));
+      const live = l.status === 'approved';
+      const open = live ? ' href="#l-' + esc(l.id) + '"' : '';
       const people = l.interested.length
-        ? '<div class="me-people"><b>' + (l.interested.length >= 3 ? '🔥 ' : '👀 ') + l.interested.length + ' interested</b>' + l.interested.map((p) =>
-          '<div class="me-person"><span>' + esc(p.name || 'Someone') + '</span>' +
-          (p.phone ? '<a href="sms:' + esc(p.phone) + '">' + esc(p.phone) + '</a>' : '') +
-          (p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : '') + '</div>').join('') + '</div>'
-        : '<p class="me-none">No one has tapped "I\'m interested" yet. Sharing your listing helps.</p>';
-      return '<article class="me-card">' +
-        (l.photo ? '<img class="me-photo" src="' + esc(photoUrl(l.photo)) + '" alt="" loading="lazy">' : '<div class="me-photo me-noimg">🏠</div>') +
-        '<div class="me-card-body">' +
-          '<div class="me-card-top"><b>' + esc(l.complex) + '</b><span class="me-status ' + s[1] + '">' + esc(s[0]) + '</span></div>' +
-          ((d.featured || []).includes(String(l.id)) ? '<p class="me-featured">⭐ Featured on Instagram</p>' : '') +
-          '<p class="me-sub">' + money(l.rent) + '/mo · available ' + esc(fmtDate(l.availableFrom)) + '</p>' +
-          people +
-          '<div class="me-actions">' +
-            (l.status === 'approved' ? '<a class="btn btn-outline btn-sm" href="#l-' + esc(l.id) + '">View</a>' : '') +
-            (l.editUrl ? '<button type="button" class="btn btn-outline btn-sm" data-me-edit="' + esc(l.editUrl) + '">Edit</button>' : '') +
-            (l.status === 'approved' ? '<button type="button" class="btn btn-ghost btn-sm" data-share="' + esc(l.id) + '">Share</button>' : '') +
-            (l.status === 'approved' && l.takeDownUrl ? '<a class="btn btn-ghost btn-sm" href="' + esc(l.takeDownUrl) + '" target="_blank" rel="noopener">Mark taken</a>' : '') +
-            (l.status !== 'taken' && !(d.featured || []).includes(String(l.id)) ? '<button type="button" class="btn btn-feature btn-sm" data-feature-pay="' + esc(l.id) + '">⭐ Get featured · $10</button>' : '') +
+        ? '<div class="mc-people"><p class="mc-people-head">' + (l.interested.length >= 3 ? '🔥 ' : '👀 ') + plural(l.interested.length, 'person') .replace('persons', 'people') + ' interested</p>' +
+          l.interested.map((p) => '<div class="mc-person"><span class="mc-avatar">' + esc(initials(p.name || p.email || '?')) + '</span><b>' + esc(p.name || 'Someone') + '</b>' +
+            '<span class="mc-reach">' + (p.phone ? '<a class="pill-link" href="sms:' + esc(p.phone) + '">💬 Text</a>' : '') + (p.email ? '<a class="pill-link" href="mailto:' + esc(p.email) + '">✉️ Email</a>' : '') + '</span></div>').join('') + '</div>'
+        : '<p class="mc-none">No one has tapped "I\'m interested" yet. Sharing your listing helps.</p>';
+      return '<article class="mc">' +
+        '<div class="mc-top">' +
+          (live ? '<a class="mc-thumb"' + open + '>' : '<div class="mc-thumb">') +
+            (l.photo ? '<img src="' + esc(photoUrl(l.photo)) + '" alt="" loading="lazy">' : '<span>🏠</span>') +
+          (live ? '</a>' : '</div>') +
+          '<div class="mc-info">' +
+            (live ? '<a class="mc-name"' + open + '>' + esc(l.complex) + '</a>' : '<b class="mc-name">' + esc(l.complex) + '</b>') +
+            '<p class="mc-sub">' + money(l.rent) + '/mo · Move in ' + esc(shortDate(l.availableFrom)) + '</p>' +
+            '<span class="me-status ' + s[1] + '">' + esc(s[0]) + '</span>' +
           '</div>' +
-        '</div></article>';
+        '</div>' +
+        people +
+        '<div class="mc-actions">' +
+          (l.editUrl ? '<button type="button" class="mc-btn" data-me-edit="' + esc(l.editUrl) + '">✏️ Edit</button>' : '') +
+          (live ? '<button type="button" class="mc-btn" data-share="' + esc(l.id) + '">↗ Share</button>' : '') +
+          (live && l.takeDownUrl ? '<a class="mc-btn" href="' + esc(l.takeDownUrl) + '" target="_blank" rel="noopener">✓ Mark taken</a>' : '') +
+        '</div>' +
+        (isFeatured ? '<p class="mc-featured">⭐ Featured on Instagram</p>'
+          : l.status !== 'taken' ? '<button type="button" class="btn btn-feature btn-block mc-feature" data-feature-pay="' + esc(l.id) + '">⭐ Get featured on Instagram · $10</button>' : '') +
+      '</article>';
     }).join('') : '<div class="me-empty"><p>No listings under <b>' + esc(d.email) + '</b> yet.</p><small>Listed with a different email? Sign in with that one to see it here.</small></div>';
 
     $('#me-alerts').innerHTML = d.alerts.length ? d.alerts.map((a) => {
-      const bits = [a.maxRent ? 'Under ' + money(a.maxRent) + '/mo' : 'Any price', a.moveIn ? 'move in by ' + fmtDate(a.moveIn) : '', WHO[a.gender] || '',
-        a.unitType === 'unit' ? 'whole place' : a.unitType === 'bed' ? 'private room' : '', a.notifyBy === 'text' ? 'by text' : 'by email'].filter(Boolean);
-      return '<div class="me-row"><span class="me-row-ic">🔔</span><span>' + esc(bits.join(' · ')) + '</span></div>';
+      const chips = [a.maxRent ? 'Under ' + money(a.maxRent) : 'Any price', a.moveIn ? 'By ' + shortDate(a.moveIn) : '', WHO[a.gender] ? WHO[a.gender].replace(/^./, (c) => c.toUpperCase()) : '',
+        a.unitType === 'unit' ? 'Whole place' : a.unitType === 'bed' ? 'Private room' : '', a.notifyBy === 'text' ? 'By text' : 'By email'].filter(Boolean);
+      return '<div class="me-row"><span class="me-row-ic">🔔</span><span class="chip-row">' + chips.map((c) => '<span class="mini-chip">' + esc(c) + '</span>').join('') + '</span></div>';
     }).join('') : '<div class="me-empty"><p>No alerts yet.</p><small>Get a text or email the moment a place fits your budget.</small></div>';
 
     $('#me-interests').innerHTML = d.interests.length ? d.interests.map((i) =>
       '<a class="me-row link" href="#l-' + esc(i.listingId) + '"><span class="me-row-ic">🏠</span><span><b>' + esc(i.complex || 'A listing') + '</b>' +
-      (i.rent ? ' · ' + money(i.rent) + '/mo' : '') + (i.status === 'taken' ? ' <em class="me-status taken">Taken</em>' : '') + '</span><span class="arrow">›</span></a>').join('')
+      (i.rent ? ' <span class="muted">· ' + money(i.rent) + '/mo</span>' : '') + (i.status === 'taken' ? ' <em class="me-status taken">Taken</em>' : '') + '</span><span class="arrow">›</span></a>').join('')
       : '<div class="me-empty"><p>Nothing yet.</p><small>Tap "I\'m interested" on a listing and it shows up here.</small></div>';
 
     $('#me-body').hidden = false;
