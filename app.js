@@ -1167,7 +1167,8 @@
   });
   $('#manage-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'sendEditLinks'); });
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Transitions always play (Braydon wants them even when Windows' "Animation effects" is off). They're gentle slides and fades.
+  const reduceMotion = false;
   let view = '';
   function viewFor(h) { return /^#l-/.test(h) ? 'focus' : h === '#board' ? 'board' : 'home'; }
   const rank = { home: 0, board: 1, focus: 2 };

@@ -740,9 +740,6 @@ body.view-home .iam-card:nth-child(4) { animation-delay: .26s; }
 .btn:active, .iam-card:active, .city-opt:active, .me-btn:active, .back-home:active { transform: scale(.975); }
 .seg label:active span { transform: scale(.95); }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after, ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; transition: none !important; }
-}
 
 /* Board screen: the browser's jump to #board must not hide the top under the header */
 #board { scroll-margin-top: 90px; }
@@ -887,7 +884,7 @@ body.view-home .iam-card:nth-child(4) { animation-delay: .36s; }
 .sort-row #result-count { white-space: nowrap; }
 /* Other pages (How it works, complex pages) ease in the same way */
 .page { animation: vt-in .6s var(--ease-out) backwards; }
-@media (prefers-reduced-motion: reduce) { .page { animation: none; } }
+
 
 /* ===== v2: lighter, smoother motion ===== */
 /* Blur behind pop-ups and under the header is expensive to draw and made things stutter. */
