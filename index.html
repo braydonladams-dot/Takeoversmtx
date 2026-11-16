@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794868859">
+  <link rel="stylesheet" href="styles.css?v=1794869754">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -663,6 +663,31 @@
     </div>
   </dialog>
 
+  <!-- $10 Instagram feature: pay right here (Stripe card form inside our own pop-up) -->
+  <dialog id="pay-dialog" class="dialog finder pay">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step" data-step="pay">
+        <span class="si-badge">⭐</span>
+        <h2 class="finder-title">Get featured on Instagram</h2>
+        <div class="pay-summary">
+          <div><b id="pay-listing">Your listing</b><small>Its own slide in this week's Featured places post on @takeoversmtx</small></div>
+          <span class="pay-price">$10<small>one time</small></span>
+        </div>
+        <div id="pay-element" class="pay-element"></div>
+        <p class="form-error" hidden></p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="pay-btn" disabled>Pay $10</button>
+        <p class="si-fine">🔒 Secure payment by Stripe. Your card never touches our site.</p>
+      </div>
+      <div class="finder-step finder-done" data-step="done" hidden>
+        <div class="done-check">✓</div>
+        <h2 class="finder-title">You're featured!</h2>
+        <p class="finder-hint">We'll add <b id="pay-done-listing">your place</b> to this week's Featured places post on @takeoversmtx. Your receipt is on its way to your email.</p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
+      </div>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <!-- Feedback -->
@@ -725,8 +750,8 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=1794868859"></script>
-  <script src="app.js?v=1794868859"></script>
+  <script src="config.js?v=1794869754"></script>
+  <script src="app.js?v=1794869754"></script>
 <script src="/topbar.js?v=1794857363" defer></script>
 </body>
 </html>

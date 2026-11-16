@@ -1339,3 +1339,13 @@ body.view-me .home, body.view-me .board, body.view-me .how, body.view-me .storie
 .secure-note { display: block; margin-top: .45rem; color: var(--muted); font-size: .8rem; }
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 300; max-width: min(92vw, 460px); padding: .9rem 1.2rem; border-radius: 16px; background: #0f172a; color: #fff; font-weight: 600; font-size: .95rem; box-shadow: 0 16px 40px rgba(15, 23, 42, .3); transform: translate(-50%, 140%); opacity: 0; transition: transform .5s cubic-bezier(.22, 1, .36, 1), opacity .4s; }
 .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* Pay pop-up */
+.pay-summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.1rem; border-radius: 16px; background: linear-gradient(135deg, #f5f7ff, #fdf4ff); border: 1px solid #dbe3ff; margin: .2rem 0 1.3rem; }
+.pay-summary b { display: block; font-size: 1.02rem; }
+.pay-summary small { color: var(--muted); font-size: .84rem; line-height: 1.35; display: block; margin-top: .15rem; }
+.pay-price { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; color: var(--ink); text-align: right; line-height: 1; white-space: nowrap; }
+.pay-price small { display: block; font-size: .75rem; font-weight: 600; color: var(--muted); margin-top: .25rem; }
+.pay-element { min-height: 180px; margin-bottom: 1.1rem; }
+#pay-dialog .form-error { margin: 0 0 1rem; }
+#pay-dialog .btn-block { width: 100%; }

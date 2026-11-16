@@ -1707,30 +1707,108 @@
     clearTimeout(toast.timer);
     toast.timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => (t.hidden = true), 400); }, ms || 4500);
   }
-  async function featurePay(listingId, btn) {
+  // Stripe card form inside our own pop-up (styled to match the site)
+  var stripeJs = null, payState = null;
+  function loadStripe() {
+    if (window.Stripe) return Promise.resolve(window.Stripe);
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://js.stripe.com/v3/';
+      s.onload = () => res(window.Stripe);
+      s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  const PAY_LOOK = {
+    theme: 'stripe',
+    variables: {
+      colorPrimary: '#2f5bea', colorText: '#0f172a', colorTextSecondary: '#64748b', colorDanger: '#b42318',
+      colorBackground: '#ffffff', fontFamily: 'Inter, system-ui, -apple-system, sans-serif', fontSizeBase: '15px',
+      borderRadius: '12px', spacingUnit: '4px', fontWeightMedium: '600',
+    },
+    rules: {
+      '.Input': { padding: '13px 14px', border: '1px solid #e7e9ee', backgroundColor: '#f8fafc', boxShadow: 'none' },
+      '.Input:focus': { border: '1px solid #2f5bea', boxShadow: '0 0 0 3px #eef2ff', backgroundColor: '#ffffff' },
+      '.Label': { fontWeight: '600', color: '#0f172a', marginBottom: '6px' },
+      '.Tab': { border: '1px solid #e7e9ee', boxShadow: 'none' },
+      '.Tab--selected': { border: '1px solid #2f5bea', boxShadow: '0 0 0 3px #eef2ff' },
+    },
+  };
+  const payErr = (msg) => { const e = $('#pay-dialog .form-error'); e.textContent = msg || ''; e.hidden = !msg; };
+  async function featurePay(listingId) {
     if (!session) { afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me'; return openSignIn({ title: 'Sign in to get featured' }); }
-    const label = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = 'Opening checkout…'; }
-    track('feature/checkout', 'Feature checkout started');
+    const d = $('#pay-dialog');
+    d.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el.dataset.step !== 'pay'));
+    $('#pay-element').innerHTML = '<div class="me-loading"><span class="spinner"></span> Loading secure checkout…</div>';
+    $('#pay-listing').textContent = 'Your listing';
+    const payBtn = $('#pay-btn');
+    payBtn.disabled = true;
+    payBtn.textContent = 'Pay $10';
+    payErr('');
+    payState = null;
+    const others = [...document.querySelectorAll('dialog[open]')].filter((x) => x !== d);
+    others.forEach((x) => x.close());
+    setTimeout(() => d.showModal(), others.length ? 360 : 0);
+    track('feature/checkout', 'Feature checkout opened');
     try {
-      const r = await fetch(CFG.supabaseUrl + '/functions/v1/feature-checkout', {
+      const [StripeCtor, r] = await Promise.all([loadStripe(), fetch(CFG.supabaseUrl + '/functions/v1/feature-pay', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
         body: JSON.stringify(listingId ? { listingId } : {}),
-      });
+      })]);
       const j = await r.json().catch(() => ({}));
-      if (j.ok && j.url) { location.href = j.url; return; }
-      toast(j.error === 'already featured' ? "That listing is already featured. You're all set!" :
-        j.error === 'no listing' ? "We couldn't find your listing yet. Give it a minute, then try from your account." :
-        "Couldn't open checkout. Try again in a minute.", 6000);
-    } catch (_) {
+      if (!j.ok) {
+        d.close();
+        toast(j.error === 'already featured' ? "That listing is already featured. You're all set!" :
+          j.error === 'no listing' ? "We couldn't find your listing yet. Give it a minute, then try from your account." :
+          "Couldn't open checkout. Try again in a minute.", 6000);
+        return;
+      }
+      $('#pay-listing').textContent = j.listing.complex;
+      $('#pay-done-listing').textContent = j.listing.complex;
+      stripeJs = stripeJs || StripeCtor(CFG.stripeKey);
+      const elements = stripeJs.elements({ clientSecret: j.clientSecret, appearance: PAY_LOOK, fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' }] });
+      const pe = elements.create('payment', { layout: 'tabs', wallets: { applePay: 'auto', googlePay: 'auto' } });
+      $('#pay-element').innerHTML = '';
+      pe.mount('#pay-element');
+      pe.on('ready', () => { payBtn.disabled = false; });
+      payState = { elements, listingId: String(j.listing.id) };
+    } catch (e) {
+      console.error(e);
+      d.close();
       toast("Couldn't open checkout. Check your connection and try again.");
     }
-    if (btn) { btn.disabled = false; btn.textContent = label; }
   }
+  $('#pay-btn').addEventListener('click', async () => {
+    if (!payState || !stripeJs) return;
+    const btn = $('#pay-btn');
+    btn.disabled = true;
+    btn.textContent = 'Paying…';
+    payErr('');
+    const { error, paymentIntent } = await stripeJs.confirmPayment({
+      elements: payState.elements,
+      redirect: 'if_required',
+      confirmParams: { return_url: location.origin + '/?featured=' + encodeURIComponent(payState.listingId) + '#me' },
+    });
+    if (error) {
+      payErr(error.message || 'Payment didn\'t go through. Check your card and try again.');
+      btn.disabled = false;
+      btn.textContent = 'Pay $10';
+      return;
+    }
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      justPaid = payState.listingId;
+      if (meData) { meData.featured = (meData.featured || []).concat(justPaid); if (view === 'me') renderMe(meData); }
+      track('feature/paid', 'Feature paid in pop-up');
+      const d = $('#pay-dialog');
+      slideSteps($('.finder-body', d), d.querySelector('[data-step="pay"]'), d.querySelector('[data-step="done"]'), 1);
+    } else {
+      payErr("Your payment is processing. We'll email you as soon as it's done.");
+    }
+  });
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-feature-pay]');
-    if (b) featurePay(b.dataset.featurePay || '', b);
+    if (b) featurePay(b.dataset.featurePay || '');
   });
   (function backFromStripe() {
     const q = new URLSearchParams(location.search);

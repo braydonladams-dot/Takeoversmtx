@@ -12,4 +12,6 @@ window.TAKEOVER_CONFIG = {
   // Accounts + payments (Supabase). The publishable key is meant to be public; real access is locked by Row Level Security.
   supabaseUrl: 'https://fkflptyzstspweekfihc.supabase.co',
   supabaseKey: 'sb_publishable_RXLgFj5YCEy8yP9Al_UPxw_vNYTX2uU',
+  // Stripe publishable key (meant to be public). Test mode until Stripe is fully set up.
+  stripeKey: 'pk_test_51UcYVKA7RQFcJ2PuBAZeWYdXIFOxqqZ9IBdi2D88TJk2vEHYHLHfGNzgXGyiT0abLbm6F0KeWwkU5eFyVcTQ1UST00Dud4s35H',
 };
