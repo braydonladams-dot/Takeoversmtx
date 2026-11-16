@@ -360,6 +360,7 @@
     if (live.length) {
       $('#live-count').textContent = live.length + (live.length === 1 ? ' place' : ' places') + ' open in San Marcos';
       $('#finder-count').textContent = live.length + ' open';
+      $('#tb-count').textContent = live.length + ' places';
     }
     const cta = `<div class="alert-cta"><div><b>Don't see the right place?</b><span>Get a text or email the moment one fits your budget and move-in date. Free.</span></div><button type="button" class="btn btn-primary" data-open="waitlist-dialog" data-cta="board">Get alerts</button></div>`;
     const cards = list.map(card);

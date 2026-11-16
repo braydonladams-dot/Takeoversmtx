@@ -64,6 +64,11 @@ function layout({ title, desc, canonical, body, jsonld, scripts = '' }) {
   <script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ''}
 </head>
 <body>
+  <div class="topbar" id="topbar">
+    <a class="tb-item" href="/get-featured">⭐ <b>New:</b> get your place featured on our Instagram <span class="go">→</span></a>
+    <a class="tb-item" href="/#alerts">🔔 Get a text the moment a place fits your budget <span class="go">→</span></a>
+    <a class="tb-item" href="/#board">🔥 New places every week near Texas State <span class="go">→</span></a>
+  </div>
   <header class="site-header">
     <a class="brand" href="/"><img src="/favicon.svg" alt="" width="30" height="30">Takeover<span>SMTX</span></a>
     <nav class="nav">
@@ -82,6 +87,7 @@ ${body}
     <p><a class="ig-link" href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener">${ig}<span>Follow <b>@takeoversmtx</b> on Instagram</span></a></p>
   </footer>
   <a class="feedback-fab" href="/#feedback" aria-label="Send feedback">💬 Feedback</a>${scripts}
+<script src="/topbar.js" defer></script>
 </body>
 </html>
 `;

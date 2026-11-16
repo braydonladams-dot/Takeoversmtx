@@ -1211,3 +1211,41 @@ body:not(.first-load) .home-copy, body:not(.first-load) .iam-card { animation: n
 .contact-pick .choice i { font-style: normal; font-size: 1.15rem; line-height: 1; }
 @media (max-width: 600px) { .choice-cards.four { grid-template-columns: 1fr 1fr; } }
 .wizard .row.pair { grid-template-columns: 1fr 1fr !important; }
+
+/* ===== Announcement bar (top of every page) ===== */
+.topbar { position: relative; height: 40px; overflow: hidden; color: #fff;
+  background: linear-gradient(90deg, #1e3a8a 0%, #2f5bea 45%, #7c3aed 100%); }
+.topbar::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .14) 50%, transparent 70%); background-size: 250% 100%; animation: tb-shine 7s ease-in-out infinite; }
+@keyframes tb-shine { 0% { background-position: 120% 0; } 60%, 100% { background-position: -120% 0; } }
+.tb-item { position: absolute; inset: 0; width: 100%; display: flex; align-items: center; justify-content: center; gap: .35rem; padding: 0 1rem;
+  border: 0; background: none; color: #fff; font: inherit; font-size: .88rem; font-weight: 500; text-decoration: none; white-space: nowrap; cursor: pointer;
+  opacity: 0; transform: translateY(100%); transition: transform .7s cubic-bezier(.22, 1, .36, 1), opacity .7s; }
+.tb-item.on { opacity: 1; transform: none; }
+.tb-item.out { opacity: 0; transform: translateY(-100%); }
+.tb-item:not(.on) { pointer-events: none; }
+.tb-item b { font-weight: 800; }
+.tb-item .go { display: inline-block; opacity: .85; transition: transform .25s; }
+.tb-item:hover .go { transform: translateX(4px); }
+@media (max-width: 600px) { .topbar { height: 36px; } .tb-item { font-size: .8rem; } }
+
+/* Logo: "SMTX" as a small gradient badge */
+.brand span { display: inline-block; margin-left: .4rem; padding: .14rem .45rem; border-radius: 8px; font-size: .72em; font-weight: 800; letter-spacing: .03em; color: #fff;
+  background: linear-gradient(135deg, #2f5bea, #7c3aed); box-shadow: 0 2px 8px rgba(79, 70, 229, .3); vertical-align: 2px; }
+
+/* Home: soft color glow behind the "I am..." screen, and no duplicate "students looking" line */
+body.view-home main { background:
+  radial-gradient(700px 420px at 12% 30%, rgba(47, 91, 234, .09), transparent 65%),
+  radial-gradient(640px 420px at 88% 75%, rgba(124, 58, 237, .08), transparent 65%); }
+.home #looking-stat { display: none !important; }
+body.view-home .home { min-height: calc(100vh - 110px); min-height: calc(100svh - 110px); }
+@media (max-width: 899px) and (max-height: 760px) { .home-sub { display: none; } .home h1 { margin-bottom: 1rem; } }
+@media (max-width: 480px) {
+  .site-header { gap: .5rem; }
+  .brand { font-size: 1.02rem; gap: .4rem; }
+  .brand img { width: 26px; height: 26px; }
+  .brand span { margin-left: .25rem; font-size: .66em; padding: .12rem .38rem; }
+  .nav { gap: .35rem; }
+  .nav .btn-primary { font-size: .85rem; padding: .45rem .75rem; }
+  .me-btn { width: 36px; height: 36px; margin-left: 0; }
+}
