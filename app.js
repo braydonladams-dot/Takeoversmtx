@@ -1279,8 +1279,8 @@
   // Transitions always play (Braydon wants them even when Windows' "Animation effects" is off). They're gentle slides and fades.
   const reduceMotion = false;
   let view = '';
-  function viewFor(h) { return /^#l-/.test(h) ? 'focus' : h === '#board' ? 'board' : 'home'; }
-  const rank = { home: 0, board: 1, focus: 2 };
+  function viewFor(h) { return /^#l-/.test(h) ? 'focus' : h === '#board' ? 'board' : h === '#me' ? 'me' : 'home'; }
+  const rank = { home: 0, board: 1, me: 1, focus: 2 };
   function swap(fn, dir) {
     const m = $('main');
     if (reduceMotion || !m.animate) return fn();
@@ -1305,7 +1305,10 @@
     view = next;
     const apply = () => {
       document.body.classList.toggle('view-home', next === 'home');
-      document.body.classList.toggle('view-board', next !== 'home');
+      document.body.classList.toggle('view-board', next === 'board' || next === 'focus');
+      document.body.classList.toggle('view-me', next === 'me');
+      $('#me').hidden = next !== 'me';
+      if (next === 'me') loadMe();
       if (next === 'focus') focusFromHash();
       else exitFocus();
       // Back from a listing keeps your spot on the board; everything else starts at the top.
@@ -1510,6 +1513,250 @@
   if (location.hash === '#feedback') openDialog('feedback-dialog');
   const editMatch = location.hash.match(/^#edit-([\w]+)\.([\w]+)$/);
   if (editMatch) startEdit(editMatch[1], editMatch[2]);
+
+  // ---------- accounts (Supabase): sign in with an emailed code, profile page ----------
+  var sb = window.supabase && CFG.supabaseUrl
+    ? window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } })
+    : null;
+  var session = null, meData = null, afterSignIn = null, authChecked = false, pendingMe = false;
+  const siDlg = $('#signin-dialog'), siEmail = $('#signin-email'), siCode = $('#signin-code');
+  const userIcon = $('.me-btn').innerHTML;
+  const ls = {
+    get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (_) { /* private mode */ } },
+  };
+  const initials = (email) => String(email || '?').trim().charAt(0).toUpperCase();
+  const siErr = (form, msg) => { const e = $('.form-error', form); e.textContent = msg || ''; e.hidden = !msg; };
+
+  function siStep(step, instant) {
+    const cur = siDlg.querySelector('.finder-step:not([hidden])');
+    const nxt = siDlg.querySelector('.finder-step[data-step="' + step + '"]');
+    if (cur === nxt) return;
+    if (instant || !cur) { siDlg.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el !== nxt)); return; }
+    slideSteps($('.finder-body', siDlg), cur, nxt, step === 'code' ? 1 : -1);
+  }
+  function openSignIn(opts) {
+    opts = opts || {};
+    $('#signin-title').textContent = opts.title || 'Sign in to Takeover';
+    $('#signin-hint').textContent = opts.hint || "See your listings, who's interested, and your alerts in one place. No password, we'll email you a code.";
+    siStep('email', true);
+    siErr(siEmail, '');
+    siErr(siCode, '');
+    siCode.code.value = '';
+    siDlg.showModal();
+    track('open/signin', 'Opened sign in');
+  }
+
+  let resendAt = 0;
+  async function sendCode(email) {
+    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    if (error) throw error;
+    resendAt = Date.now() + 30000;
+  }
+  siEmail.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = siEmail.email.value.trim();
+    if (!siEmail.checkValidity() || !email) return siErr(siEmail, 'Please enter a valid email.');
+    if (!sb) return siErr(siEmail, "Sign in isn't available right now.");
+    const btn = $('button[type=submit]', siEmail);
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      await sendCode(email);
+      siErr(siEmail, '');
+      $('#signin-sent-to').textContent = email;
+      siStep('code');
+      track('signin/code-sent', 'Sign in: code sent');
+      setTimeout(() => siCode.code.focus({ preventScroll: true }), 650);
+    } catch (err) {
+      console.error(err);
+      siErr(siEmail, /rate|second|limit/i.test(err.message || '') ? 'Too many tries. Wait a minute and try again.' : "Couldn't send the code. Check the email and try again.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Email me a code';
+    }
+  });
+  siCode.code.addEventListener('input', () => { siCode.code.value = siCode.code.value.replace(/\D/g, '').slice(0, 8); });
+  siCode.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = siCode.code.value.trim();
+    if (code.length < 6) return siErr(siCode, 'Enter the code from the email.');
+    const btn = $('button[type=submit]', siCode);
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    try {
+      const { data, error } = await sb.auth.verifyOtp({ email: siEmail.email.value.trim(), token: code, type: 'email' });
+      if (error) throw error;
+      session = data.session;
+      siErr(siCode, '');
+      track('signin/done', 'Signed in');
+      paintAccountBtn();
+      prefillFromAccount();
+      siDlg.close();
+      const next = afterSignIn;
+      afterSignIn = null;
+      setTimeout(() => (next ? next() : (location.hash = 'me')), 350);
+    } catch (err) {
+      console.error(err);
+      siErr(siCode, "That code didn't work. Check it, or tap Resend code.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  });
+  siDlg.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-si-back]')) return siStep('email');
+    const rs = e.target.closest('[data-si-resend]');
+    if (!rs) return;
+    const left = Math.ceil((resendAt - Date.now()) / 1000);
+    if (left > 0) return siErr(siCode, 'You can resend in ' + left + ' seconds.');
+    try {
+      await sendCode(siEmail.email.value.trim());
+      siErr(siCode, '');
+      rs.textContent = 'Sent ✓';
+      setTimeout(() => (rs.textContent = 'Resend code'), 3000);
+    } catch (_) {
+      siErr(siCode, "Couldn't resend. Try again in a minute.");
+    }
+  });
+
+  // Header button: initial + a dot when someone new is interested in your place.
+  function totalInterested() { return meData ? meData.listings.reduce((n, l) => n + l.interested.length, 0) : 0; }
+  function paintAccountBtn() {
+    const b = $('.me-btn');
+    if (session) {
+      const fresh = totalInterested() > Number(ls.get('tsmtx_seen_int') || 0);
+      b.classList.add('signed-in');
+      b.innerHTML = '<span>' + esc(initials(session.user.email)) + '</span>' + (fresh ? '<i class="me-dot"></i>' : '');
+    } else {
+      b.classList.remove('signed-in');
+      b.innerHTML = userIcon;
+    }
+  }
+  // Signed in? Fill your email into forms so you don't retype it.
+  function prefillFromAccount() {
+    if (!session) return;
+    const em = session.user.email;
+    [['#listing-form', 'email'], ['#waitlist-form', 'email'], ['#interest-form', 'email']].forEach(([f, n]) => {
+      const el = $(f) && $(f).elements[n];
+      if (el && !el.value) el.value = em;
+    });
+  }
+
+  async function fetchMe() {
+    if (!sb || !session) return null;
+    const r = await fetch(CFG.supabaseUrl + '/functions/v1/me', { headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey } });
+    if (r.status === 401) { await sb.auth.signOut(); session = null; paintAccountBtn(); return null; }
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'failed');
+    meData = j;
+    return j;
+  }
+
+  const STATUS = { approved: ['Live', 'live'], pending: ['In review', 'review'], taken: ['Taken', 'taken'] };
+  const WHO = { Female: 'girls', Male: 'guys' };
+  function renderMe(d) {
+    $('#me-email').textContent = d.email;
+    $('#me-avatar').textContent = initials(d.email);
+    $('#me-listings').innerHTML = d.listings.length ? d.listings.map((l) => {
+      const s = STATUS[l.status] || [l.status, ''];
+      const people = l.interested.length
+        ? '<div class="me-people"><b>' + (l.interested.length >= 3 ? '🔥 ' : '👀 ') + l.interested.length + ' interested</b>' + l.interested.map((p) =>
+          '<div class="me-person"><span>' + esc(p.name || 'Someone') + '</span>' +
+          (p.phone ? '<a href="sms:' + esc(p.phone) + '">' + esc(p.phone) + '</a>' : '') +
+          (p.email ? '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' : '') + '</div>').join('') + '</div>'
+        : '<p class="me-none">No one has tapped "I\'m interested" yet. Sharing your listing helps.</p>';
+      return '<article class="me-card">' +
+        (l.photo ? '<img class="me-photo" src="' + esc(photoUrl(l.photo)) + '" alt="" loading="lazy">' : '<div class="me-photo me-noimg">🏠</div>') +
+        '<div class="me-card-body">' +
+          '<div class="me-card-top"><b>' + esc(l.complex) + '</b><span class="me-status ' + s[1] + '">' + esc(s[0]) + '</span></div>' +
+          '<p class="me-sub">' + money(l.rent) + '/mo · available ' + esc(fmtDate(l.availableFrom)) + '</p>' +
+          people +
+          '<div class="me-actions">' +
+            (l.status === 'approved' ? '<a class="btn btn-outline btn-sm" href="#l-' + esc(l.id) + '">View</a>' : '') +
+            (l.editUrl ? '<button type="button" class="btn btn-outline btn-sm" data-me-edit="' + esc(l.editUrl) + '">Edit</button>' : '') +
+            (l.status === 'approved' ? '<button type="button" class="btn btn-ghost btn-sm" data-share="' + esc(l.id) + '">Share</button>' : '') +
+            (l.status === 'approved' && l.takeDownUrl ? '<a class="btn btn-ghost btn-sm" href="' + esc(l.takeDownUrl) + '" target="_blank" rel="noopener">Mark taken</a>' : '') +
+          '</div>' +
+        '</div></article>';
+    }).join('') : '<div class="me-empty"><p>No listings under <b>' + esc(d.email) + '</b> yet.</p><small>Listed with a different email? Sign in with that one to see it here.</small></div>';
+
+    $('#me-alerts').innerHTML = d.alerts.length ? d.alerts.map((a) => {
+      const bits = [a.maxRent ? 'Under ' + money(a.maxRent) + '/mo' : 'Any price', a.moveIn ? 'move in by ' + fmtDate(a.moveIn) : '', WHO[a.gender] || '',
+        a.unitType === 'unit' ? 'whole place' : a.unitType === 'bed' ? 'private room' : '', a.notifyBy === 'text' ? 'by text' : 'by email'].filter(Boolean);
+      return '<div class="me-row"><span class="me-row-ic">🔔</span><span>' + esc(bits.join(' · ')) + '</span></div>';
+    }).join('') : '<div class="me-empty"><p>No alerts yet.</p><small>Get a text or email the moment a place fits your budget.</small></div>';
+
+    $('#me-interests').innerHTML = d.interests.length ? d.interests.map((i) =>
+      '<a class="me-row link" href="#l-' + esc(i.listingId) + '"><span class="me-row-ic">🏠</span><span><b>' + esc(i.complex || 'A listing') + '</b>' +
+      (i.rent ? ' · ' + money(i.rent) + '/mo' : '') + (i.status === 'taken' ? ' <em class="me-status taken">Taken</em>' : '') + '</span><span class="arrow">›</span></a>').join('')
+      : '<div class="me-empty"><p>Nothing yet.</p><small>Tap "I\'m interested" on a listing and it shows up here.</small></div>';
+
+    $('#me-body').hidden = false;
+    $('#me-loading').hidden = true;
+    ls.set('tsmtx_seen_int', String(totalInterested())); // you've seen everyone who's interested
+    paintAccountBtn();
+  }
+
+  async function loadMe() {
+    if (!sb) { $('#me-loading').hidden = true; $('#me-error').hidden = false; return; }
+    if (!authChecked) { pendingMe = true; return; }
+    if (!session) {
+      setTimeout(() => { goHome(); afterSignIn = () => { location.hash = 'me'; }; openSignIn({ title: 'Sign in to see your account' }); }, 0);
+      return;
+    }
+    $('#me-email').textContent = session.user.email;
+    $('#me-avatar').textContent = initials(session.user.email);
+    $('#me-error').hidden = true;
+    if (meData) renderMe(meData);
+    else { $('#me-loading').hidden = false; $('#me-body').hidden = true; }
+    try {
+      const d = await fetchMe();
+      if (d) renderMe(d);
+    } catch (e) {
+      console.error(e);
+      if (!meData) $('#me-error').hidden = false;
+    } finally {
+      $('#me-loading').hidden = true;
+    }
+  }
+
+  document.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-account]')) {
+      if (session) location.hash = 'me';
+      else openSignIn();
+      return;
+    }
+    if (e.target.closest('[data-signout]')) {
+      if (sb) await sb.auth.signOut();
+      session = null;
+      meData = null;
+      paintAccountBtn();
+      track('signin/out', 'Signed out');
+      goHome();
+      return;
+    }
+    if (e.target.closest('[data-me-retry]')) return loadMe();
+    const ed = e.target.closest('[data-me-edit]');
+    if (ed) {
+      const m = ed.dataset.meEdit.match(/#edit-([\w]+)\.([\w]+)/);
+      if (m) startEdit(m[1], m[2]);
+    }
+  });
+
+  if (sb) {
+    sb.auth.getSession().then(({ data }) => {
+      session = data.session;
+      authChecked = true;
+      paintAccountBtn();
+      prefillFromAccount();
+      if (pendingMe || location.hash === '#me') { pendingMe = false; loadMe(); }
+      else if (session) fetchMe().then(paintAccountBtn).catch(() => {});
+    });
+    sb.auth.onAuthStateChange((_event, s) => { session = s; if (!s) meData = null; paintAccountBtn(); });
+  } else {
+    authChecked = true;
+  }
 
   load();
 })();

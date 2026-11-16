@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794857363">
+  <link rel="stylesheet" href="styles.css?v=1794866813">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -40,7 +40,7 @@
       <a class="btn btn-ghost nav-wide" href="/how-it-works">How it works</a>
       <button class="btn btn-ghost nav-wide" data-open="waitlist-dialog">Get alerts</button>
       <button class="btn btn-primary" data-open="listing-dialog">List your lease</button>
-      <button type="button" class="me-btn" data-open="manage-dialog" aria-label="My listing" title="My listing">
+      <button type="button" class="me-btn" data-account aria-label="Your account" title="Your account">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
       </button>
     </nav>
@@ -55,6 +55,34 @@
         <button type="button" class="btn btn-outline" data-see-all>See all takeovers</button>
         <button type="button" class="btn btn-ghost" data-open="waitlist-dialog">Get alerts for new listings</button>
       </div>
+    </section>
+
+    <section id="me" class="me-page" hidden>
+      <div class="board-top">
+        <button type="button" class="back-home" data-home>← Home</button>
+        <h1 class="board-title">Your account</h1>
+      </div>
+      <div class="me-head">
+        <span class="me-avatar" id="me-avatar">?</span>
+        <div class="me-who"><b id="me-email"></b><small>Signed in</small></div>
+        <button type="button" class="btn btn-ghost btn-sm" data-signout>Sign out</button>
+      </div>
+      <div id="me-loading" class="me-loading"><span class="spinner"></span> Loading your stuff…</div>
+      <div id="me-body" hidden>
+        <section class="me-section">
+          <div class="me-section-head"><h2>Your listings</h2><button type="button" class="btn btn-outline btn-sm" data-open="listing-dialog">+ List a place</button></div>
+          <div id="me-listings" class="me-list"></div>
+        </section>
+        <section class="me-section">
+          <div class="me-section-head"><h2>Your alerts</h2><button type="button" class="btn btn-outline btn-sm" data-open="waitlist-dialog">+ New alert</button></div>
+          <div id="me-alerts" class="me-list"></div>
+        </section>
+        <section class="me-section">
+          <div class="me-section-head"><h2>Places you're interested in</h2></div>
+          <div id="me-interests" class="me-list"></div>
+        </section>
+      </div>
+      <p id="me-error" class="empty" hidden>Couldn't load your account right now. <button type="button" class="link-btn" data-me-retry>Try again</button></p>
     </section>
 
     <section class="home">
@@ -591,6 +619,35 @@
     </div>
   </dialog>
 
+  <dialog id="signin-dialog" class="dialog finder">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <form class="finder-step" data-step="email" id="signin-email" novalidate>
+        <span class="si-badge">👋</span>
+        <h2 class="finder-title" id="signin-title">Sign in to Takeover</h2>
+        <p class="finder-hint" id="signin-hint">See your listings, who's interested, and your alerts in one place. No password, we'll email you a code.</p>
+        <div class="finder-fields">
+          <label class="f-label">Email<input type="email" name="email" required maxlength="120" autocomplete="email" placeholder="you@email.com"></label>
+        </div>
+        <p class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Email me a code</button>
+        <p class="si-fine">New here? Same button, it creates your account.</p>
+      </form>
+      <form class="finder-step" data-step="code" id="signin-code" novalidate hidden>
+        <button type="button" class="finder-back" data-si-back>← Use a different email</button>
+        <span class="si-badge">📬</span>
+        <h2 class="finder-title">Check your email</h2>
+        <p class="finder-hint">We sent a code to <b id="signin-sent-to"></b>. It's from <b>Takeover SMTX</b>.</p>
+        <div class="finder-fields">
+          <label class="f-label">Code<input name="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="••••••••"></label>
+        </div>
+        <p class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Sign in</button>
+        <p class="si-fine">Don't see it? Check your <b>Junk</b> or <b>Spam</b> folder. <button type="button" class="link-btn" data-si-resend>Resend code</button></p>
+      </form>
+    </div>
+  </dialog>
+
   <!-- Feedback -->
   <button type="button" class="feedback-fab" data-open="feedback-dialog" aria-label="Send feedback">💬 Feedback</button>
   <dialog id="feedback-dialog" class="dialog">
@@ -650,8 +707,9 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794857363"></script>
-  <script src="app.js?v=1794857363"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js?v=1794866813"></script>
+  <script src="app.js?v=1794866813"></script>
 <script src="/topbar.js?v=1794857363" defer></script>
 </body>
 </html>

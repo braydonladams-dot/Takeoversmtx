@@ -8,4 +8,8 @@ window.TAKEOVER_CONFIG = {
 
   // Where people can reach you with questions (shown in the footer).
   contactEmail: 'team@takeoversmtx.com',
+
+  // Accounts + payments (Supabase). The publishable key is meant to be public; real access is locked by Row Level Security.
+  supabaseUrl: 'https://fkflptyzstspweekfihc.supabase.co',
+  supabaseKey: 'sb_publishable_RXLgFj5YCEy8yP9Al_UPxw_vNYTX2uU',
 };
