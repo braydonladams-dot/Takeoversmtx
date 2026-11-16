@@ -246,7 +246,7 @@
     return list.sort(by);
   }
 
-  const typeLabel = (l) => (l.unitType === 'unit' ? 'Whole unit' : 'Shared unit (by the bed)');
+  const typeLabel = (l) => (l.unitType === 'unit' ? 'Whole place' : 'Private room');
 
   function tagsHtml(l) {
     return [
@@ -337,7 +337,7 @@
           <div class="detail-intro">
             <h1>${esc(l.complex)}</h1>
             ${byLine(l, true)}
-            <div class="tags">${tagsHtml(l)}</div>
+            <p class="detail-meta">${detailBits(l).map(esc).join(" · ")}</p>
           </div>
           ${l.incentive > 0 ? `<div class="callout">💵 The current tenant is offering <b>${money(l.incentive)}</b> to whoever takes over this lease.</div>` : ''}
           <section class="detail-section">
@@ -350,7 +350,7 @@
         <aside class="detail-side">
           <div class="action-card">
             <div class="detail-rent">${money(l.rent)}<small>/mo</small></div>
-            <p class="action-sub">${esc(typeLabel(l))} · available ${esc(fmtDate(l.availableFrom))}</p>
+            <p class="action-sub">${esc(typeLabel(l))} · Move in <b>${esc(shortDate(l.availableFrom))}</b></p>
             ${l.incentive > 0 ? `<p class="action-inc">+ ${money(l.incentive)} cash incentive</p>` : ''}
             ${interestLine(l, 'interest-line big')}
             <div class="detail-actions">

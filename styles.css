@@ -1377,3 +1377,7 @@ body.view-me .home, body.view-me .board, body.view-me .how, body.view-me .storie
   color: #94a3b8; font-size: .8rem; }
 .lc-foot .card-report { margin: 0; padding: .2rem .35rem; font-size: .78rem; }
 .lcard.has-incentive { border-color: #22c55e; }
+
+/* Listing page: one clean detail line under the name */
+.detail-meta { margin: .1rem 0 0; color: var(--muted); font-size: 1rem; }
+.action-sub b { color: var(--ink); }
