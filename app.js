@@ -271,7 +271,7 @@
   function card(l) {
     const c = contactLink(l);
     return `
-      <article class="card clickable" id="l-${esc(l.id)}" data-listing="${esc(l.id)}" tabindex="0" aria-label="View details for ${esc(l.complex)}">
+      <article class="card clickable${l.incentive > 0 ? ' has-incentive' : ''}" id="l-${esc(l.id)}" data-listing="${esc(l.id)}" tabindex="0" aria-label="View details for ${esc(l.complex)}">
         ${photosHtml(l)}
         <div class="card-top">
           <h3>${esc(l.complex)}</h3>
@@ -1258,7 +1258,11 @@
         { duration: 560, easing: EASE });
     };
   }
+  let routedHash = null;
   function route() {
+    // Opening a listing fires both "hashchange" and "popstate"; only handle each address once so the slide plays once.
+    if (location.hash === routedHash) return;
+    routedHash = location.hash;
     const next = viewFor(location.hash);
     if (next === view) { if (next === 'focus') focusFromHash(); return; }
     const from = view;

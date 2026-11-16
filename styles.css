@@ -1017,3 +1017,7 @@ body:not(.first-load) .home-copy, body:not(.first-load) .iam-card { animation: n
 #waitlist-form .fit-count { margin: 0; }
 #waitlist-form #movein-chips { grid-template-columns: 1fr 1fr; }
 .form-success h2 { font-size: 1.5rem; letter-spacing: -.025em; }
+
+/* Listings with a cash incentive get a green outline */
+.card.has-incentive { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e, 0 6px 22px rgba(34, 197, 94, .14); }
+.card.has-incentive.clickable:hover, a.card.has-incentive:hover { box-shadow: 0 0 0 2px #22c55e, 0 10px 30px rgba(34, 197, 94, .2); }

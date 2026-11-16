@@ -26,7 +26,7 @@
       l.unitType === 'bed' && l.gender && l.gender !== 'Any' ? '<span class="tag">' + esc(l.gender) + ' roommates</span>' : '',
       l.furnished === 'Yes' ? '<span class="tag">Furnished</span>' : '',
     ].join('');
-    return '<a class="card cp-card" href="/#l-' + esc(l.id) + '">' +
+    return '<a class="card cp-card' + (Number(l.incentive) > 0 ? ' has-incentive' : '') + '" href="/#l-' + esc(l.id) + '">' +
       (p ? '<img class="cp-photo" src="' + esc(photoUrl(p)) + '" alt="Photo of a lease takeover at ' + esc(l.complex) + '" loading="lazy">' : '') +
       '<div class="card-top"><h3>' + esc(l.complex) + '</h3><div class="rent">' + money(l.rent) + '<small>/mo</small></div></div>' +
       '<div class="tags">' + tags + '</div>' +
