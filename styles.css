@@ -1318,3 +1318,8 @@ body.view-me .home, body.view-me .board, body.view-me .how, body.view-me .storie
 .save-acct small { color: var(--muted); font-size: .84rem; line-height: 1.35; display: block; }
 .save-ic { width: 40px; height: 40px; border-radius: 12px; background: #fff; display: grid; place-items: center; font-size: 1.2rem; flex: none; }
 .wizard input.from-account { background: var(--tag) !important; color: var(--muted); cursor: not-allowed; }
+
+/* Privacy / Terms pages */
+.legal .panel ul { margin: .4rem 0 0; padding-left: 1.2rem; display: grid; gap: .45rem; }
+.legal .panel li, .legal .panel p { line-height: 1.6; }
+.legal .panel h2 { margin-bottom: .5rem; }

@@ -207,7 +207,7 @@ ${all.map((c) => `      <a class="panel cp-row" href="/lease-takeover/${c.slug}"
   fs.writeFileSync(path.join(OUT, 'index.html'), indexPage(all, live.length));
   fs.readdirSync(OUT).forEach((f) => { if (!keep.has(f)) fs.rmSync(path.join(OUT, f)); });
 
-  const urls = ['/', '/how-it-works', '/get-featured', '/lease-takeover/', ...all.map((c) => '/lease-takeover/' + c.slug)];
+  const urls = ['/', '/how-it-works', '/get-featured', '/privacy', '/terms', '/lease-takeover/', ...all.map((c) => '/lease-takeover/' + c.slug)];
   fs.writeFileSync(path.join(site, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${ORIGIN}${u}</loc></url>`).join('\n')}
