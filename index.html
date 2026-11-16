@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794866813">
+  <link rel="stylesheet" href="styles.css?v=1794867209">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -484,6 +484,11 @@
       <h2>You're on the list.</h2>
       <p id="waitlist-success-text">We'll let you know when something matching what you want is listed.</p>
       <div id="waitlist-fits" class="fits" hidden></div>
+<div class="save-acct" hidden>
+        <span class="save-ic">💾</span>
+        <div><b>Save this to an account</b><small>See and change your alerts anytime. No password, just a code to your email.</small></div>
+        <button type="button" class="btn btn-primary btn-sm" data-save-acct>Save</button>
+      </div>
       <p class="ig-note"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><span>Follow <a href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener"><b>@takeoversmtx</b></a> on Instagram to see new places first.</span></p>
       <p class="spam-note" id="waitlist-spam-note" hidden>📩 Our emails come from <b>Braydon from Takeover SMTX</b>. If you don't see one, check your <b>spam</b> or <b>promotions</b> folder and mark it "Not spam."</p>
       <button type="button" class="btn btn-primary" data-close>Done</button>
@@ -516,6 +521,11 @@
       <h2>Here's how to reach <span class="interest-first">them</span></h2>
       <p class="muted">We also sent them your info, so they may reach out first. Mention you found it on Takeover SMTX.</p>
       <div id="interest-contact" class="interest-contact"></div>
+      <div class="save-acct" hidden>
+        <span class="save-ic">💾</span>
+        <div><b>Save this to an account</b><small>Keep track of places you're interested in. No password, just a code to your email.</small></div>
+        <button type="button" class="btn btn-primary btn-sm" data-save-acct>Save</button>
+      </div>
       <button type="button" class="btn btn-outline" data-close>Done</button>
     </div>
   </dialog>
@@ -708,8 +718,8 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=1794866813"></script>
-  <script src="app.js?v=1794866813"></script>
+  <script src="config.js?v=1794867209"></script>
+  <script src="app.js?v=1794867209"></script>
 <script src="/topbar.js?v=1794857363" defer></script>
 </body>
 </html>

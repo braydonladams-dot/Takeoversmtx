@@ -85,6 +85,7 @@
       $('#interest-contact').innerHTML = `<a class="btn btn-primary btn-lg btn-block" href="${esc(c.href)}" target="_blank" rel="noopener" data-contact="${esc(data.listingId)}">${esc(c.label)}</a>`;
       form.hidden = true;
       $('.form-success', form.closest('dialog')).hidden = false;
+      offerSave('#interest-dialog', data.email);
       track('interest/' + data.listingId, 'Interested: ' + ((all.find((x) => x.id === data.listingId) || {}).complex || data.listingId));
       render();
       if (!$('#focus').hidden) focusFromHash();
@@ -492,7 +493,17 @@
   }
 
   // ---------- dialogs ----------
-  function openDialog(id) {
+  function openDialog(id, opts) {
+    if (id === 'listing-dialog' && !(opts && opts.skipGate) && CFG.requireAccountToList !== false && window.supabase && CFG.supabaseUrl) {
+      if (!authChecked) { setTimeout(() => openDialog(id, opts), 250); return; }
+      if (!session) {
+        afterSignIn = () => openDialog('listing-dialog');
+        openSignIn({ title: 'Sign in to list your place', hint: "So you can see who's interested and manage your listing in one place. No password, we'll email you a code." });
+        track('gate/listing', 'Sign in asked before listing');
+        return;
+      }
+    }
+    if (id === 'listing-dialog' || id === 'waitlist-dialog' || id === 'interest-dialog') setTimeout(prefillFromAccount);
     track('open/' + id.replace('-dialog', ''), 'Opened form: ' + id.replace('-dialog', ''));
     const d = document.getElementById(id);
     $('form', d).hidden = false;
@@ -565,7 +576,7 @@
   async function startEdit(id, token) {
     const d = $('#listing-dialog');
     const f = $('#listing-form');
-    openDialog('listing-dialog');
+    openDialog('listing-dialog', { skipGate: true });
     $('#listing-title').textContent = 'Loading your listing…';
     f.hidden = true;
     try {
@@ -799,6 +810,7 @@
       form.hidden = true;
       $('.form-success', form.closest('dialog')).hidden = false;
       track('submitted/' + type, 'Submitted: ' + type);
+      if (type === 'waitlist') offerSave('#waitlist-dialog', data.email);
     } catch (e) {
       console.error(e);
       err.textContent = 'Something went wrong. Check your connection and try again.';
@@ -1635,12 +1647,41 @@
   }
   // Signed in? Fill your email into forms so you don't retype it.
   function prefillFromAccount() {
+    lockListingEmail();
     if (!session) return;
     const em = session.user.email;
     [['#listing-form', 'email'], ['#waitlist-form', 'email'], ['#interest-form', 'email']].forEach(([f, n]) => {
       const el = $(f) && $(f).elements[n];
       if (el && !el.value) el.value = em;
     });
+  }
+
+  // "Save this to an account" card on the alerts / interested success screens
+  function offerSave(dialogSel, email) {
+    const box = $(dialogSel + ' .save-acct');
+    if (!box) return;
+    box.hidden = !sb || !!session;
+    box.dataset.email = String(email || '').trim();
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-save-acct]');
+    if (!b) return;
+    const email = b.closest('.save-acct').dataset.email;
+    b.closest('dialog').close();
+    afterSignIn = () => { location.hash = 'me'; };
+    track('signin/save-offer', 'Tapped save to account');
+    setTimeout(() => {
+      openSignIn({ title: 'Save to your account', hint: "We'll email you a code. Then everything you do here shows up in your account." });
+      if (email) { siEmail.email.value = email; siEmail.requestSubmit(); }
+    }, 360);
+  });
+
+  // Listing email comes from your account, so your listing always shows up there
+  function lockListingEmail() {
+    const el = $('#listing-form').elements.email;
+    if (!el) return;
+    el.readOnly = !!session && !editing;
+    el.classList.toggle('from-account', el.readOnly);
   }
 
   async function fetchMe() {

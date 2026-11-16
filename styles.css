@@ -1310,3 +1310,11 @@ body.view-me .home, body.view-me .board, body.view-me .how, body.view-me .storie
   .me-photo { width: 84px; height: 84px; }
   .me-head .btn { padding: .4rem .7rem; }
 }
+
+/* "Save this to an account" card + account-locked email */
+.save-acct { display: flex; align-items: center; gap: .8rem; padding: .9rem 1rem; border-radius: 16px; border: 1.5px solid #dbe3ff; background: linear-gradient(135deg, #f5f7ff, #fdf4ff); margin: .2rem 0; text-align: left; }
+.save-acct > div { flex: 1; min-width: 0; }
+.save-acct b { display: block; font-size: .98rem; }
+.save-acct small { color: var(--muted); font-size: .84rem; line-height: 1.35; display: block; }
+.save-ic { width: 40px; height: 40px; border-radius: 12px; background: #fff; display: grid; place-items: center; font-size: 1.2rem; flex: none; }
+.wizard input.from-account { background: var(--tag) !important; color: var(--muted); cursor: not-allowed; }
