@@ -1756,12 +1756,19 @@
     setTimeout(() => d.showModal(), others.length ? 360 : 0);
     track('feature/checkout', 'Feature checkout opened');
     try {
-      const [StripeCtor, r] = await Promise.all([loadStripe(), fetch(CFG.supabaseUrl + '/functions/v1/feature-pay', {
+      const ask = () => fetch(CFG.supabaseUrl + '/functions/v1/feature-pay', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
         body: JSON.stringify(listingId ? { listingId } : {}),
-      })]);
-      const j = await r.json().catch(() => ({}));
+      }).then((r) => r.json()).catch(() => ({}));
+      const [StripeCtor, first] = await Promise.all([loadStripe(), ask()]);
+      let j = first;
+      // A just-posted listing can take a few seconds to show up; keep the pop-up loading and try again.
+      for (let i = 0; i < 4 && !j.ok && j.error === 'no listing' && opts.fromListing; i++) {
+        await new Promise((res) => setTimeout(res, 2500));
+        if (!$('#pay-dialog').open) return;
+        j = await ask();
+      }
       if (!j.ok) {
         payFromListing = false;
         d.close();
