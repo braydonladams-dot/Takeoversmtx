@@ -1414,3 +1414,13 @@ a.mc-name:hover { color: var(--maroon); }
 .mc-featured { margin: 0; text-align: center; padding: .6rem; border-radius: 12px; background: #fef3c7; color: #92400e; font-weight: 700; font-size: .92rem; }
 .chip-row { display: flex; flex-wrap: wrap; gap: .35rem; }
 .mini-chip { padding: .25rem .6rem; border-radius: 999px; background: var(--tag); font-size: .84rem; font-weight: 600; color: var(--ink); }
+
+/* Slim footer on the home screen (the full footer shows on the other screens) */
+.mini-footer { display: none; }
+body.view-home .mini-footer { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: .4rem 1.4rem; padding: 1rem 1.25rem 1.4rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+.mini-footer a { color: var(--muted); text-decoration: none; }
+.mini-footer a:hover { color: var(--maroon); text-decoration: underline; }
+.mini-footer span a { color: var(--ink); font-weight: 600; }
+.mini-footer nav { display: flex; gap: 1rem; }
+body.view-home .home { min-height: calc(100vh - 168px); min-height: calc(100svh - 168px); }
+body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh - 176px); }
