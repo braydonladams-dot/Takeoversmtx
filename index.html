@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794852526">
+  <link rel="stylesheet" href="styles.css?v=1794853034">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -102,50 +102,43 @@
           <input type="search" id="f-search" placeholder="Search by complex, street, or keyword" aria-label="Search">
         </div>
 
-        <div class="filter-grid">
-          <label class="fl"><span>Room</span>
-            <select id="f-type">
-              <option value="">Any</option>
-              <option value="bed">Shared (by the bed)</option>
-              <option value="unit">Whole unit</option>
-            </select>
-          </label>
-          <label class="fl"><span>Roommates</span>
-            <select id="f-gender">
-              <option value="">Any</option>
-              <option value="Female">Girls</option>
-              <option value="Male">Guys</option>
-            </select>
-          </label>
-          <label class="fl"><span>Lease</span>
-            <select id="f-arrangement">
-              <option value="">Any</option>
-              <option value="takeover">Takeovers only</option>
-              <option value="sublease">Subleases only</option>
-            </select>
-          </label>
-          <label class="fl"><span>Max rent</span>
-            <span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits id="f-max" maxlength="5" placeholder="Any"></span>
-          </label>
-          <label class="fl"><span>Move in by</span>
-            <input type="date" id="f-movein">
-          </label>
-          <label class="fl"><span>Sort by</span>
-            <select id="f-sort">
-              <option value="new">Newest</option>
-              <option value="cheap">Lowest rent</option>
-              <option value="incentive">Biggest incentive</option>
-              <option value="soon">Available soonest</option>
-            </select>
-          </label>
+        <div class="filter-row" id="filter-row">
+          <select id="f-type" class="pill" aria-label="Room type">
+            <option value="">Room type</option>
+            <option value="bed">Private room</option>
+            <option value="unit">Whole place</option>
+          </select>
+          <select id="f-gender" class="pill" aria-label="Roommates">
+            <option value="">Roommates</option>
+            <option value="Female">Girls</option>
+            <option value="Male">Guys</option>
+          </select>
+          <label class="pill money-pill" aria-label="Max rent"><span>$</span><input type="text" inputmode="numeric" autocomplete="off" data-digits id="f-max" maxlength="5" placeholder="Max rent"></label>
+          <select id="f-movein" class="pill" aria-label="Move in by">
+            <option value="">Move in</option>
+          </select>
+          <select id="f-arrangement" class="pill" aria-label="Lease type">
+            <option value="">Lease type</option>
+            <option value="takeover">Takeovers</option>
+            <option value="sublease">Subleases</option>
+          </select>
           <label class="chip">
             <input type="checkbox" id="f-incentive">
-            <span>$ Cash incentive</span>
+            <span>$ Incentive</span>
           </label>
+          <button type="button" class="clear-filters" id="f-clear" hidden>Clear</button>
+        </div>
+        <div class="sort-row">
+          <p id="result-count" class="muted"></p>
+          <select id="f-sort" class="sort-select" aria-label="Sort">
+            <option value="new">Newest first</option>
+            <option value="cheap">Lowest rent</option>
+            <option value="incentive">Biggest incentive</option>
+            <option value="soon">Available soonest</option>
+          </select>
         </div>
       </div>
 
-      <p id="result-count" class="muted"></p>
       <div id="listings" class="grid"></div>
       <div id="taken-wrap" hidden>
         <h2 class="taken-head">Taken through Takeover SMTX</h2>
@@ -461,65 +454,80 @@
 
   <!-- "Looking for a place": where -> optional filters -> results (or alerts if nothing fits) -->
   <dialog id="finder-dialog" class="dialog finder">
-    <div class="dialog-head">
-      <h2 id="finder-title">Where are you looking?</h2>
-      <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
-    </div>
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
 
-    <div class="finder-step" data-step="where">
-      <div class="city-list">
-        <button type="button" class="city-opt" data-city="san-marcos">
-          <span><b>San Marcos, TX</b><small>Texas State</small></span><span class="city-count" id="finder-count"></span>
-        </button>
-        <button type="button" class="city-opt other" data-goto="request">
-          <span><b>Somewhere else</b><small>We're opening new cities soon</small></span><span class="arrow">›</span>
-        </button>
-      </div>
-    </div>
-
-    <form class="finder-step form" data-step="filters" id="finder-form" novalidate hidden>
-      <p class="muted finder-hint">All optional. Skip to see everything.</p>
-      <label>Max rent / month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="max" maxlength="5" placeholder="Any"></span></label>
-      <fieldset class="seg-group"><legend>Room</legend>
-        <div class="seg">
-          <label><input type="radio" name="type" value="" checked><span>Any</span></label>
-          <label><input type="radio" name="type" value="bed"><span>Private room</span></label>
-          <label><input type="radio" name="type" value="unit"><span>Whole place</span></label>
+      <div class="finder-step" data-step="where">
+        <h2 class="finder-title">Where are you looking?</h2>
+        <p class="finder-hint">Pick a city to see what's open.</p>
+        <div class="city-list">
+          <button type="button" class="city-opt" data-city="san-marcos">
+            <span class="city-pin">📍</span>
+            <span class="city-txt"><b>San Marcos, TX</b><small>Near Texas State</small></span>
+            <span class="city-count" id="finder-count"></span>
+          </button>
+          <button type="button" class="city-opt other" data-goto="request">
+            <span class="city-pin">🌎</span>
+            <span class="city-txt"><b>Somewhere else</b><small>We're opening new cities soon</small></span>
+            <span class="arrow">›</span>
+          </button>
         </div>
-      </fieldset>
-      <fieldset class="seg-group"><legend>Roommates</legend>
-        <div class="seg">
-          <label><input type="radio" name="gender" value="" checked><span>Any</span></label>
-          <label><input type="radio" name="gender" value="Female"><span>Girls</span></label>
-          <label><input type="radio" name="gender" value="Male"><span>Guys</span></label>
-        </div>
-      </fieldset>
-      <fieldset class="seg-group"><legend>Move in by</legend>
-        <div class="seg" id="finder-when"></div>
-      </fieldset>
-      <p class="fit-count" id="finder-fit"></p>
-      <div class="finder-actions">
-        <button type="button" class="btn btn-ghost" data-finder-skip>Skip</button>
-        <button type="submit" class="btn btn-primary">Show places</button>
       </div>
-      <button type="button" class="link-btn finder-back" data-goto="where">← Change city</button>
-    </form>
 
-    <form class="finder-step form" data-step="request" id="city-form" novalidate hidden>
-      <p class="muted">We're starting in San Marcos and opening new cities as people ask. Tell us where, and we'll email you when it opens.</p>
-      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label>City and state<input name="city" required maxlength="80" placeholder="Austin, TX"></label>
-      <label>School <small>(optional)</small><input name="school" maxlength="80" placeholder="UT Austin"></label>
-      <label>Email<input type="email" name="email" required maxlength="120" autocomplete="email"></label>
-      <p class="form-error" hidden></p>
-      <button type="submit" class="btn btn-primary btn-block">Tell me when it opens</button>
-      <button type="button" class="link-btn finder-back" data-goto="where">← Back</button>
-    </form>
+      <form class="finder-step" data-step="filters" id="finder-form" novalidate hidden>
+        <button type="button" class="finder-back" data-goto="where">← San Marcos, TX</button>
+        <h2 class="finder-title">What are you looking for?</h2>
+        <p class="finder-hint">All optional. Skip to see everything.</p>
+        <div class="finder-fields">
+          <label class="f-label">Max rent per month
+            <span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="max" maxlength="5" placeholder="Any"></span>
+          </label>
+          <fieldset class="seg-group"><legend>Room</legend>
+            <div class="seg">
+              <label><input type="radio" name="type" value="" checked><span>Any</span></label>
+              <label><input type="radio" name="type" value="bed"><span>Private room</span></label>
+              <label><input type="radio" name="type" value="unit"><span>Whole place</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="seg-group"><legend>Roommates</legend>
+            <div class="seg">
+              <label><input type="radio" name="gender" value="" checked><span>Any</span></label>
+              <label><input type="radio" name="gender" value="Female"><span>Girls</span></label>
+              <label><input type="radio" name="gender" value="Male"><span>Guys</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="seg-group"><legend>Move in by</legend>
+            <div class="seg" id="finder-when"></div>
+          </fieldset>
+        </div>
+        <p class="fit-count" id="finder-fit"></p>
+        <div class="finder-actions">
+          <button type="button" class="btn btn-ghost btn-lg" data-finder-skip>Skip</button>
+          <button type="submit" class="btn btn-primary btn-lg">Show places</button>
+        </div>
+      </form>
 
-    <div class="finder-step" data-step="requested" hidden>
-      <h2>You're on the list</h2>
-      <p class="muted">We'll email you when Takeover opens in <b id="requested-city"></b>. The more people ask for a city, the sooner it opens, so share it with friends there.</p>
-      <button type="button" class="btn btn-primary" data-close>Done</button>
+      <form class="finder-step" data-step="request" id="city-form" novalidate hidden>
+        <button type="button" class="finder-back" data-goto="where">← Back</button>
+        <h2 class="finder-title">Where should we open next?</h2>
+        <p class="finder-hint">We're starting in San Marcos and opening new cities as people ask. Tell us where, and we'll email you when it opens.</p>
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="finder-fields">
+          <label class="f-label">City and state<input name="city" required maxlength="80" placeholder="Austin, TX"></label>
+          <label class="f-label">School <small>(optional)</small><input name="school" maxlength="80" placeholder="UT Austin"></label>
+          <label class="f-label">Email<input type="email" name="email" required maxlength="120" autocomplete="email"></label>
+        </div>
+        <p class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Tell me when it opens</button>
+      </form>
+
+      <div class="finder-step finder-done" data-step="requested" hidden>
+        <div class="done-check">✓</div>
+        <h2 class="finder-title">You're on the list</h2>
+        <p class="finder-hint">We'll email you when Takeover opens in <b id="requested-city"></b>. The more people ask for a city, the sooner it opens, so share it with friends there.</p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
+      </div>
+
     </div>
   </dialog>
 
@@ -581,7 +589,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794852526"></script>
-  <script src="app.js?v=1794852526"></script>
+  <script src="config.js?v=1794853034"></script>
+  <script src="app.js?v=1794853034"></script>
 </body>
 </html>

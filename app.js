@@ -993,11 +993,32 @@
   // ---------- home screen: "I am looking for a place" finder ----------
   const finder = $('#finder-dialog');
   const ff = $('#finder-form');
-  const fTitles = { where: 'Where are you looking?', filters: 'What are you looking for?', request: 'Where should we open next?', requested: '' };
-  function finderStep(step) {
-    finder.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el.dataset.step !== step));
-    $('#finder-title').textContent = fTitles[step];
-    $('#finder-title').hidden = !fTitles[step];
+  const fOrder = ['where', 'filters', 'request', 'requested'];
+  let stepBusy = false;
+  async function finderStep(step, instant) {
+    const body = finder.querySelector('.finder-body');
+    const cur = finder.querySelector('.finder-step:not([hidden])');
+    const nxt = finder.querySelector('.finder-step[data-step="' + step + '"]');
+    if (cur === nxt || stepBusy) return;
+    const show = () => finder.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el !== nxt));
+    if (instant || !cur || !nxt.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return show();
+    stepBusy = true;
+    const dir = fOrder.indexOf(step) >= fOrder.indexOf(cur.dataset.step) ? 1 : -1;
+    const h0 = body.offsetHeight;
+    await cur.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(' + (-28 * dir) + 'px)' }],
+      { duration: 220, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' }).finished;
+    show();
+    cur.getAnimations().forEach((a) => a.cancel());
+    const h1 = body.offsetHeight;
+    body.style.overflow = 'hidden';
+    const grow = body.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }], { duration: 420, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+    nxt.animate([{ opacity: 0, transform: 'translateX(' + (36 * dir) + 'px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 480, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+    await grow.finished;
+    body.style.overflow = '';
+    stepBusy = false;
+    const first = nxt.querySelector('input:not([type=hidden]):not(.hp):not([type=radio])');
+    if (first && step === 'request') first.focus({ preventScroll: true });
   }
   // Move-in choices: Any / Now / by the next Jan, Jun and Aug (sorted), used as "move in by" dates.
   (function () {
@@ -1009,6 +1030,7 @@
       .map(([m, d, n]) => { const x = next(m, d); return [iso(x), n + " '" + String(x.getFullYear()).slice(2), x]; })
       .sort((a, b) => a[2] - b[2]).map(([v, n]) => [v, n]);
     const opts = [['', 'Any'], [iso(soon), 'Now']].concat(seasons);
+    $('#f-movein').innerHTML = opts.map(([v, n], i) => '<option value="' + v + '">' + (i ? 'Move in: ' + n : 'Move in') + '</option>').join('');
     $('#finder-when').innerHTML = opts.map(([v, n], i) => '<label><input type="radio" name="when" value="' + v + '"' + (i ? '' : ' checked') + '><span>' + n + '</span></label>').join('');
   })();
   function applyFinder(useFilters) {
@@ -1075,7 +1097,7 @@
   document.addEventListener('click', (e) => {
     if (e.target.closest('[data-finder]')) {
       track('cta/home-find', 'Home: looking for a place');
-      finderStep('where');
+      finderStep('where', true);
       finder.showModal();
       return;
     }
@@ -1132,8 +1154,29 @@
   HTMLDialogElement.prototype.close = function (v) {
     if (!this.open || reduceMotion || this.classList.contains('closing')) return nativeClose.call(this, v);
     this.classList.add('closing');
-    setTimeout(() => { this.classList.remove('closing'); nativeClose.call(this, v); }, 170);
+    setTimeout(() => { this.classList.remove('closing'); nativeClose.call(this, v); }, 260);
   };
+
+  // Filter pills light up when they're set; "Clear" resets them.
+  const pillIds = ['#f-type', '#f-gender', '#f-max', '#f-movein', '#f-arrangement'];
+  function syncPills() {
+    let any = !!$('#f-search').value.trim() || $('#f-incentive').checked;
+    pillIds.forEach((id) => {
+      const el = $(id), on = !!String(el.value).trim();
+      (el.closest('.money-pill') || el).classList.toggle('on', on);
+      any = any || on;
+    });
+    $('#f-clear').hidden = !any;
+  }
+  ['#f-search', '#f-incentive'].concat(pillIds).forEach((id) => { $(id).addEventListener('input', syncPills); $(id).addEventListener('change', syncPills); });
+  $('#f-clear').addEventListener('click', () => {
+    pillIds.concat('#f-search').forEach((id) => ($(id).value = ''));
+    $('#f-incentive').checked = false;
+    syncPills();
+    render();
+  });
+  const renderBase = render;
+  render = function () { renderBase(); syncPills(); };
 
   if (CFG.contactEmail) {
     $('#footer-contact').innerHTML = `Questions? <a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a>`;
