@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794856437">
+  <link rel="stylesheet" href="styles.css?v=1794856988">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -206,17 +206,18 @@
             </div>
           </fieldset>
 
-          <div class="row three">
+          <div class="row pair">
             <label>Bedrooms<input type="text" inputmode="numeric" autocomplete="off" data-digits name="bedrooms" maxlength="2" pattern="[0-9]{1,2}" required placeholder="4"></label>
             <label>Bathrooms<input type="text" inputmode="decimal" autocomplete="off" data-decimal name="bathrooms" maxlength="4" pattern="[0-9]{1,2}(\.5)?" required placeholder="4"></label>
-            <label id="gender-field">Roommates
-              <select name="gender">
-                <option value="Any">Any</option>
-                <option value="Female">Girls</option>
-                <option value="Male">Guys</option>
-              </select>
-            </label>
           </div>
+          <fieldset class="seg-group" id="gender-field">
+            <legend>Roommates</legend>
+            <div class="choice-cards three compact">
+              <label class="choice"><input type="radio" name="gender" value="Any" checked><span>Any</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Female"><span>Girls</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Male"><span>Guys</span></label>
+            </div>
+          </fieldset>
 
           <fieldset class="seg-group">
             <legend>Furnished?</legend>
@@ -273,17 +274,16 @@
             <label>Your name<input name="name" required maxlength="80" autocomplete="name"><small class="help">Only your first name is shown.</small></label>
             <label>Email<input type="email" name="email" required placeholder="you@email.com" maxlength="120" autocomplete="email"><small class="help">Private. We send your listing link here.</small></label>
           </div>
-          <div class="row">
-            <label>Contact method
-              <select name="contactMethod" required>
-                <option value="text">Text</option>
-                <option value="instagram">Instagram</option>
-                <option value="snapchat">Snapchat</option>
-                <option value="email">Email</option>
-              </select>
-            </label>
-            <label>Number or handle<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="contact" required maxlength="120" placeholder="512-555-0123"><small class="help">Only shared when someone taps "I'm interested".</small></label>
-          </div>
+          <fieldset class="seg-group">
+            <legend>How should people reach you?</legend>
+            <div class="choice-cards four compact contact-pick">
+              <label class="choice"><input type="radio" name="contactMethod" value="text" checked><span><i>💬</i>Text</span></label>
+              <label class="choice"><input type="radio" name="contactMethod" value="instagram"><span><i>📸</i>Instagram</span></label>
+              <label class="choice"><input type="radio" name="contactMethod" value="snapchat"><span><i>👻</i>Snapchat</span></label>
+              <label class="choice"><input type="radio" name="contactMethod" value="email"><span><i>✉️</i>Email</span></label>
+            </div>
+          </fieldset>
+          <label>Number or handle<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="contact" required maxlength="120" placeholder="512-555-0123"><small class="help">Only shared when someone taps "I'm interested".</small></label>
           <div class="form-section verify-slot" id="verify-slot" hidden></div>
         </section>
       </div>
@@ -412,13 +412,14 @@
               <label class="choice"><input type="radio" name="gender" value="Other"><span>Rather not say</span></label>
             </div>
           </fieldset>
-          <label>Room type
-            <select name="unitType">
-              <option value="either">Either</option>
-              <option value="bed">Private room (shared apartment)</option>
-              <option value="unit">Whole place</option>
-            </select>
-          </label>
+          <fieldset class="seg-group">
+            <legend>Room type</legend>
+            <div class="choice-cards three compact">
+              <label class="choice"><input type="radio" name="unitType" value="either" checked><span>Either</span></label>
+              <label class="choice"><input type="radio" name="unitType" value="bed"><span>Private room</span></label>
+              <label class="choice"><input type="radio" name="unitType" value="unit"><span>Whole place</span></label>
+            </div>
+          </fieldset>
           <label>Preferred complexes or area <small class="hint">optional</small><input name="complexes" maxlength="200" placeholder="e.g. Cabana Beach, near campus"></label>
           <label>Anything else? <small class="hint">optional</small><textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
         </section>
@@ -644,7 +645,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794856437"></script>
-  <script src="app.js?v=1794856437"></script>
+  <script src="config.js?v=1794856988"></script>
+  <script src="app.js?v=1794856988"></script>
 </body>
 </html>

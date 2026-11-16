@@ -914,7 +914,7 @@
   }, true);
 
   // The listing contact box changes with the method: number pad + dashes for Text, normal keyboard otherwise.
-  const contactMethodEl = $('#listing-form [name=contactMethod]');
+  const contactMethodEl = { get value() { return $('#listing-form').contactMethod.value; } };
   const contactEl = $('#listing-form [name=contact]');
   const CONTACT_INPUT = {
     text: { type: 'tel', mode: 'tel', ph: '512-555-0123', ac: 'tel' },
@@ -930,7 +930,7 @@
     if (cfg.type === 'tel') { contactEl.pattern = '[0-9]{3}-[0-9]{3}-[0-9]{4}'; contactEl.value = formatPhone(contactEl.value); }
     else { contactEl.removeAttribute('pattern'); if (wasPhone) contactEl.value = ''; }
   }
-  contactMethodEl.addEventListener('change', syncContactInput);
+  $$('#listing-form [name=contactMethod]').forEach((r) => r.addEventListener('change', syncContactInput));
   $('#listing-form').addEventListener('reset', () => setTimeout(syncContactInput));
   syncContactInput();
 
@@ -1398,6 +1398,7 @@
       any = any || on;
     });
     $('#f-clear').hidden = !any;
+    (dropdowns || []).forEach((d) => d.refresh());
   }
   ['#f-search', '#f-incentive'].concat(pillIds).forEach((id) => { $(id).addEventListener('input', syncPills); $(id).addEventListener('change', syncPills); });
   $('#f-clear').addEventListener('click', () => {
@@ -1408,6 +1409,95 @@
   });
   const renderBase = render;
   render = function () { renderBase(); syncPills(); };
+
+  // ---------- board filters: clean custom menus instead of the browser's plain dropdown ----------
+  var dropdowns = []; // var on purpose: syncPills (above) reads it
+  const chevron = '<svg viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function enhanceSelect(sel) {
+    const isPill = sel.classList.contains('pill');
+    const wrap = document.createElement('div');
+    wrap.className = 'dd';
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    sel.classList.add('dd-native');
+    sel.tabIndex = -1;
+    sel.setAttribute('aria-hidden', 'true');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'dd-btn ' + (isPill ? 'pill-btn' : 'sort-btn');
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-label', sel.getAttribute('aria-label') || '');
+    const menu = document.createElement('div');
+    menu.className = 'dd-menu';
+    menu.setAttribute('role', 'listbox');
+    menu.hidden = true;
+    wrap.append(btn);
+    document.body.appendChild(menu);
+    const api = {};
+    api.refresh = () => {
+      const o = sel.options[sel.selectedIndex];
+      btn.innerHTML = '<span>' + esc(o ? o.textContent : '') + '</span>' + chevron;
+      btn.classList.toggle('on', isPill && !!sel.value);
+    };
+    const place = () => {
+      const r = btn.getBoundingClientRect();
+      const w = Math.max(r.width, 200);
+      const left = Math.min(Math.max(8, isPill ? r.left : r.right - w), innerWidth - w - 8);
+      menu.style.minWidth = w + 'px';
+      menu.style.left = left + 'px';
+      menu.style.top = r.bottom + 8 + 'px';
+    };
+    api.close = (instant) => {
+      if (menu.hidden) return;
+      btn.setAttribute('aria-expanded', 'false');
+      btn.classList.remove('open');
+      if (instant) { menu.hidden = true; return; }
+      const a = menu.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-6px) scale(.97)' }], { duration: 160, easing: 'ease-in' });
+      a.onfinish = () => { menu.hidden = true; };
+    };
+    const open = () => {
+      dropdowns.forEach((d) => d !== api && d.close(true));
+      menu.innerHTML = [...sel.options].map((o, i) =>
+        '<button type="button" role="option" class="dd-opt' + (o.selected ? ' sel' : '') + '" data-i="' + i + '" aria-selected="' + o.selected + '"><span>' + esc(isPill && o.value === '' ? 'Any' : o.textContent) + '</span><b>✓</b></button>').join('');
+      menu.hidden = false;
+      place();
+      btn.setAttribute('aria-expanded', 'true');
+      btn.classList.add('open');
+      menu.animate([{ opacity: 0, transform: 'translateY(-8px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: EASE });
+      const s = menu.querySelector('.sel') || menu.querySelector('.dd-opt');
+      if (s) s.focus({ preventScroll: true });
+    };
+    btn.addEventListener('click', () => (menu.hidden ? open() : api.close()));
+    btn.addEventListener('keydown', (e) => { if (e.key === 'ArrowDown') { e.preventDefault(); open(); } });
+    menu.addEventListener('click', (e) => {
+      const b = e.target.closest('.dd-opt');
+      if (!b) return;
+      sel.selectedIndex = Number(b.dataset.i);
+      sel.dispatchEvent(new Event('input', { bubbles: true }));
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      api.refresh();
+      api.close();
+      btn.focus({ preventScroll: true });
+    });
+    menu.addEventListener('keydown', (e) => {
+      const opts = [...menu.querySelectorAll('.dd-opt')];
+      const i = opts.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); (opts[i + 1] || opts[0]).focus(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); (opts[i - 1] || opts[opts.length - 1]).focus(); }
+      if (e.key === 'Escape' || e.key === 'Tab') { api.close(); btn.focus({ preventScroll: true }); }
+    });
+    api.wrap = wrap;
+    api.menu = menu;
+    dropdowns.push(api);
+    api.refresh();
+    return api;
+  }
+  $$('.filters select').forEach(enhanceSelect);
+  document.addEventListener('click', (e) => dropdowns.forEach((d) => { if (!d.wrap.contains(e.target) && !d.menu.contains(e.target)) d.close(); }));
+  window.addEventListener('scroll', () => dropdowns.forEach((d) => d.close(true)), { passive: true });
+  window.addEventListener('resize', () => dropdowns.forEach((d) => d.close(true)));
+  $('#filter-row').addEventListener('scroll', () => dropdowns.forEach((d) => d.close(true)), { passive: true });
 
   if (CFG.contactEmail) {
     $('#footer-contact').innerHTML = `Questions? <a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a>`;
