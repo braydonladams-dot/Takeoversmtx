@@ -1,0 +1,62 @@
+[
+  {
+    "key": "arba",
+    "name": "Arba San Marcos",
+    "slug": "arba"
+  },
+  {
+    "key": "cabanabeach",
+    "name": "Cabana Beach",
+    "slug": "cabana-beach"
+  },
+  {
+    "key": "cheathamstreetflats",
+    "name": "Cheatham Street Flats",
+    "slug": "cheatham-street-flats"
+  },
+  {
+    "key": "cottages",
+    "name": "The Cottages",
+    "slug": "cottages"
+  },
+  {
+    "key": "foundry",
+    "name": "The Foundry",
+    "slug": "foundry"
+  },
+  {
+    "key": "lyndon",
+    "name": "The Lyndon",
+    "slug": "lyndon"
+  },
+  {
+    "key": "mirage",
+    "name": "Mirage San Marcos",
+    "slug": "mirage"
+  },
+  {
+    "key": "oasis",
+    "name": "The Oasis",
+    "slug": "oasis"
+  },
+  {
+    "key": "retreat",
+    "name": "The Retreat",
+    "slug": "retreat"
+  },
+  {
+    "key": "union",
+    "name": "Union San Marcos",
+    "slug": "union"
+  },
+  {
+    "key": "viewonsquare",
+    "name": "The View on the Square",
+    "slug": "view-on-the-square"
+  },
+  {
+    "key": "villagesontelluride",
+    "name": "The Villages on Telluride",
+    "slug": "villages-on-telluride"
+  }
+]
