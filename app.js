@@ -812,6 +812,7 @@
       $('.form-success', form.closest('dialog')).hidden = false;
       track('submitted/' + type, 'Submitted: ' + type);
       if (type === 'waitlist') offerSave('#waitlist-dialog', data.email);
+      if (type === 'listing' && data.wantsFeature && !editing) featurePay('', { fromListing: true });
     } catch (e) {
       console.error(e);
       err.textContent = 'Something went wrong. Check your connection and try again.';
@@ -1708,7 +1709,7 @@
     toast.timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => (t.hidden = true), 400); }, ms || 4500);
   }
   // Stripe card form inside our own pop-up (styled to match the site)
-  var stripeJs = null, payState = null;
+  var stripeJs = null, payState = null, payFromListing = false;
   function loadStripe() {
     if (window.Stripe) return Promise.resolve(window.Stripe);
     return new Promise((res, rej) => {
@@ -1735,7 +1736,11 @@
     },
   };
   const payErr = (msg) => { const e = $('#pay-dialog .form-error'); e.textContent = msg || ''; e.hidden = !msg; };
-  async function featurePay(listingId) {
+  async function featurePay(listingId, opts) {
+    opts = opts || {};
+    $('#pay-posted').hidden = !opts.fromListing;
+    $('#pay-done-posted').hidden = !opts.fromListing;
+    payFromListing = !!opts.fromListing;
     if (!session) { afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me'; return openSignIn({ title: 'Sign in to get featured' }); }
     const d = $('#pay-dialog');
     d.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el.dataset.step !== 'pay'));
@@ -1758,6 +1763,7 @@
       })]);
       const j = await r.json().catch(() => ({}));
       if (!j.ok) {
+        payFromListing = false;
         d.close();
         toast(j.error === 'already featured' ? "That listing is already featured. You're all set!" :
           j.error === 'no listing' ? "We couldn't find your listing yet. Give it a minute, then try from your account." :
@@ -1775,10 +1781,16 @@
       payState = { elements, listingId: String(j.listing.id) };
     } catch (e) {
       console.error(e);
+      payFromListing = false;
       d.close();
       toast("Couldn't open checkout. Check your connection and try again.");
     }
   }
+  $('#pay-dialog').addEventListener('close', () => {
+    const done = !$('#pay-dialog [data-step="done"]').hidden;
+    if (payFromListing && !done) toast('Your listing is posted. You can get it featured anytime from your account.', 6000);
+    payFromListing = false;
+  });
   $('#pay-btn').addEventListener('click', async () => {
     if (!payState || !stripeJs) return;
     const btn = $('#pay-btn');

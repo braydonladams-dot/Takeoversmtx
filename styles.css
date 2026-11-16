@@ -1349,3 +1349,5 @@ body.view-me .home, body.view-me .board, body.view-me .how, body.view-me .storie
 .pay-element { min-height: 180px; margin-bottom: 1.1rem; }
 #pay-dialog .form-error { margin: 0 0 1rem; }
 #pay-dialog .btn-block { width: 100%; }
+.pay-posted { margin: 0 0 1rem; padding: .6rem .85rem; border-radius: 12px; background: #dcfce7; color: #15803d; font-weight: 600; font-size: .9rem; }
+.pay-posted { margin-right: 3.2rem !important; }
