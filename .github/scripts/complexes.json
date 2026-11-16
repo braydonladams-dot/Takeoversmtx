@@ -5,6 +5,16 @@
     "slug": "arba"
   },
   {
+    "key": "beacon",
+    "name": "The Beacon",
+    "slug": "beacon"
+  },
+  {
+    "key": "bishopssquare",
+    "name": "Bishop'S Square",
+    "slug": "bishop-s-square"
+  },
+  {
     "key": "cabanabeach",
     "name": "Cabana Beach",
     "slug": "cabana-beach"
