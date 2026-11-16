@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794856137">
+  <link rel="stylesheet" href="styles.css?v=1794856437">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -620,16 +620,17 @@
       <input type="hidden" name="listingId">
       <input type="hidden" name="listingName">
 
-      <label>What's wrong?
-        <select name="reason" required>
-          <option value="taken">It's already taken</option>
-          <option value="wrong">Info is wrong (price, dates, fee)</option>
-          <option value="scam">Looks like a scam</option>
-          <option value="other">Something else</option>
-        </select>
-      </label>
-      <label>Details <small>(optional)</small><textarea name="details" rows="3" maxlength="800"></textarea></label>
-      <label>Your contact, if we can follow up <small>(optional)</small><input name="contact" maxlength="120"></label>
+      <fieldset class="seg-group">
+        <legend>What's wrong?</legend>
+        <div class="report-reasons">
+          <label class="rr"><input type="radio" name="reason" value="taken" required><span><i>🏁</i><em><b>It's already taken</b></em></span></label>
+          <label class="rr"><input type="radio" name="reason" value="wrong"><span><i>✏️</i><em><b>Info is wrong</b><small>Price, dates or fee</small></em></span></label>
+          <label class="rr"><input type="radio" name="reason" value="scam"><span><i>🚩</i><em><b>Looks like a scam</b><small>Asked for money before a tour, fake photos...</small></em></span></label>
+          <label class="rr"><input type="radio" name="reason" value="other"><span><i>💬</i><em><b>Something else</b></em></span></label>
+        </div>
+      </fieldset>
+      <label>Details <small class="hint">optional</small><textarea name="details" rows="3" maxlength="800" placeholder="Anything that helps us check it"></textarea></label>
+      <label>Your contact, if we can follow up <small class="hint">optional</small><input name="contact" maxlength="120" placeholder="Phone or email"></label>
 
       <p class="form-error" hidden></p>
       <button type="submit" class="btn btn-primary btn-block">Send report</button>
@@ -643,7 +644,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794856137"></script>
-  <script src="app.js?v=1794856137"></script>
+  <script src="config.js?v=1794856437"></script>
+  <script src="app.js?v=1794856437"></script>
 </body>
 </html>

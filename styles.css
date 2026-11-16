@@ -1158,3 +1158,26 @@ body:not(.first-load) .home-copy, body:not(.first-load) .iam-card { animation: n
 .dialog-head .wiz-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 4px; margin: 0; border-radius: 0; background: var(--tag); }
 .dialog-head .wiz-progress span { border-radius: 0 999px 999px 0; }
 .wizard .wiz-steps { padding-top: 1.5rem; }
+
+/* Instagram handle box: let the text breathe (it was clipping letters) */
+.form label.ig-tag-input, .fo-handle { min-height: 50px; border-radius: 14px; padding: 0 .9rem; }
+.form .ig-tag-input input, .fo-handle input { height: 48px !important; padding: 0 .35rem !important; line-height: 1.4; font-size: .95rem; }
+
+/* Report: tap-able reasons instead of a plain dropdown */
+.report-reasons { display: grid; gap: .5rem; }
+.form label.rr { position: relative; cursor: pointer; font-weight: 400; }
+.rr input { position: absolute; opacity: 0; pointer-events: none; }
+.rr span { display: grid; grid-template-columns: 36px 1fr; column-gap: .75rem; align-items: center; padding: .8rem 1rem; border: 1.5px solid var(--line); border-radius: 14px; background: #fff; transition: border-color .2s, background .2s, transform .12s; }
+.rr i { grid-row: span 2; width: 36px; height: 36px; border-radius: 10px; background: var(--tag); display: grid; place-items: center; font-style: normal; font-size: 1.05rem; }
+.rr b { font-size: .97rem; }
+.rr small { color: var(--muted); font-size: .83rem; }
+.rr:hover span { border-color: #c7d2fe; }
+.rr input:checked + span { border-color: var(--maroon); background: var(--accent-soft); }
+.rr input:checked + span b { color: var(--maroon); }
+.rr input:checked + span i { background: #fff; }
+.rr input:focus-visible + span { box-shadow: 0 0 0 3px var(--accent-soft); }
+.rr:active span { transform: scale(.985); }
+#report-dialog textarea, #report-dialog input:not([type=radio]):not([type=hidden]) { border-radius: 14px; }
+.rr span { display: flex; align-items: center; gap: .75rem; }
+.rr i { flex: none; }
+.rr em { font-style: normal; display: grid; gap: .1rem; }

@@ -691,7 +691,7 @@
   function validate(form, type) {
     if (type === 'waitlist' && Number(form.maxRent.value) > 0 && !form.moveIn.value) return 'Please pick when you want to move in.';
     if (!form.checkValidity()) {
-      const bad = form.querySelector(':invalid');
+      const bad = form.querySelector('input:invalid, select:invalid, textarea:invalid');
       if (bad.type === 'tel' && bad.value) return 'Please enter a full 10-digit phone number.';
       if (bad.type === 'radio') return `Please pick one for "${bad.closest('fieldset')?.querySelector('legend')?.childNodes[0]?.textContent.trim() || bad.name}".`;
       return `Please fill in "${bad.closest('label')?.childNodes[0]?.textContent.trim() || bad.name}".`;
@@ -1025,6 +1025,7 @@
   syncNotifyBy();
   $('#waitlist-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'waitlist'); });
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
+  $('#report-form').addEventListener('change', () => { $('#report-form .form-error').hidden = true; });
   $('#feedback-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'feedback'); });
 
   const EASE = 'cubic-bezier(.22, 1, .36, 1)';
