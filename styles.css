@@ -1087,3 +1087,31 @@ body:not(.first-load) .home-copy, body:not(.first-load) .iam-card { animation: n
 .feature-cta b { display: block; }
 .feature-cta small { color: var(--muted); }
 .feature-cta .arrow { margin-left: auto; color: var(--maroon); font-size: 1.4rem; }
+
+/* "Get featured on Instagram" offer on the last listing screen */
+.feature-offer { border: 1.5px solid #dbe3ff; border-radius: 18px; padding: 1.2rem; background: linear-gradient(135deg, #f5f7ff, #fdf4ff); display: grid; gap: .8rem; transition: border-color .25s, box-shadow .25s; }
+.feature-offer.on { border-color: var(--maroon); box-shadow: 0 0 0 4px var(--accent-soft); }
+.fo-head { display: flex; gap: .8rem; align-items: center; }
+.fo-star { width: 44px; height: 44px; border-radius: 13px; background: #fbbf24; display: grid; place-items: center; font-size: 1.3rem; flex: none; }
+.fo-head b { display: block; font-size: 1.08rem; letter-spacing: -.01em; }
+.fo-head small { color: var(--muted); font-size: .88rem; }
+.feature-offer > p { margin: 0; font-size: .93rem; color: #334155; line-height: 1.5; }
+.feature-offer > p a { color: var(--maroon); font-weight: 600; }
+.fo-choice { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+.fo-choice label { position: relative; cursor: pointer; }
+.fo-choice input { position: absolute; opacity: 0; pointer-events: none; }
+.fo-choice span { display: grid; gap: .1rem; padding: .8rem .9rem; border: 1.5px solid var(--line); border-radius: 14px; background: #fff; transition: border-color .2s, background .2s, transform .12s; }
+.fo-choice span b { font-size: .98rem; }
+.fo-choice span small { color: var(--muted); font-size: .82rem; }
+.fo-choice input:checked + span { border-color: var(--maroon); background: var(--accent-soft); }
+.fo-choice input:checked + span b { color: var(--maroon); }
+.fo-choice input:focus-visible + span { box-shadow: 0 0 0 3px var(--accent-soft); }
+.fo-choice label:active span { transform: scale(.98); }
+.fo-handle { background: #fff; }
+
+/* Success screen: next step for people who chose the feature */
+.feature-pay { display: flex; gap: .9rem; align-items: flex-start; padding: 1.1rem; border-radius: 16px; border: 1.5px solid #fcd34d; background: #fffbeb; }
+.feature-pay b { display: block; font-size: 1.02rem; }
+.feature-pay p { margin: .3rem 0 .8rem; font-size: .92rem; color: #334155; }
+.ig-tag-input:focus-within, .fo-handle:focus-within { border-color: var(--maroon) !important; box-shadow: 0 0 0 3px var(--accent-soft) !important; outline: none !important; }
+.fo-handle input:focus { outline: none !important; box-shadow: none !important; }

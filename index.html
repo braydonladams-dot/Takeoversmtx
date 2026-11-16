@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794855076">
+  <link rel="stylesheet" href="styles.css?v=1794855430">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -312,10 +312,17 @@
         </label>
         <p class="verify-private">🔒 Only we see it. Never shown on the site, deleted after we check.</p>
       </div>
-      <div class="ig-tag-card">
-        <p class="ig-tag-head"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><b>Want to be tagged on Instagram?</b></p>
-        <p>We post every listing on <b>@takeoversmtx</b>. Add your handle and we'll tag you so it shows up for your followers too.</p>
-        <label class="ig-tag-input"><span>@</span><input type="text" id="ig-tag" maxlength="31" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="yourhandle"></label>
+      <div class="feature-offer" id="feature-offer">
+        <div class="fo-head">
+          <span class="fo-star">⭐</span>
+          <div><b>Get featured on Instagram</b><small>$10 · your own slide in our weekly Featured places post</small></div>
+        </div>
+        <p>More students see your place, and we tag you so it shows up for your friends too. <a href="/get-featured" target="_blank" rel="noopener">See what you get</a></p>
+        <div class="fo-choice">
+          <label><input type="radio" name="wantsFeature" value="true"><span><b>Yes, feature it</b><small>+$10</small></span></label>
+          <label><input type="radio" name="wantsFeature" value="false" checked><span><b>No thanks</b><small>Just list it free</small></span></label>
+        </div>
+        <label class="ig-tag-input fo-handle"><span>@</span><input type="text" id="ig-tag" maxlength="31" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="your Instagram, so we can tag you (optional)"></label>
       </div>
       <p class="verify-optional">Both are optional.</p>
       <div class="verify-actions">
@@ -332,7 +339,15 @@
       <p>Your listing should be on the board within a few minutes. We'll email you your link (from <b>Braydon from Takeover SMTX</b>) once it's live.</p>
       <p class="spam-note">📩 Don't see it? Check your <b>spam</b> or <b>promotions</b> folder, and mark it "Not spam" so you get our check-ins too.</p>
       <p>Once it's up, share it everywhere. Every share helps it get taken faster.</p>
-      <a class="feature-cta" href="/get-featured" data-cta="feature">
+      <div class="feature-pay" id="feature-pay" hidden>
+        <span class="fo-star">⭐</span>
+        <div>
+          <b>One more step to get featured</b>
+          <p>Send us a message on Instagram to pay the $10, and your place goes in this week's Featured places post.</p>
+          <a class="btn btn-primary" href="https://ig.me/m/takeoversmtx" target="_blank" rel="noopener" data-cta="feature-pay">Message @takeoversmtx</a>
+        </div>
+      </div>
+      <a class="feature-cta" id="feature-cta" href="/get-featured" data-cta="feature">
         <span class="gf-ic">⭐</span>
         <span><b>Want more eyes on it?</b><small>Get featured in our weekly Instagram post for $10.</small></span>
         <span class="arrow">›</span>
@@ -615,7 +630,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794855076"></script>
-  <script src="app.js?v=1794855076"></script>
+  <script src="config.js?v=1794855430"></script>
+  <script src="app.js?v=1794855430"></script>
 </body>
 </html>

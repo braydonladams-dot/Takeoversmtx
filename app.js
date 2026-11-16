@@ -500,6 +500,8 @@
       $('#verify-step').hidden = true;
       nudged = false;
       $('#ig-tag').value = '';
+      $('#feature-offer [name=wantsFeature][value=false]').checked = true;
+      syncFeature();
       wizShow(1, true);
     }
     if (id === 'waitlist-dialog') {
@@ -760,6 +762,13 @@
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
     if (type === 'listing' && proof) data.proof = proof.split(',')[1];
     if (type === 'listing') data.tagInstagram = $('#ig-tag').value.trim();
+    if (type === 'listing') {
+      const pick = $('#feature-offer [name=wantsFeature]:checked');
+      data.wantsFeature = !!pick && pick.value === 'true';
+      $('#feature-pay').hidden = !data.wantsFeature;
+      $('#feature-cta').hidden = data.wantsFeature;
+      if (data.wantsFeature) track('feature/chose-yes', 'Listing: wants Instagram feature');
+    }
     const btn = $('button[type=submit]', form);
     const btnText = btn.textContent;
     btn.disabled = true;
@@ -1082,6 +1091,14 @@
       }
     }
   }, true);
+
+  // "Get featured on Instagram" offer on the last listing screen
+  function syncFeature() {
+    const yes = !!$('#feature-offer [name=wantsFeature][value=true]:checked');
+    $('#feature-offer').classList.toggle('on', yes);
+    $('#verify-submit').textContent = yes ? 'Submit + get featured' : 'Submit listing';
+  }
+  $$('#feature-offer [name=wantsFeature]').forEach((r) => r.addEventListener('change', syncFeature));
 
   // ---------- small reusable step-by-step form (used by Get alerts) ----------
   function makeWizard(form, check) {
