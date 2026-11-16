@@ -16,8 +16,11 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://takeoversmtx.com/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=1794810021">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=1794852101">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -29,9 +32,12 @@
   <header class="site-header">
     <a class="brand" href="#"><img src="favicon.svg" alt="" width="30" height="30">Takeover<span>SMTX</span></a>
     <nav class="nav">
-      <a class="btn btn-ghost" href="/how-it-works">How it works</a>
-      <button class="btn btn-ghost" data-open="waitlist-dialog">Get alerts</button>
+      <a class="btn btn-ghost nav-wide" href="/how-it-works">How it works</a>
+      <button class="btn btn-ghost nav-wide" data-open="waitlist-dialog">Get alerts</button>
       <button class="btn btn-primary" data-open="listing-dialog">List your lease</button>
+      <button type="button" class="me-btn" data-open="manage-dialog" aria-label="My listing" title="My listing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      </button>
     </nav>
   </header>
 
@@ -46,17 +52,37 @@
       </div>
     </section>
 
-    <section class="hero">
-      <h1>Every San Marcos lease takeover, in one place.</h1>
-      <p>Taking over a lease is often cheaper than signing a new one, and some people will even pay you to take theirs.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="#board">Browse takeovers</a>
-        <button class="btn btn-outline btn-lg" data-open="listing-dialog">Get out of my lease</button>
+    <section class="home">
+      <div class="home-copy">
+        <span class="live-pill"><span class="dot"></span><span id="live-count">Lease takeovers in San Marcos</span></span>
+        <h1>Get out of your lease. <em>Or take over someone else's.</em></h1>
+        <p class="home-sub">Lease takeovers are often cheaper than a new lease, and some people will even pay you to take theirs.</p>
+        <div class="hero-stats">
+          <p id="looking-stat" class="looking-stat" hidden></p>
+          <p id="success-stat" class="success-stat" hidden></p>
+        </div>
       </div>
-      <a class="text-link" href="/how-it-works">New here? See how it works →</a>
-      <div class="hero-stats">
-        <p id="looking-stat" class="looking-stat" hidden></p>
-        <p id="success-stat" class="success-stat" hidden></p>
+      <div class="home-pick">
+        <p class="iam">I am…</p>
+        <div class="iam-cards">
+          <button type="button" class="iam-card primary" data-finder>
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+            <span class="txt"><b>Looking for a place</b><span>Take over a lease, often for less</span></span><span class="arrow">›</span>
+          </button>
+          <button type="button" class="iam-card" data-open="listing-dialog" data-cta="home-list">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M17 6l2 2M15 8l2 2"/></svg></span>
+            <span class="txt"><b>Putting my lease up</b><span>Find someone to take it over</span></span><span class="arrow">›</span>
+          </button>
+          <button type="button" class="iam-card" data-open="manage-dialog" data-cta="home-taken">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span>
+            <span class="txt"><b>My lease got taken</b><span>Take your listing down</span></span><span class="arrow">›</span>
+          </button>
+          <a class="iam-card" href="#board" data-browse>
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span>
+            <span class="txt"><b>Just browsing</b><span>See every listing</span></span><span class="arrow">›</span>
+          </a>
+        </div>
+        <p class="home-foot">Free to look around. <a href="/how-it-works">How it works →</a></p>
       </div>
     </section>
 
@@ -78,6 +104,13 @@
               <option value="">Any</option>
               <option value="bed">Shared (by the bed)</option>
               <option value="unit">Whole unit</option>
+            </select>
+          </label>
+          <label class="fl"><span>Roommates</span>
+            <select id="f-gender">
+              <option value="">Any</option>
+              <option value="Female">Girls</option>
+              <option value="Male">Guys</option>
             </select>
           </label>
           <label class="fl"><span>Lease</span>
@@ -422,6 +455,70 @@
     </div>
   </dialog>
 
+  <!-- "Looking for a place": where -> optional filters -> results (or alerts if nothing fits) -->
+  <dialog id="finder-dialog" class="dialog finder">
+    <div class="dialog-head">
+      <h2 id="finder-title">Where are you looking?</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+    </div>
+
+    <div class="finder-step" data-step="where">
+      <div class="city-list">
+        <button type="button" class="city-opt" data-city="san-marcos">
+          <span><b>San Marcos, TX</b><small>Texas State</small></span><span class="city-count" id="finder-count"></span>
+        </button>
+        <button type="button" class="city-opt other" data-goto="request">
+          <span><b>Somewhere else</b><small>We're opening new cities soon</small></span><span class="arrow">›</span>
+        </button>
+      </div>
+    </div>
+
+    <form class="finder-step form" data-step="filters" id="finder-form" novalidate hidden>
+      <p class="muted finder-hint">All optional. Skip to see everything.</p>
+      <label>Max rent / month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="max" maxlength="5" placeholder="Any"></span></label>
+      <fieldset class="seg-group"><legend>Room</legend>
+        <div class="seg">
+          <label><input type="radio" name="type" value="" checked><span>Any</span></label>
+          <label><input type="radio" name="type" value="bed"><span>Private room</span></label>
+          <label><input type="radio" name="type" value="unit"><span>Whole place</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="seg-group"><legend>Roommates</legend>
+        <div class="seg">
+          <label><input type="radio" name="gender" value="" checked><span>Any</span></label>
+          <label><input type="radio" name="gender" value="Female"><span>Girls</span></label>
+          <label><input type="radio" name="gender" value="Male"><span>Guys</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="seg-group"><legend>Move in by</legend>
+        <div class="seg" id="finder-when"></div>
+      </fieldset>
+      <p class="fit-count" id="finder-fit"></p>
+      <div class="finder-actions">
+        <button type="button" class="btn btn-ghost" data-finder-skip>Skip</button>
+        <button type="submit" class="btn btn-primary">Show places</button>
+      </div>
+      <button type="button" class="link-btn finder-back" data-goto="where">← Change city</button>
+    </form>
+
+    <form class="finder-step form" data-step="request" id="city-form" novalidate hidden>
+      <p class="muted">We're starting in San Marcos and opening new cities as people ask. Tell us where, and we'll email you when it opens.</p>
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label>City and state<input name="city" required maxlength="80" placeholder="Austin, TX"></label>
+      <label>School <small>(optional)</small><input name="school" maxlength="80" placeholder="UT Austin"></label>
+      <label>Email<input type="email" name="email" required maxlength="120" autocomplete="email"></label>
+      <p class="form-error" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block">Tell me when it opens</button>
+      <button type="button" class="link-btn finder-back" data-goto="where">← Back</button>
+    </form>
+
+    <div class="finder-step" data-step="requested" hidden>
+      <h2>You're on the list</h2>
+      <p class="muted">We'll email you when Takeover opens in <b id="requested-city"></b>. The more people ask for a city, the sooner it opens, so share it with friends there.</p>
+      <button type="button" class="btn btn-primary" data-close>Done</button>
+    </div>
+  </dialog>
+
   <!-- Feedback -->
   <button type="button" class="feedback-fab" data-open="feedback-dialog" aria-label="Send feedback">💬 Feedback</button>
   <dialog id="feedback-dialog" class="dialog">
@@ -480,7 +577,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794810021"></script>
-  <script src="app.js?v=1794810021"></script>
+  <script src="config.js?v=1794852101"></script>
+  <script src="app.js?v=1794852101"></script>
 </body>
 </html>

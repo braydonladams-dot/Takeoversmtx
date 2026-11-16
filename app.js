@@ -208,6 +208,7 @@
   function filtered() {
     const q = $('#f-search').value.trim().toLowerCase();
     const type = $('#f-type').value;
+    const gender = $('#f-gender').value;
     const arrangement = $('#f-arrangement').value;
     const max = Number($('#f-max').value) || 0;
     const moveIn = toDate($('#f-movein').value);
@@ -218,6 +219,7 @@
       if (l.taken) return false;
       if (q && !`${l.complex} ${l.description}`.toLowerCase().includes(q)) return false;
       if (type && l.unitType !== type) return false;
+      if (gender && l.unitType === 'bed' && l.gender && l.gender !== 'Any' && l.gender !== gender) return false;
       if (arrangement && l.arrangement !== arrangement) return false;
       if (max && l.rent > max) return false;
       if (moveIn && toDate(l.availableFrom) > moveIn) return false;
@@ -336,6 +338,10 @@
     const list = filtered();
     const live = all.filter((l) => !l.taken);
     const taken = all.filter((l) => l.taken);
+    if (live.length) {
+      $('#live-count').textContent = live.length + (live.length === 1 ? ' place' : ' places') + ' open in San Marcos';
+      $('#finder-count').textContent = live.length + ' open';
+    }
     const cta = `<div class="alert-cta"><div><b>Don't see the right place?</b><span>Get a text or email the moment one fits your budget and move-in date. Free.</span></div><button type="button" class="btn btn-primary" data-open="waitlist-dialog" data-cta="board">Get alerts</button></div>`;
     const cards = list.map(card);
     if (cards.length) cards.splice(Math.min(6, cards.length), 0, cta);
@@ -482,6 +488,8 @@
       if ($('#f-max').value && !f.maxRent.value) f.maxRent.value = $('#f-max').value;
       if ($('#f-movein').value && !f.moveIn.value) f.moveIn.value = $('#f-movein').value;
       if ($('#f-type').value) f.unitType.value = $('#f-type').value;
+      const g = $('#f-gender').value && f.querySelector('[name=gender][value="' + $('#f-gender').value + '"]');
+      if (g) g.checked = true;
       syncWhenFromDate();
       updateFits();
     }
@@ -765,7 +773,7 @@
   }
 
   // ---------- wire up ----------
-  ['#f-search', '#f-type', '#f-arrangement', '#f-max', '#f-movein', '#f-incentive', '#f-sort'].forEach((s) =>
+  ['#f-search', '#f-type', '#f-gender', '#f-arrangement', '#f-max', '#f-movein', '#f-incentive', '#f-sort'].forEach((s) =>
     $(s).addEventListener('input', render)
   );
 
@@ -982,6 +990,104 @@
   $('#waitlist-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'waitlist'); });
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
   $('#feedback-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'feedback'); });
+
+  // ---------- home screen: "I am looking for a place" finder ----------
+  const finder = $('#finder-dialog');
+  const ff = $('#finder-form');
+  const fTitles = { where: 'Where are you looking?', filters: 'What are you looking for?', request: 'Where should we open next?', requested: '' };
+  function finderStep(step) {
+    finder.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el.dataset.step !== step));
+    $('#finder-title').textContent = fTitles[step];
+    $('#finder-title').hidden = !fTitles[step];
+  }
+  // Move-in choices: Any / Now / by the next Jan, Jun and Aug (sorted), used as "move in by" dates.
+  (function () {
+    const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const now = new Date();
+    const next = (m, day) => { const d = new Date(now.getFullYear(), m, day); return d < now ? new Date(now.getFullYear() + 1, m, day) : d; };
+    const soon = new Date(now.getTime() + 14 * 864e5);
+    const seasons = [[0, 15, 'Spring'], [5, 1, 'Summer'], [7, 20, 'Fall']]
+      .map(([m, d, n]) => { const x = next(m, d); return [iso(x), n + " '" + String(x.getFullYear()).slice(2), x]; })
+      .sort((a, b) => a[2] - b[2]).map(([v, n]) => [v, n]);
+    const opts = [['', 'Any'], [iso(soon), 'Now']].concat(seasons);
+    $('#finder-when').innerHTML = opts.map(([v, n], i) => '<label><input type="radio" name="when" value="' + v + '"' + (i ? '' : ' checked') + '><span>' + n + '</span></label>').join('');
+  })();
+  function applyFinder(useFilters) {
+    const v = useFilters ? Object.fromEntries(new FormData(ff).entries()) : {};
+    $('#f-max').value = v.max || '';
+    $('#f-type').value = v.type || '';
+    $('#f-gender').value = v.gender || '';
+    $('#f-movein').value = v.when || '';
+    $('#f-search').value = '';
+    $('#f-arrangement').value = '';
+    $('#f-incentive').checked = false;
+    render();
+  }
+  function finderFit() {
+    const v = Object.fromEntries(new FormData(ff).entries());
+    const max = Number(v.max) || 0, by = toDate(v.when);
+    const n = all.filter((l) => !l.taken && (!max || l.rent <= max) && (!v.type || l.unitType === v.type) &&
+      (!v.gender || l.unitType !== 'bed' || !l.gender || l.gender === 'Any' || l.gender === v.gender) &&
+      (!by || !toDate(l.availableFrom) || toDate(l.availableFrom) <= by)).length;
+    $('#finder-fit').innerHTML = n
+      ? '🔥 <b>' + n + ' place' + (n === 1 ? '' : 's') + '</b> fit' + (n === 1 ? 's' : '') + ' right now'
+      : "Nothing fits yet. We'll set you up with a free alert so you hear the moment one does.";
+    return n;
+  }
+  ff.addEventListener('input', finderFit);
+  ff.addEventListener('change', finderFit);
+  function finderDone(useFilters) {
+    applyFinder(useFilters);
+    finder.close();
+    const n = filtered().length;
+    track('finder/' + (useFilters ? 'filters' : 'skip'), 'Finder: ' + (useFilters ? 'filters' : 'skip') + ' (' + n + ')');
+    if (useFilters && !n) return openDialog('waitlist-dialog');
+    $('#board').scrollIntoView({ behavior: 'smooth' });
+  }
+  ff.addEventListener('submit', (e) => { e.preventDefault(); finderDone(true); });
+  finder.addEventListener('click', (e) => {
+    const go = e.target.closest('[data-goto]');
+    if (go) return finderStep(go.dataset.goto);
+    if (e.target.closest('[data-city]')) { finderStep('filters'); finderFit(); return; }
+    if (e.target.closest('[data-finder-skip]')) return finderDone(false);
+  });
+  $('#city-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target, err = $('.form-error', f);
+    if (!f.checkValidity()) { err.textContent = 'Please add your city and email.'; err.hidden = false; return; }
+    err.hidden = true;
+    const btn = $('button[type=submit]', f);
+    btn.disabled = true;
+    try {
+      if (!DEMO && !f.website.value) {
+        await fetch(API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({
+          type: 'feedback', message: 'City request: ' + f.city.value.trim() + (f.school.value.trim() ? ' (' + f.school.value.trim() + ')' : ''),
+          contact: f.email.value.trim(), page: 'city-request' }) });
+      }
+      track('city-request', 'City request: ' + f.city.value.trim());
+      $('#requested-city').textContent = f.city.value.trim();
+      f.reset();
+      finderStep('requested');
+    } catch (_) {
+      err.textContent = 'Something went wrong. Try again.';
+      err.hidden = false;
+    } finally { btn.disabled = false; }
+  });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-finder]')) {
+      track('cta/home-find', 'Home: looking for a place');
+      finderStep('where');
+      finder.showModal();
+      return;
+    }
+    const br = e.target.closest('[data-browse]');
+    if (br) {
+      e.preventDefault();
+      track('cta/home-browse', 'Home: just browsing');
+      applyFinder(false);
+      $('#board').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
   $('#manage-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'sendEditLinks'); });
 
   window.addEventListener('hashchange', focusFromHash);
