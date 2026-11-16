@@ -888,3 +888,73 @@ body.view-home .iam-card:nth-child(4) { animation-delay: .36s; }
 /* Other pages (How it works, complex pages) ease in the same way */
 .page { animation: vt-in .6s var(--ease-out) backwards; }
 @media (prefers-reduced-motion: reduce) { .page { animation: none; } }
+
+/* ===== v2: lighter, smoother motion ===== */
+/* Blur behind pop-ups and under the header is expensive to draw and made things stutter. */
+.dialog::backdrop { backdrop-filter: none; background: rgba(15, 23, 42, .5); }
+.site-header { backdrop-filter: none; background: #fff; view-transition-name: none; }
+main { will-change: auto; }
+
+/* Pop-ups: open soft, close by sliding down and fading */
+.dialog[open] { animation: dlg-in .55s cubic-bezier(.22, 1, .36, 1); }
+.dialog.closing { animation: dlg-down .33s cubic-bezier(.4, 0, 1, 1) forwards; }
+.dialog.closing::backdrop { animation: bd-out .33s ease forwards; }
+@keyframes dlg-in { from { opacity: 0; transform: translateY(34px) scale(.97); } }
+@keyframes dlg-down { to { opacity: 0; transform: translateY(70px); } }
+@media (max-width: 600px) {
+  .dialog[open] { animation: sheet-in .6s cubic-bezier(.22, 1, .36, 1); }
+  .dialog.closing { animation: sheet-out .34s cubic-bezier(.4, 0, 1, 1) forwards; }
+}
+.finder-body, .wiz-steps { position: relative; }
+
+/* Home float-in only on the first visit */
+body:not(.first-load) .home-copy, body:not(.first-load) .iam-card { animation: none; }
+
+/* Board cards float in one after another */
+#listings > * { animation: card-in .6s cubic-bezier(.22, 1, .36, 1) backwards; animation-delay: calc(var(--i, 0) * 45ms); }
+@keyframes card-in { from { opacity: 0; transform: translateY(16px); } }
+
+/* ===== List your lease: clean 4-step form ===== */
+.wizard { gap: 0; }
+.wiz-head { display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; }
+.wiz-count { font-size: .85rem; font-weight: 600; color: var(--muted); }
+.wiz-progress { height: 4px; background: var(--tag); border-radius: 999px; margin: 0 0 1.6rem; overflow: hidden; }
+.wiz-progress span { display: block; height: 100%; width: 25%; background: var(--maroon); border-radius: 999px; transition: width .55s cubic-bezier(.22, 1, .36, 1); }
+.wiz-steps { display: grid; }
+.wiz-step { display: grid; gap: 1.25rem; align-content: start; }
+.wiz-title { font-size: 1.35rem; letter-spacing: -.025em; margin: 0; }
+.wiz-sub { color: var(--muted); font-size: .95rem; line-height: 1.5; margin: -.85rem 0 .1rem; }
+.wiz-sub .already-listed { display: inline; margin: 0; }
+.wizard label { font-weight: 600; font-size: .92rem; }
+.wizard label > input, .wizard label > select, .wizard label > textarea, .wizard label > .money { margin-top: .45rem; }
+.wizard input:not([type=radio]):not([type=checkbox]):not([type=file]), .wizard select, .wizard textarea { height: 50px; border-radius: 14px; font-size: 1rem; }
+.wizard textarea { height: auto; min-height: 110px; padding-top: .8rem; }
+.wizard .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+.wizard .row.three { grid-template-columns: 1fr 1fr 1.2fr; }
+.wizard .help { display: block; margin-top: .4rem; font-size: .8rem; font-weight: 400; color: var(--muted); line-height: 1.35; }
+.wizard .hint { font-weight: 400; }
+.wizard .seg-group legend { font-size: .92rem; margin-bottom: .55rem; }
+.wizard .choice-cards { gap: .6rem; }
+.wizard .choice-cards.stack { grid-template-columns: 1fr; }
+.wizard .choice-cards.stack .choice span { flex-direction: row; justify-content: space-between; align-items: center; text-align: left; gap: 1rem; }
+.wizard .choice-cards.stack .choice small { margin: 0; text-align: right; }
+.wizard .choice span { min-height: 54px; border-radius: 14px; }
+.wizard .form-error { margin: 1.1rem 0 0; }
+.wiz-nav { display: grid; grid-template-columns: 1fr 2fr; gap: .75rem; margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+.wiz-nav [data-wiz-submit], .wiz-nav [data-wiz-next] { grid-column: 2; grid-row: 1; }
+.wiz-nav [data-wiz-back] { grid-column: 1; grid-row: 1; }
+/* Photos step */
+.photo-field { display: grid; gap: .8rem; }
+.photo-add { display: flex; align-items: center; gap: .9rem; padding: 1.1rem 1.2rem; border: 1.5px dashed #cbd5e1; border-radius: 16px; background: var(--input); cursor: pointer; transition: border-color .2s, background .2s; }
+.photo-add:hover { border-color: var(--maroon); background: var(--accent-soft); }
+.photo-add-ic { width: 44px; height: 44px; border-radius: 12px; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; font-size: 1.5rem; color: var(--maroon); flex: none; }
+.photo-add b { display: block; font-size: 1rem; }
+.photo-add small { display: block; font-weight: 400; }
+@media (max-width: 600px) {
+  .wizard .row, .wizard .row.three { grid-template-columns: 1fr 1fr; }
+  .wizard .row.three #gender-field { grid-column: 1 / -1; }
+  .wizard .row:not(.three) { grid-template-columns: 1fr; }
+  .wiz-title { font-size: 1.25rem; }
+}
+.wizard .photo-add { display: flex; flex-direction: row; align-items: center; width: 100%; margin: 0; text-align: left; }
+.wizard .photo-add > span:not(.photo-add-ic) { display: grid; gap: .1rem; }

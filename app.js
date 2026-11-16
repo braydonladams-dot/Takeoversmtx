@@ -346,6 +346,7 @@
     const cards = list.map(card);
     if (cards.length) cards.splice(Math.min(6, cards.length), 0, cta);
     $('#listings').innerHTML = cards.join('');
+    [...$('#listings').children].forEach((c, i) => c.style.setProperty('--i', Math.min(i, 9)));
     bindPhotoCounters($('#listings'));
     $('#empty').hidden = list.length > 0;
     $('#result-count').textContent = live.length
@@ -481,6 +482,7 @@
       $('#verify-step').hidden = true;
       nudged = false;
       $('#ig-tag').value = '';
+      wizShow(1, true);
     }
     if (id === 'waitlist-dialog') {
       const f = $('#waitlist-form');
@@ -634,6 +636,7 @@
     slot.hidden = !inForm;
   }
   function showVerifyStep(show) {
+    $('#listing-dialog').dataset.dir = show ? '1' : '-1';
     $('#listing-form').hidden = show;
     $('#verify-step').hidden = !show;
     if (show) $('#listing-dialog').scrollTop = 0;
@@ -990,35 +993,87 @@
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
   $('#feedback-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'feedback'); });
 
+  const EASE = 'cubic-bezier(.22, 1, .36, 1)';
+
+  // ---------- "List your lease": 4 steps that slide ----------
+  const lf = $('#listing-form');
+  const wizSteps = [...lf.querySelectorAll('.wiz-step')];
+  let wiz = 1;
+  function wizShow(n, instant) {
+    const from = wizSteps[wiz - 1], to = wizSteps[n - 1];
+    const dir = n >= wiz ? 1 : -1;
+    wiz = n;
+    $('#wiz-count').textContent = 'Step ' + n + ' of ' + wizSteps.length;
+    $('#wiz-bar').style.width = (n / wizSteps.length) * 100 + '%';
+    $('[data-wiz-back]', lf).style.visibility = n > 1 ? 'visible' : 'hidden';
+    $('[data-wiz-next]', lf).hidden = n === wizSteps.length;
+    $('[data-wiz-submit]', lf).hidden = n !== wizSteps.length;
+    $('.form-error', lf).hidden = true;
+    if (instant || from === to) { wizSteps.forEach((s) => (s.hidden = s !== to)); return; }
+    const d = $('#listing-dialog');
+    if (d.scrollTop > 0) d.scrollTo({ top: 0, behavior: 'smooth' });
+    slideSteps($('.wiz-steps', lf), from, to, dir);
+  }
+  function fieldMsg(bad) {
+    if (bad.type === 'tel' && bad.value) return 'Please enter a full 10-digit phone number.';
+    if (bad.type === 'email' && bad.value) return 'Please enter a valid email address.';
+    const lab = bad.closest('label');
+    const name = lab ? lab.childNodes[0].textContent.trim() : bad.name;
+    return bad.value ? 'Please check "' + name + '".' : 'Please fill in "' + name + '".';
+  }
+  function stepProblem(n) {
+    const bad = [...wizSteps[n - 1].querySelectorAll('input, select, textarea')].find((el) => !el.checkValidity());
+    if (bad) return { el: bad, msg: fieldMsg(bad) };
+    if (n === 2 && lf.availableFrom.value && lf.leaseEnds.value && lf.availableFrom.value > lf.leaseEnds.value) {
+      return { el: lf.leaseEnds, msg: 'The "available from" date must be before the lease end date.' };
+    }
+    return null;
+  }
+  function wizCheck(n) {
+    const p = stepProblem(n);
+    const err = $('.form-error', lf);
+    if (!p) { err.hidden = true; return true; }
+    err.textContent = p.msg;
+    err.hidden = false;
+    p.el.focus({ preventScroll: false });
+    return false;
+  }
+  lf.addEventListener('click', (e) => {
+    if (e.target.closest('[data-wiz-next]')) { if (wizCheck(wiz)) { wizShow(wiz + 1); track('wizard/' + wiz, 'Listing step ' + wiz); } return; }
+    if (e.target.closest('[data-wiz-back]')) wizShow(Math.max(1, wiz - 1));
+  });
+  // Enter key or Submit before the last step moves forward instead; on the last step, jump back to anything missed.
+  $('#listing-dialog').addEventListener('submit', (e) => {
+    if (e.target !== lf) return;
+    if (wiz < wizSteps.length) {
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (wizCheck(wiz)) wizShow(wiz + 1);
+      return;
+    }
+    for (let i = 1; i <= wizSteps.length; i++) {
+      if (stepProblem(i)) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        if (i !== wiz) wizShow(i);
+        setTimeout(() => wizCheck(i), i !== wiz ? 600 : 0);
+        return;
+      }
+    }
+  }, true);
+
   // ---------- home screen: "I am looking for a place" finder ----------
   const finder = $('#finder-dialog');
   const ff = $('#finder-form');
   const fOrder = ['where', 'filters', 'request', 'requested'];
-  let stepBusy = false;
-  async function finderStep(step, instant) {
-    const body = finder.querySelector('.finder-body');
+  function finderStep(step, instant) {
     const cur = finder.querySelector('.finder-step:not([hidden])');
     const nxt = finder.querySelector('.finder-step[data-step="' + step + '"]');
-    if (cur === nxt || stepBusy) return;
-    const show = () => finder.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el !== nxt));
-    if (instant || !cur || !nxt.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return show();
-    stepBusy = true;
+    if (cur === nxt) return;
+    if (instant || !cur) { finder.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el !== nxt)); return; }
     const dir = fOrder.indexOf(step) >= fOrder.indexOf(cur.dataset.step) ? 1 : -1;
-    const h0 = body.offsetHeight;
-    await cur.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(' + (-28 * dir) + 'px)' }],
-      { duration: 220, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' }).finished;
-    show();
-    cur.getAnimations().forEach((a) => a.cancel());
-    const h1 = body.offsetHeight;
-    body.style.overflow = 'hidden';
-    const grow = body.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }], { duration: 420, easing: 'cubic-bezier(.22, 1, .36, 1)' });
-    nxt.animate([{ opacity: 0, transform: 'translateX(' + (36 * dir) + 'px)' }, { opacity: 1, transform: 'none' }],
-      { duration: 480, easing: 'cubic-bezier(.22, 1, .36, 1)' });
-    await grow.finished;
-    body.style.overflow = '';
-    stepBusy = false;
-    const first = nxt.querySelector('input:not([type=hidden]):not(.hp):not([type=radio])');
-    if (first && step === 'request') first.focus({ preventScroll: true });
+    slideSteps(finder.querySelector('.finder-body'), cur, nxt, dir).then(() => {
+      const first = nxt.querySelector('input:not(.hp):not([type=radio])');
+      if (first && step === 'request') first.focus({ preventScroll: true });
+    });
   }
   // Move-in choices: Any / Now / by the next Jan, Jun and Aug (sorted), used as "move in by" dates.
   (function () {
@@ -1115,21 +1170,26 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let view = '';
   function viewFor(h) { return /^#l-/.test(h) ? 'focus' : h === '#board' ? 'board' : 'home'; }
-  function swap(fn) {
-    if (reduceMotion) return fn();
-    if (document.startViewTransition) return document.startViewTransition(fn);
-    fn();
+  const rank = { home: 0, board: 1, focus: 2 };
+  function swap(fn, dir) {
     const m = $('main');
-    m.classList.remove('view-in');
-    void m.offsetWidth; // restart the animation
-    m.classList.add('view-in');
+    if (reduceMotion || !m.animate) return fn();
+    m.getAnimations().forEach((a) => a.cancel());
+    const out = m.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(' + (-36 * dir) + 'px)' }],
+      { duration: 190, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' });
+    out.onfinish = () => {
+      fn();
+      out.cancel();
+      m.animate([{ opacity: 0, transform: 'translateX(' + (60 * dir) + 'px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 560, easing: EASE });
+    };
   }
   function route() {
     const next = viewFor(location.hash);
     if (next === view) { if (next === 'focus') focusFromHash(); return; }
     const from = view;
     view = next;
-    swap(() => {
+    const apply = () => {
       document.body.classList.toggle('view-home', next === 'home');
       document.body.classList.toggle('view-board', next !== 'home');
       if (next === 'focus') focusFromHash();
@@ -1137,7 +1197,9 @@
       // Back from a listing keeps your spot on the board; everything else starts at the top.
       if (!(from === 'focus' && next === 'board')) { window.scrollTo(0, 0); requestAnimationFrame(() => window.scrollTo(0, 0)); }
       if (next === 'board') track('view-board', 'Board screen');
-    });
+    };
+    if (!from) return apply(); // first load: no slide
+    swap(apply, rank[next] >= rank[from] ? 1 : -1);
   }
   function goBoard() { if (location.hash === '#board') route(); else location.hash = 'board'; }
   function goHome() {
@@ -1146,6 +1208,62 @@
     route();
   }
   window.addEventListener('hashchange', route);
+
+  // ---------- motion helpers ----------
+  // Slide from one panel to the next inside a box: the old one glides out while the new one glides in,
+  // and the box smoothly grows or shrinks to fit.
+  function slideSteps(box, from, to, dir) {
+    if (reduceMotion || !to.animate) { from.hidden = true; to.hidden = false; return Promise.resolve(); }
+    box.getAnimations().forEach((a) => a.finish());
+    const h0 = box.offsetHeight;
+    const top = from.offsetTop, left = from.offsetLeft, w = from.offsetWidth;
+    const keep = from.getAttribute('style') || '';
+    from.style.cssText = keep + ';position:absolute;top:' + top + 'px;left:' + left + 'px;width:' + w + 'px;margin:0;pointer-events:none;';
+    to.hidden = false;
+    const h1 = box.offsetHeight;
+    box.style.overflow = 'hidden';
+    const leave = from.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(' + (-70 * dir) + 'px)' }],
+      { duration: 320, easing: 'cubic-bezier(.4, 0, .6, 1)', fill: 'forwards' });
+    const enter = to.animate([{ opacity: 0, transform: 'translateX(' + (90 * dir) + 'px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 560, delay: 40, easing: EASE, fill: 'backwards' });
+    const grow = Math.abs(h1 - h0) > 2 ? box.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }], { duration: 560, easing: EASE }) : null;
+    return Promise.all([enter.finished, grow ? grow.finished : 0]).catch(() => {}).then(() => {
+      leave.cancel();
+      from.hidden = true;
+      from.setAttribute('style', keep);
+      if (!keep) from.removeAttribute('style');
+      box.style.overflow = '';
+    });
+  }
+  // Inside pop-ups: when the next screen appears (e.g. "Thanks!"), it slides in and the pop-up resizes smoothly.
+  const lastH = new WeakMap();
+  const sizeWatch = new ResizeObserver((entries) => entries.forEach((e) => { if (!e.target._sizing) lastH.set(e.target, e.target.offsetHeight); }));
+  const panelWatch = new MutationObserver((muts) => {
+    const shown = new Set();
+    muts.forEach((m) => { const el = m.target; if (!el.hidden && el.parentElement && el.parentElement.tagName === 'DIALOG') shown.add(el); });
+    shown.forEach((el) => {
+      const d = el.parentElement;
+      if (!d.open || reduceMotion || !el.animate) return;
+      const dir = Number(d.dataset.dir || 1);
+      delete d.dataset.dir;
+      d.scrollTop = 0;
+      el.animate([{ opacity: 0, transform: 'translateX(' + (70 * dir) + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 560, easing: EASE });
+      const h0 = lastH.get(d), h1 = d.offsetHeight;
+      if (h0 && Math.abs(h0 - h1) > 2) {
+        d._sizing = true;
+        d.style.overflow = 'hidden';
+        d.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }], { duration: 560, easing: EASE }).finished.catch(() => {}).then(() => {
+          d._sizing = false;
+          d.style.overflow = '';
+          lastH.set(d, d.offsetHeight);
+        });
+      }
+    });
+  });
+  $$('dialog').forEach((d) => { sizeWatch.observe(d); panelWatch.observe(d, { attributes: true, attributeFilter: ['hidden'], subtree: true }); });
+
+  // The home screen's float-in only plays on the first visit, not every time you come back.
+  setTimeout(() => document.body.classList.remove('first-load'), 1600);
   window.addEventListener('popstate', route);
   route();
 
@@ -1154,7 +1272,7 @@
   HTMLDialogElement.prototype.close = function (v) {
     if (!this.open || reduceMotion || this.classList.contains('closing')) return nativeClose.call(this, v);
     this.classList.add('closing');
-    setTimeout(() => { this.classList.remove('closing'); nativeClose.call(this, v); }, 260);
+    setTimeout(() => { this.classList.remove('closing'); nativeClose.call(this, v); }, 330);
   };
 
   // Filter pills light up when they're set; "Clear" resets them.

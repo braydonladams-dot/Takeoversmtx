@@ -20,11 +20,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794853034">
+  <link rel="stylesheet" href="styles.css?v=1794853702">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
-<body>
+<body class="first-load">
   <div id="demo-banner" class="banner" hidden>
     Demo mode: these are sample listings. Connect your Google Sheet to go live (see README).
   </div>
@@ -178,115 +178,122 @@
 
   <!-- List your lease -->
   <dialog id="listing-dialog" class="dialog">
-    <form id="listing-form" class="form" novalidate>
+    <form id="listing-form" class="form wizard" novalidate>
       <div class="dialog-head">
-        <h2 id="listing-title">List your lease</h2>
+        <div class="wiz-head">
+          <h2 id="listing-title">List your lease</h2>
+          <span class="wiz-count" id="wiz-count">Step 1 of 4</span>
+        </div>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
       </div>
-      <p class="muted">Most listings go live within a few minutes and get posted on our Instagram, <b>@takeoversmtx</b>. Every listing is checked for scams and spam.</p>
-      <p class="already-listed">Already listed? <button type="button" class="link-btn owner-link" data-switch-manage>Edit yours instead</button></p>
-      <p class="looking-note" id="looking-note" hidden></p>
+      <div class="wiz-progress" aria-hidden="true"><span id="wiz-bar"></span></div>
 
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <div class="form-section">
-        <h3>About you</h3>
-        <div class="row">
-          <label>Your name <small class="hint">· only your first name is shown</small><input name="name" required maxlength="80" autocomplete="name"></label>
-          <label>Email <small class="hint">· private, for verification</small><input type="email" name="email" required placeholder="you@email.com" maxlength="120" autocomplete="email"></label>
-        </div>
-      </div>
+      <div class="wiz-steps">
+        <section class="wiz-step" data-wstep="1">
+          <h3 class="wiz-title">The place</h3>
+          <p class="wiz-sub">Most listings go live within minutes and get posted on <b>@takeoversmtx</b>. <span class="already-listed">Already listed? <button type="button" class="link-btn owner-link" data-switch-manage>Edit yours instead</button></span></p>
+          <p class="looking-note" id="looking-note" hidden></p>
 
-      <div class="form-section">
-        <h3>The place</h3>
-        <label>Apartment complex or address<input name="complex" required maxlength="120" placeholder="Complex name, or street address for a house"></label>
+          <label>Apartment complex or address<input name="complex" required maxlength="120" placeholder="e.g. The Retreat, or a street address"></label>
 
-        <fieldset class="seg-group">
-          <legend>Room type</legend>
-          <div class="choice-cards two compact">
-            <label class="choice"><input type="radio" name="unitType" value="bed" checked><span>Shared (by the bed)</span></label>
-            <label class="choice"><input type="radio" name="unitType" value="unit"><span>Whole unit</span></label>
+          <fieldset class="seg-group">
+            <legend>Room type</legend>
+            <div class="choice-cards two compact">
+              <label class="choice"><input type="radio" name="unitType" value="bed" checked><span>Private room<small>Shared apartment</small></span></label>
+              <label class="choice"><input type="radio" name="unitType" value="unit"><span>Whole place<small>The entire unit</small></span></label>
+            </div>
+          </fieldset>
+
+          <div class="row three">
+            <label>Bedrooms<input type="text" inputmode="numeric" autocomplete="off" data-digits name="bedrooms" maxlength="2" pattern="[0-9]{1,2}" required placeholder="4"></label>
+            <label>Bathrooms<input type="text" inputmode="decimal" autocomplete="off" data-decimal name="bathrooms" maxlength="4" pattern="[0-9]{1,2}(\.5)?" required placeholder="4"></label>
+            <label id="gender-field">Roommates
+              <select name="gender">
+                <option value="Any">Any</option>
+                <option value="Female">Girls</option>
+                <option value="Male">Guys</option>
+              </select>
+            </label>
           </div>
-        </fieldset>
 
-        <div class="row three">
-          <label>Bedrooms<input type="text" inputmode="numeric" autocomplete="off" data-digits name="bedrooms" maxlength="2" pattern="[0-9]{1,2}" required placeholder="e.g. 4"></label>
-          <label>Bathrooms<input type="text" inputmode="decimal" autocomplete="off" data-decimal name="bathrooms" maxlength="4" pattern="[0-9]{1,2}(\.5)?" required placeholder="e.g. 4"></label>
-          <label id="gender-field">Roommates
-            <select name="gender">
-              <option value="Any">Any / N/A</option>
-              <option value="Female">Female</option>
-              <option value="Male">Male</option>
-            </select>
-          </label>
-        </div>
+          <fieldset class="seg-group">
+            <legend>Furnished?</legend>
+            <div class="choice-cards two compact">
+              <label class="choice"><input type="radio" name="furnished" value="Yes" checked><span>Yes</span></label>
+              <label class="choice"><input type="radio" name="furnished" value="No"><span>No</span></label>
+            </div>
+          </fieldset>
+        </section>
 
-        <fieldset class="seg-group">
-          <legend>Furnished?</legend>
-          <div class="choice-cards two compact">
-            <label class="choice"><input type="radio" name="furnished" value="Yes" checked><span>Yes</span></label>
-            <label class="choice"><input type="radio" name="furnished" value="No"><span>No</span></label>
+        <section class="wiz-step" data-wstep="2" hidden>
+          <h3 class="wiz-title">Lease details</h3>
+          <p class="wiz-sub">The money and the dates. You can change these later.</p>
+
+          <fieldset class="seg-group">
+            <legend>Takeover or sublease?</legend>
+            <div class="choice-cards stack">
+              <label class="choice"><input type="radio" name="arrangement" value="takeover" checked><span>Takeover<small>The lease goes into their name</small></span></label>
+              <label class="choice"><input type="radio" name="arrangement" value="sublease"><span>Sublease<small>You stay on the lease, they pay you</small></span></label>
+              <label class="choice"><input type="radio" name="arrangement" value="unsure"><span>Not sure<small>Whatever the complex allows</small></span></label>
+            </div>
+          </fieldset>
+
+          <div class="row">
+            <label>Rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="rent" maxlength="5" pattern="[1-9][0-9]{0,4}" required placeholder="650"></span></label>
+            <label>Cash incentive<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="incentive" maxlength="5" placeholder="0"></span><small class="help">Optional. Gets it taken faster.</small></label>
           </div>
-        </fieldset>
-      </div>
 
-      <div class="form-section">
-        <h3>Lease details</h3>
-        <fieldset class="seg-group">
-          <legend>Takeover or sublease?</legend>
-          <div class="choice-cards">
-            <label class="choice"><input type="radio" name="arrangement" value="takeover" checked><span>Takeover<small>The lease goes into their name</small></span></label>
-            <label class="choice"><input type="radio" name="arrangement" value="sublease"><span>Sublease<small>You stay on the lease, they pay you</small></span></label>
-            <label class="choice"><input type="radio" name="arrangement" value="unsure"><span>Not sure<small>Whatever the complex allows</small></span></label>
+          <div class="row">
+            <label>Available from<input type="date" name="availableFrom" required><small class="help">First day someone can move in.</small></label>
+            <label>Lease ends<input type="date" name="leaseEnds" required></label>
           </div>
-        </fieldset>
 
-        <div class="row">
-          <label>Rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="rent" maxlength="5" pattern="[1-9][0-9]{0,4}" required placeholder="650"></span></label>
-          <label>Cash incentive <small class="hint">· optional</small><span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="incentive" maxlength="5" placeholder="0"></span></label>
-        </div>
+          <label>Transfer fee your complex charges<input name="takeoverFee" maxlength="200" placeholder="e.g. $300, or &quot;don't know&quot;"><small class="help">Optional.</small></label>
+        </section>
 
-        <div class="row">
-          <label>Available from <button type="button" class="help-tip has-tip" aria-label="What does available from mean?" data-tip-title="Available from" data-tip="The first day someone could move in and take over your lease. If it's open now, just pick today.">?</button><input type="date" name="availableFrom" required></label>
-          <label>Lease ends<input type="date" name="leaseEnds" required></label>
-        </div>
+        <section class="wiz-step" data-wstep="3" hidden>
+          <h3 class="wiz-title">Photos</h3>
+          <p class="wiz-sub">Listings with photos get taken much faster. Bedroom, living room, kitchen and the view are good picks.</p>
+          <div class="photo-field">
+            <div class="photo-previews" id="photo-previews"></div>
+            <label class="photo-add" id="photo-add">
+              <span class="photo-add-ic">+</span><span><b>Add photos</b><small>Up to 8</small></span>
+              <input type="file" id="photo-input" accept="image/*" multiple hidden>
+            </label>
+          </div>
+          <label>Description <small class="hint">optional</small><textarea name="description" rows="4" maxlength="800" placeholder="Room size, roommates, parking, utilities, why you're leaving..."></textarea></label>
+        </section>
 
-        <label>Transfer fee your complex charges<input name="takeoverFee" maxlength="200" placeholder="e.g. $300, or &quot;don't know&quot;"></label>
-      </div>
-
-      <div class="form-section">
-        <h3>Photos &amp; description</h3>
-        <div class="photo-field">
-          <span class="label">Photos <small class="hint">· up to 8, optional</small></span>
-          <p class="photo-note">Listings with photos get taken faster. Bedroom, living room, kitchen and the view are good picks.</p>
-          <div class="photo-previews" id="photo-previews"></div>
-          <label class="photo-add btn btn-outline btn-sm" id="photo-add">+ Add photos
-            <input type="file" id="photo-input" accept="image/*" multiple hidden>
-          </label>
-        </div>
-
-        <label>Description<textarea name="description" rows="3" maxlength="800" placeholder="Room size, roommates, parking, utilities, why you're leaving..."></textarea></label>
-      </div>
-
-      <div class="form-section verify-slot" id="verify-slot" hidden></div>
-
-      <div class="form-section">
-        <h3>How people reach you</h3>
-        <div class="row">
-          <label>Contact method
-            <select name="contactMethod" required>
-              <option value="text">Text</option>
-              <option value="instagram">Instagram</option>
-              <option value="snapchat">Snapchat</option>
-              <option value="email">Email</option>
-            </select>
-          </label>
-          <label>Number or handle <small class="hint">· only shared with people who tap "I&#39;m interested"</small><input type="tel" inputmode="tel" autocomplete="tel" data-phone name="contact" required maxlength="120" placeholder="512-555-0123"></label>
-        </div>
+        <section class="wiz-step" data-wstep="4" hidden>
+          <h3 class="wiz-title">About you</h3>
+          <p class="wiz-sub">How people interested in your place can reach you.</p>
+          <div class="row">
+            <label>Your name<input name="name" required maxlength="80" autocomplete="name"><small class="help">Only your first name is shown.</small></label>
+            <label>Email<input type="email" name="email" required placeholder="you@email.com" maxlength="120" autocomplete="email"><small class="help">Private. We send your listing link here.</small></label>
+          </div>
+          <div class="row">
+            <label>Contact method
+              <select name="contactMethod" required>
+                <option value="text">Text</option>
+                <option value="instagram">Instagram</option>
+                <option value="snapchat">Snapchat</option>
+                <option value="email">Email</option>
+              </select>
+            </label>
+            <label>Number or handle<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="contact" required maxlength="120" placeholder="512-555-0123"><small class="help">Only shared when someone taps "I'm interested".</small></label>
+          </div>
+          <div class="form-section verify-slot" id="verify-slot" hidden></div>
+        </section>
       </div>
 
       <p class="form-error" hidden></p>
-      <button type="submit" class="btn btn-primary btn-block btn-lg">Submit listing</button>
+      <div class="wiz-nav">
+        <button type="button" class="btn btn-ghost btn-lg" data-wiz-back>Back</button>
+        <button type="button" class="btn btn-primary btn-lg" data-wiz-next>Next</button>
+        <button type="submit" class="btn btn-primary btn-lg" data-wiz-submit hidden>Submit listing</button>
+      </div>
     </form>
     <div id="verify-step" class="form verify-step" hidden>
       <div class="dialog-head">
@@ -589,7 +596,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794853034"></script>
-  <script src="app.js?v=1794853034"></script>
+  <script src="config.js?v=1794853702"></script>
+  <script src="app.js?v=1794853702"></script>
 </body>
 </html>
