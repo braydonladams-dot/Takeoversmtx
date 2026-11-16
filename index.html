@@ -16,7 +16,7 @@
   <meta name="twitter:image" content="https://takeoversmtx.com/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=1794432089">
+  <link rel="stylesheet" href="styles.css?v=1794790622">
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -290,7 +290,7 @@
         <a id="edit-takedown-link" class="btn btn-outline btn-sm" href="#">Take my listing down</a>
       </div>
       <h2 id="listing-success-title">You're all set.</h2>
-      <p>Your listing should be on the board within a few minutes. We'll email you your link from <b>team@takeoversmtx.com</b> once it's live.</p>
+      <p>Your listing should be on the board within a few minutes. We'll email you your link (from <b>Braydon from Takeover SMTX</b>) once it's live.</p>
       <p class="spam-note">📩 Don't see it? Check your <b>spam</b> or <b>promotions</b> folder, and mark it "Not spam" so you get our check-ins too.</p>
       <p>Once it's up, share it everywhere. Every share helps it get taken faster.</p>
       <div class="ig-repost">
@@ -313,10 +313,13 @@
 
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <div class="row">
-        <label>Max rent / month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
-        <label>Move-in date<input type="date" name="moveIn" required></label>
-      </div>
+      <label>Max rent / month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
+        <fieldset class="seg-group">
+          <legend>When do you want to move in?</legend>
+          <div class="choice-cards compact" id="movein-chips"></div>
+          <label id="movein-date-field" hidden>Move-in date<input type="date" name="moveIn" required></label>
+        </fieldset>
+        <p class="fit-count" id="fit-count" hidden></p>
 
       <fieldset class="seg-group">
         <legend>I'm a <button type="button" class="help-tip has-tip" aria-label="Why we ask" data-tip-title="Why we ask" data-tip="Lots of places are girls-only or guys-only, so this keeps you from getting alerts you can't take.">?</button></legend>
@@ -327,7 +330,7 @@
         </div>
       </fieldset>
 
-      <label>Name<input name="name" required maxlength="80" autocomplete="given-name"></label>
+      <label>First name <small class="muted">(optional)</small><input name="name" maxlength="80" autocomplete="given-name"></label>
 
       <fieldset class="seg-group">
         <legend>Send alerts by</legend>
@@ -360,8 +363,9 @@
     <div class="form-success" hidden>
       <h2>You're on the list.</h2>
       <p id="waitlist-success-text">We'll let you know when something matching what you want is listed.</p>
+      <div id="waitlist-fits" class="fits" hidden></div>
       <p class="ig-note"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><span>Follow <a href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener"><b>@takeoversmtx</b></a> on Instagram to see new places first.</span></p>
-      <p class="spam-note" id="waitlist-spam-note" hidden>📩 Our emails come from <b>team@takeoversmtx.com</b>. If you don't see one, check your <b>spam</b> or <b>promotions</b> folder and mark it "Not spam."</p>
+      <p class="spam-note" id="waitlist-spam-note" hidden>📩 Our emails come from <b>Braydon from Takeover SMTX</b>. If you don't see one, check your <b>spam</b> or <b>promotions</b> folder and mark it "Not spam."</p>
       <button type="button" class="btn btn-primary" data-close>Done</button>
     </div>
   </dialog>
@@ -411,7 +415,7 @@
     </form>
     <div class="form-success" hidden>
       <h2>Check your email</h2>
-      <p>If there's a listing under that email, the link is on its way from <b>team@takeoversmtx.com</b>. Check spam or promotions if you don't see it in a minute.</p>
+      <p>If there's a listing under that email, the link is on its way from <b>Braydon from Takeover SMTX</b>. Check spam or promotions if you don't see it in a minute.</p>
       <button type="button" class="btn btn-primary" data-close>Done</button>
     </div>
   </dialog>
@@ -474,7 +478,7 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794432089"></script>
-  <script src="app.js?v=1794432089"></script>
+  <script src="config.js?v=1794790622"></script>
+  <script src="app.js?v=1794790622"></script>
 </body>
 </html>

@@ -336,7 +336,10 @@
     const list = filtered();
     const live = all.filter((l) => !l.taken);
     const taken = all.filter((l) => l.taken);
-    $('#listings').innerHTML = list.map(card).join('');
+    const cta = `<div class="alert-cta"><div><b>Don't see the right place?</b><span>Get a text or email the moment one fits your budget and move-in date. Free.</span></div><button type="button" class="btn btn-primary" data-open="waitlist-dialog" data-cta="board">Get alerts</button></div>`;
+    const cards = list.map(card);
+    if (cards.length) cards.splice(Math.min(6, cards.length), 0, cta);
+    $('#listings').innerHTML = cards.join('');
     bindPhotoCounters($('#listings'));
     $('#empty').hidden = list.length > 0;
     $('#result-count').textContent = live.length
@@ -479,6 +482,8 @@
       if ($('#f-max').value && !f.maxRent.value) f.maxRent.value = $('#f-max').value;
       if ($('#f-movein').value && !f.moveIn.value) f.moveIn.value = $('#f-movein').value;
       if ($('#f-type').value) f.unitType.value = $('#f-type').value;
+      syncWhenFromDate();
+      updateFits();
     }
     d.showModal();
   }
@@ -647,6 +652,7 @@
 
   // ---------- forms ----------
   function validate(form, type) {
+    if (type === 'waitlist' && Number(form.maxRent.value) > 0 && !form.moveIn.value) return 'Please pick when you want to move in.';
     if (!form.checkValidity()) {
       const bad = form.querySelector(':invalid');
       if (bad.type === 'tel' && bad.value) return 'Please enter a full 10-digit phone number.';
@@ -674,6 +680,16 @@
         ? "We'll email you as soon as something matching what you want is listed. If anything already fits, it's on its way now."
         : "We'll text you when something matching what you want is listed.";
       $('#waitlist-spam-note').hidden = !byEmail;
+      const fits = fitsFor(form) || [];
+      const box = $('#waitlist-fits');
+      box.innerHTML = fits.length
+        ? '<p class="fits-head">Places that fit you right now:</p>' +
+          fits.slice(0, 4).map((l) => `<a class="fit-row" href="#l-${esc(l.id)}" data-close><span>${esc(l.complex)}</span><b>${money(l.rent)}/mo</b></a>`).join('') +
+          (fits.length > 4 ? `<p class="muted">+ ${fits.length - 4} more on the board</p>` : '')
+        : '';
+      box.hidden = !fits.length;
+      data.name = String(data.name || '').trim();
+      delete data.moveWhen;
     }
     if (type === 'listing' && editing) {
       const err2 = $('.form-error', form);
@@ -733,7 +749,7 @@
         });
       }
       form.reset();
-      if (type === 'waitlist') syncNotifyBy();
+      if (type === 'waitlist') { syncNotifyBy(); resetWhen(); }
       if (type === 'listing') clearPhotos();
       form.hidden = true;
       $('.form-success', form.closest('dialog')).hidden = false;
@@ -760,6 +776,7 @@
       track('contact/' + ct.dataset.contact, 'Contact tap: ' + (cl ? cl.complex : ct.dataset.contact));
     }
     const open = e.target.closest('[data-open]');
+    if (open && open.dataset.cta) track('cta/' + open.dataset.cta, 'Alerts button: ' + open.dataset.cta);
     if (open) return openDialog(open.dataset.open);
     const close = e.target.closest('[data-close]');
     if (close) return close.closest('dialog').close();
@@ -909,6 +926,58 @@
     $('#waitlist-phone-field').hidden = byEmail;
   }
   $$('#waitlist-form [name=notifyBy]').forEach((r) => r.addEventListener('change', syncNotifyBy));
+
+  // Alerts form: quick move-in choices (instead of a date picker) + a live "places that fit" count.
+  const wf = $('#waitlist-form');
+  const isoDay = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const nextOn = (m, day) => { const now = new Date(); const d = new Date(now.getFullYear(), m, day); return d < now ? new Date(now.getFullYear() + 1, m, day) : d; };
+  const seasons = [['Spring', 0, 10, 'January'], ['Summer', 5, 1, 'June'], ['Fall', 7, 15, 'August']]
+    .map(([name, m, day, sub]) => { const d = nextOn(m, day); return { v: isoDay(d), label: name + " '" + String(d.getFullYear()).slice(2), sub: sub, t: d.getTime() }; })
+    .sort((a, b) => a.t - b.t);
+  const whenOpts = [{ v: isoDay(new Date()), label: 'ASAP', sub: 'Within 2 weeks' }, ...seasons, { v: 'other', label: 'Pick a date', sub: '' }];
+  $('#movein-chips').innerHTML = whenOpts.map((o) =>
+    `<label class="choice"><input type="radio" name="moveWhen" value="${o.v}"><span>${o.label}${o.sub ? `<small>${o.sub}</small>` : ''}</span></label>`).join('');
+  function showDate(show) { $('#movein-date-field').hidden = !show; }
+  wf.querySelectorAll('[name=moveWhen]').forEach((r) => r.addEventListener('change', () => {
+    if (r.value === 'other') { wf.moveIn.value = ''; showDate(true); wf.moveIn.focus(); }
+    else { wf.moveIn.value = r.value; showDate(false); }
+    updateFits();
+  }));
+  function syncWhenFromDate() {
+    if (!wf.moveIn.value || wf.querySelector('[name=moveWhen]:checked')) return;
+    wf.querySelector('[name=moveWhen][value=other]').checked = true;
+    showDate(true);
+  }
+  function resetWhen() { showDate(false); $('#fit-count').hidden = true; }
+  function fitsFor(f) {
+    const max = Number(f.maxRent.value) || 0;
+    if (!max) return null;
+    const mi = toDate(f.moveIn.value);
+    const g = String(f.gender.value || '').toLowerCase();
+    const want = f.unitType.value;
+    const now = new Date();
+    return all.filter((l) => {
+      if (l.taken || l.rent > max) return false;
+      const from = toDate(l.availableFrom), ends = toDate(l.leaseEnds);
+      if (ends && ends < now) return false;
+      if (mi && from && from.getTime() > mi.getTime() + 14 * 864e5) return false;
+      if (mi && ends && ends.getTime() <= mi.getTime()) return false;
+      if (want && want !== 'either' && l.unitType && want !== l.unitType) return false;
+      if (l.unitType === 'bed' && l.gender && l.gender !== 'Any' && g && g !== String(l.gender).toLowerCase()) return false;
+      return true;
+    }).sort((a, b) => a.rent - b.rent);
+  }
+  function updateFits() {
+    const el = $('#fit-count');
+    const fits = fitsFor(wf);
+    if (!fits) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = fits.length
+      ? `🔥 <b>${fits.length} place${fits.length === 1 ? '' : 's'}</b> fit${fits.length === 1 ? 's' : ''} right now. We'll send ${fits.length === 1 ? 'it' : 'them'} to you, plus new ones as they're listed.`
+      : "Nothing fits yet, but new places go up every week. We'll let you know the moment one does.";
+  }
+  wf.addEventListener('input', updateFits);
+  wf.addEventListener('change', updateFits);
   syncNotifyBy();
   $('#waitlist-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'waitlist'); });
   $('#report-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'report'); });
