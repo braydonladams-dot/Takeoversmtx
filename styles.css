@@ -623,3 +623,8 @@ body.focus-mode .stories { display: none; }
 .cp-row:hover { border-color: var(--maroon); }
 .cp-row span { color: var(--muted); font-size: .92rem; text-align: right; }
 @media (max-width: 640px) { .cp-ctas.two-col { grid-template-columns: 1fr; } .cp-row { flex-direction: column; align-items: flex-start; gap: .2rem; } .cp-row span { text-align: left; } }
+
+/* Privacy / Terms pages */
+.legal .panel ul { margin: .4rem 0 0; padding-left: 1.2rem; display: grid; gap: .45rem; }
+.legal .panel li, .legal .panel p { line-height: 1.6; }
+.legal .panel h2 { margin-bottom: .5rem; }
