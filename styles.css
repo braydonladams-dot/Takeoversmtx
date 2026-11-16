@@ -1331,3 +1331,11 @@ body.view-me .home, body.view-me .board, body.view-me .how, body.view-me .storie
 .btn-google:active { transform: scale(.985); }
 .or { display: flex; align-items: center; gap: .8rem; color: var(--muted); font-size: .85rem; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+/* Stripe feature checkout */
+.btn-feature { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1f2937; border: 0; font-weight: 700; }
+.btn-feature:hover { filter: brightness(1.05); }
+.me-featured { margin: 0; display: inline-block; justify-self: start; padding: .3rem .65rem; border-radius: 999px; background: #fef3c7; color: #92400e; font-weight: 700; font-size: .85rem; }
+.secure-note { display: block; margin-top: .45rem; color: var(--muted); font-size: .8rem; }
+.toast { position: fixed; left: 50%; bottom: 24px; z-index: 300; max-width: min(92vw, 460px); padding: .9rem 1.2rem; border-radius: 16px; background: #0f172a; color: #fff; font-weight: 600; font-size: .95rem; box-shadow: 0 16px 40px rgba(15, 23, 42, .3); transform: translate(-50%, 140%); opacity: 0; transition: transform .5s cubic-bezier(.22, 1, .36, 1), opacity .4s; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; }

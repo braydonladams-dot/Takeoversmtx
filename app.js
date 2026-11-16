@@ -1696,12 +1696,63 @@
     el.classList.toggle('from-account', el.readOnly);
   }
 
+  var justPaid = '';
+  function toast(msg, ms) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.hidden = false;
+    t.classList.remove('show');
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => (t.hidden = true), 400); }, ms || 4500);
+  }
+  async function featurePay(listingId, btn) {
+    if (!session) { afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me'; return openSignIn({ title: 'Sign in to get featured' }); }
+    const label = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Opening checkout…'; }
+    track('feature/checkout', 'Feature checkout started');
+    try {
+      const r = await fetch(CFG.supabaseUrl + '/functions/v1/feature-checkout', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(listingId ? { listingId } : {}),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (j.ok && j.url) { location.href = j.url; return; }
+      toast(j.error === 'already featured' ? "That listing is already featured. You're all set!" :
+        j.error === 'no listing' ? "We couldn't find your listing yet. Give it a minute, then try from your account." :
+        "Couldn't open checkout. Try again in a minute.", 6000);
+    } catch (_) {
+      toast("Couldn't open checkout. Check your connection and try again.");
+    }
+    if (btn) { btn.disabled = false; btn.textContent = label; }
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-feature-pay]');
+    if (b) featurePay(b.dataset.featurePay || '', b);
+  });
+  (function backFromStripe() {
+    const q = new URLSearchParams(location.search);
+    if (!q.has('featured') && !q.has('feature_canceled')) return;
+    const ok = q.has('featured');
+    if (ok) justPaid = q.get('featured');
+    history.replaceState(null, '', location.pathname + location.hash);
+    setTimeout(() => toast(ok ? "You're featured! ✅ We'll add your place to this week's post." : 'Checkout canceled. No charge was made.', 6500), 700);
+    if (ok) track('feature/paid-return', 'Back from Stripe: paid');
+  })();
+
   async function fetchMe() {
     if (!sb || !session) return null;
     const r = await fetch(CFG.supabaseUrl + '/functions/v1/me', { headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey } });
     if (r.status === 401) { await sb.auth.signOut(); session = null; paintAccountBtn(); return null; }
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || 'failed');
+    try {
+      const { data: paid } = await sb.from('feature_orders').select('listing_id').eq('status', 'paid');
+      j.featured = (paid || []).map((o) => String(o.listing_id));
+      if (justPaid && !j.featured.includes(justPaid)) j.featured.push(justPaid);
+    } catch (_) { j.featured = []; }
     meData = j;
     return j;
   }
@@ -1723,6 +1774,7 @@
         (l.photo ? '<img class="me-photo" src="' + esc(photoUrl(l.photo)) + '" alt="" loading="lazy">' : '<div class="me-photo me-noimg">🏠</div>') +
         '<div class="me-card-body">' +
           '<div class="me-card-top"><b>' + esc(l.complex) + '</b><span class="me-status ' + s[1] + '">' + esc(s[0]) + '</span></div>' +
+          ((d.featured || []).includes(String(l.id)) ? '<p class="me-featured">⭐ Featured on Instagram</p>' : '') +
           '<p class="me-sub">' + money(l.rent) + '/mo · available ' + esc(fmtDate(l.availableFrom)) + '</p>' +
           people +
           '<div class="me-actions">' +
@@ -1730,6 +1782,7 @@
             (l.editUrl ? '<button type="button" class="btn btn-outline btn-sm" data-me-edit="' + esc(l.editUrl) + '">Edit</button>' : '') +
             (l.status === 'approved' ? '<button type="button" class="btn btn-ghost btn-sm" data-share="' + esc(l.id) + '">Share</button>' : '') +
             (l.status === 'approved' && l.takeDownUrl ? '<a class="btn btn-ghost btn-sm" href="' + esc(l.takeDownUrl) + '" target="_blank" rel="noopener">Mark taken</a>' : '') +
+            (l.status !== 'taken' && !(d.featured || []).includes(String(l.id)) ? '<button type="button" class="btn btn-feature btn-sm" data-feature-pay="' + esc(l.id) + '">⭐ Get featured · $10</button>' : '') +
           '</div>' +
         '</div></article>';
     }).join('') : '<div class="me-empty"><p>No listings under <b>' + esc(d.email) + '</b> yet.</p><small>Listed with a different email? Sign in with that one to see it here.</small></div>';
