@@ -1351,3 +1351,29 @@ body.view-me .home, body.view-me .board, body.view-me .how, body.view-me .storie
 #pay-dialog .btn-block { width: 100%; }
 .pay-posted { margin: 0 0 1rem; padding: .6rem .85rem; border-radius: 12px; background: #dcfce7; color: #15803d; font-weight: 600; font-size: .9rem; }
 .pay-posted { margin-right: 3.2rem !important; }
+
+/* ===== Clean listing cards ===== */
+.lcard { padding: 0; gap: 0; overflow: hidden; border-radius: 20px; }
+.lcard .lc-media { position: relative; }
+.lcard .photo-wrap { margin: 0; border-radius: 0; }
+.lcard .photos img { aspect-ratio: 4 / 3; }
+.lc-placeholder { aspect-ratio: 4 / 3; display: grid; place-items: center; align-content: center; gap: .4rem; text-align: center; padding: 1rem;
+  background: radial-gradient(circle at 30% 20%, #eef2ff, #f5f3ff 60%, #f8fafc); }
+.lc-placeholder span { font-size: 2.4rem; }
+.lc-placeholder small { color: var(--muted); font-weight: 600; font-size: .9rem; }
+.lc-incentive { position: absolute; top: .75rem; left: .75rem; z-index: 2; padding: .35rem .7rem; border-radius: 999px; background: #16a34a; color: #fff;
+  font-size: .82rem; font-weight: 700; box-shadow: 0 4px 14px rgba(22, 163, 74, .35); }
+.lc-body { display: grid; gap: .3rem; padding: 1rem 1.1rem 1rem; flex: 1; align-content: start; }
+.lc-price { font-size: 1.55rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+.lc-price small { font-size: .9rem; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+.lc-name { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -.015em; }
+.lc-meta { margin: .1rem 0 0; color: var(--muted); font-size: .9rem; }
+.lc-dates { margin: 0; color: var(--muted); font-size: .9rem; }
+.lc-dates b { color: var(--ink); font-weight: 600; }
+.lcard .interest-line { margin-top: .15rem; }
+.lc-actions { margin-top: .75rem; }
+.lc-actions .btn { width: 100%; }
+.lc-foot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .55rem; padding-top: .6rem; border-top: 1px solid var(--line);
+  color: #94a3b8; font-size: .8rem; }
+.lc-foot .card-report { margin: 0; padding: .2rem .35rem; font-size: .78rem; }
+.lcard.has-incentive { border-color: #22c55e; }

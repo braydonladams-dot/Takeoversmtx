@@ -19,7 +19,6 @@
   function card(l) {
     const p = (l.photos || [])[0];
     const tags = [
-      l.verified ? '<span class="tag verified">✓ Verified lease</span>' : '',
       Number(l.incentive) > 0 ? '<span class="tag incentive">' + money(l.incentive) + ' incentive</span>' : '',
       '<span class="tag">' + (l.unitType === 'unit' ? 'Whole unit' : 'Private room') + '</span>',
       l.bedrooms !== '' && l.bedrooms != null ? '<span class="tag">' + esc(l.bedrooms) + ' bd / ' + esc(l.bathrooms) + ' ba</span>' : '',

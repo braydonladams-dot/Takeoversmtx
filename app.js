@@ -251,7 +251,6 @@
   function tagsHtml(l) {
     return [
       l.transferConfirmed ? '<span class="tag confirmed has-tip" tabindex="0" data-tip-title="Transfer confirmed" data-tip="We checked with the complex that this lease can be transferred to someone new.">✓ Transfer confirmed with complex</span>' : '',
-      l.verified ? '<span class="tag verified has-tip" tabindex="0" data-tip-title="Verified lease" data-tip="We saw proof that this person is really on this lease.">✓ Verified lease</span>' : '',
       ARRANGEMENT[l.arrangement] ? `<span class="tag arrangement has-tip" tabindex="0" data-tip-title="${esc(ARRANGEMENT[l.arrangement].label)}" data-tip="${esc(ARRANGEMENT[l.arrangement].hint)}.">${ARRANGEMENT[l.arrangement].label}</span>` : '',
       l.incentive > 0 ? `<span class="tag incentive has-tip" tabindex="0" data-tip-title="Cash incentive" data-tip="The current tenant will pay you this to take over their lease.">${money(l.incentive)} incentive</span>` : '',
       `<span class="tag">${l.unitType === 'unit' ? 'Whole unit' : 'By the bed'}</span>`,
@@ -278,26 +277,41 @@
     return strip + row;
   }
 
+  // "Nov 20" (or "now" if it's already available)
+  function shortDate(iso) {
+    const d = toDate(iso);
+    if (!d) return '';
+    return d <= new Date() ? 'now' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  function detailBits(l) {
+    return [
+      l.unitType === 'unit' ? 'Whole place' : 'Private room',
+      l.bedrooms !== '' && l.bedrooms != null ? l.bedrooms + ' bd / ' + l.bathrooms + ' ba' : '',
+      l.unitType === 'bed' && l.gender === 'Female' ? 'Girls' : l.unitType === 'bed' && l.gender === 'Male' ? 'Guys' : '',
+      l.furnished === 'Yes' ? 'Furnished' : '',
+      l.arrangement === 'sublease' ? 'Sublease' : '',
+    ].filter(Boolean);
+  }
   function card(l) {
-    const c = contactLink(l);
+    const media = photosHtml(l) || '<div class="lc-placeholder"><span>🏠</span><small>' + esc(l.complex) + '</small></div>';
+    const move = shortDate(l.availableFrom);
     return `
-      <article class="card clickable${l.incentive > 0 ? ' has-incentive' : ''}" id="l-${esc(l.id)}" data-listing="${esc(l.id)}" tabindex="0" aria-label="View details for ${esc(l.complex)}">
-        ${photosHtml(l)}
-        <div class="card-top">
-          <h3>${esc(l.complex)}</h3>
-          <div class="rent">${money(l.rent)}<small>/mo</small></div>
+      <article class="card clickable lcard${l.incentive > 0 ? ' has-incentive' : ''}" id="l-${esc(l.id)}" data-listing="${esc(l.id)}" tabindex="0" aria-label="View details for ${esc(l.complex)}">
+        <div class="lc-media">
+          ${media}
+          ${l.incentive > 0 ? `<span class="lc-incentive">💵 ${money(l.incentive)} incentive</span>` : ''}
         </div>
-        ${byLine(l, false)}
-        <div class="tags">${tagsHtml(l)}</div>
-        ${interestLine(l, 'interest-line')}
-        <div class="meta">
-          <span>Available <b>${esc(fmtDate(l.availableFrom))}</b> · Lease ends <b>${esc(fmtDate(l.leaseEnds))}</b></span>
-        </div>
-        ${l.description ? `<p class="desc">${esc(l.description)}</p>` : ''}
-        <div class="card-actions">
-          ${contactBtn(l, 'sm')}
-          <a class="btn btn-outline btn-sm" href="#l-${esc(l.id)}">View details</a>
-          <button type="button" class="card-report" data-report="${esc(l.id)}" aria-label="Report this listing" title="Report this listing">⚑ Report</button>
+        <div class="lc-body">
+          <div class="lc-price">${money(l.rent)}<small>/mo</small></div>
+          <h3 class="lc-name">${esc(l.complex)}</h3>
+          <p class="lc-meta">${detailBits(l).map(esc).join(' · ')}</p>
+          <p class="lc-dates">Move in <b>${esc(move)}</b>${l.leaseEnds ? ' · until ' + esc(fmtDate(l.leaseEnds)) : ''}</p>
+          ${interestLine(l, 'interest-line')}
+          <div class="lc-actions">${contactBtn(l, 'sm')}</div>
+          <div class="lc-foot">
+            <span>${l.listedBy ? esc(l.listedBy) + ' · ' : ''}${esc(postedAgo(l.submittedAt) || '')}</span>
+            <button type="button" class="card-report" data-report="${esc(l.id)}" aria-label="Report this listing" title="Report this listing">⚑ Report</button>
+          </div>
         </div>
       </article>`;
   }
