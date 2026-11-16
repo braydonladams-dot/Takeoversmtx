@@ -32,9 +32,9 @@ async function getListings() {
 
 // "the view on the square" -> "The View on the Square"
 const titleCase = (s) => String(s).trim().replace(/\s+/g, ' ').toLowerCase()
-  .replace(/\b[a-z]/g, (c) => c.toUpperCase())
+  .replace(/(^|[\s-])([a-z])/g, (m, p, c) => p + c.toUpperCase())
   .replace(/ (On|At|Of|The|And)\b/g, (w) => w.toLowerCase());
-const slugify = (name) => name.toLowerCase().replace(/^the\s+/, '').replace(/\bsan marcos\b/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const slugify = (name) => name.toLowerCase().replace(/['’]/g, '').replace(/^the\s+/, '').replace(/\bsan marcos\b/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const inSM = (name) => (/san marcos/i.test(name) ? name : name + ', San Marcos');
 
 const ig = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg>';
