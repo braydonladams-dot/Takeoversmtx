@@ -498,6 +498,7 @@
       if (!authChecked) { setTimeout(() => openDialog(id, opts), 250); return; }
       if (!session) {
         afterSignIn = () => openDialog('listing-dialog');
+        afterKind = 'list';
         openSignIn({ title: 'Sign in to list your place', hint: "So you can see who's interested and manage your listing in one place. No password, we'll email you a code." });
         track('gate/listing', 'Sign in asked before listing');
         return;
@@ -1528,9 +1529,9 @@
 
   // ---------- accounts (Supabase): sign in with an emailed code, profile page ----------
   var sb = window.supabase && CFG.supabaseUrl
-    ? window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } })
+    ? window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } })
     : null;
-  var session = null, meData = null, afterSignIn = null, authChecked = false, pendingMe = false;
+  var session = null, meData = null, afterSignIn = null, afterKind = 'me', authChecked = false, pendingMe = false;
   const siDlg = $('#signin-dialog'), siEmail = $('#signin-email'), siCode = $('#signin-code');
   const userIcon = $('.me-btn').innerHTML;
   const ls = {
@@ -1549,6 +1550,7 @@
   }
   function openSignIn(opts) {
     opts = opts || {};
+    if (!afterSignIn) afterKind = 'me';
     $('#signin-title').textContent = opts.title || 'Sign in to Takeover';
     $('#signin-hint').textContent = opts.hint || "See your listings, who's interested, and your alerts in one place. No password, we'll email you a code.";
     siStep('email', true);
@@ -1616,7 +1618,17 @@
       btn.textContent = 'Sign in';
     }
   });
+  // Show "Continue with Google" only once it's switched on in Supabase
+  if (sb) fetch(CFG.supabaseUrl + '/auth/v1/settings', { headers: { apikey: CFG.supabaseKey } })
+    .then((r) => r.json()).then((s) => { if (s && s.external && s.external.google) $('#google-wrap').hidden = false; }).catch(() => {});
   siDlg.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-google]')) {
+      ls.set('tsmtx_after', afterKind || 'me');
+      track('signin/google', 'Sign in: Google');
+      const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + '?signin=google' } });
+      if (error) siErr(siEmail, "Couldn't open Google sign in. Try your email instead.");
+      return;
+    }
     if (e.target.closest('[data-si-back]')) return siStep('email');
     const rs = e.target.closest('[data-si-resend]');
     if (!rs) return;
@@ -1668,7 +1680,7 @@
     if (!b) return;
     const email = b.closest('.save-acct').dataset.email;
     b.closest('dialog').close();
-    afterSignIn = () => { location.hash = 'me'; };
+    afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me';
     track('signin/save-offer', 'Tapped save to account');
     setTimeout(() => {
       openSignIn({ title: 'Save to your account', hint: "We'll email you a code. Then everything you do here shows up in your account." });
@@ -1743,7 +1755,7 @@
     if (!sb) { $('#me-loading').hidden = true; $('#me-error').hidden = false; return; }
     if (!authChecked) { pendingMe = true; return; }
     if (!session) {
-      setTimeout(() => { goHome(); afterSignIn = () => { location.hash = 'me'; }; openSignIn({ title: 'Sign in to see your account' }); }, 0);
+      setTimeout(() => { goHome(); afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me'; openSignIn({ title: 'Sign in to see your account' }); }, 0);
       return;
     }
     $('#me-email').textContent = session.user.email;
@@ -1791,6 +1803,15 @@
       authChecked = true;
       paintAccountBtn();
       prefillFromAccount();
+      if (/[?&](signin=google|code=)/.test(location.search)) {
+        const kind = ls.get('tsmtx_after') || 'me';
+        ls.set('tsmtx_after', '');
+        history.replaceState(null, '', location.pathname + location.hash);
+        if (session) {
+          track('signin/done', 'Signed in (Google)');
+          setTimeout(() => (kind === 'list' ? openDialog('listing-dialog') : (location.hash = 'me')), 300);
+        }
+      }
       if (pendingMe || location.hash === '#me') { pendingMe = false; loadMe(); }
       else if (session) fetchMe().then(paintAccountBtn).catch(() => {});
     });
