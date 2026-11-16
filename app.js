@@ -367,6 +367,7 @@
     const showLooking = looking >= MIN_LOOKING_TO_SHOW;
     $('#looking-stat').hidden = !showLooking;
     $('#looking-note').hidden = !showLooking;
+    if (live.length) $('#live-count').textContent = live.length + (live.length === 1 ? ' place' : ' places') + ' open' + (showLooking ? ' · ' + looking + ' people looking' : ' in San Marcos');
     if (showLooking) {
       $('#looking-stat').innerHTML = `<span class="pulse"></span><b>${looking}</b> students looking for a place right now`;
       $('#looking-note').innerHTML = `👀 <b>${looking} students</b> are looking for a place right now and get notified when listings like yours go up.`;
@@ -449,9 +450,7 @@
     if (boardScroll !== null) {
       history.back(); // came from the board: go back to the exact spot
     } else {
-      history.pushState('', '', location.pathname + location.search); // came from a shared link
-      exitFocus();
-      $('#board').scrollIntoView({ behavior: 'smooth' });
+      location.hash = 'board'; // came from a shared link
     }
   }
 
@@ -1042,7 +1041,7 @@
     const n = filtered().length;
     track('finder/' + (useFilters ? 'filters' : 'skip'), 'Finder: ' + (useFilters ? 'filters' : 'skip') + ' (' + n + ')');
     if (useFilters && !n) return openDialog('waitlist-dialog');
-    $('#board').scrollIntoView({ behavior: 'smooth' });
+    goBoard();
   }
   ff.addEventListener('submit', (e) => { e.preventDefault(); finderDone(true); });
   finder.addEventListener('click', (e) => {
@@ -1085,14 +1084,56 @@
       e.preventDefault();
       track('cta/home-browse', 'Home: just browsing');
       applyFinder(false);
-      $('#board').scrollIntoView({ behavior: 'smooth' });
+      goBoard();
     }
+    if (e.target.closest('[data-home]')) { e.preventDefault(); goHome(); }
   });
   $('#manage-form').addEventListener('submit', (e) => { e.preventDefault(); submit(e.target, 'sendEditLinks'); });
 
-  window.addEventListener('hashchange', focusFromHash);
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let view = '';
+  function viewFor(h) { return /^#l-/.test(h) ? 'focus' : h === '#board' ? 'board' : 'home'; }
+  function swap(fn) {
+    if (reduceMotion) return fn();
+    if (document.startViewTransition) return document.startViewTransition(fn);
+    fn();
+    const m = $('main');
+    m.classList.remove('view-in');
+    void m.offsetWidth; // restart the animation
+    m.classList.add('view-in');
+  }
+  function route() {
+    const next = viewFor(location.hash);
+    if (next === view) { if (next === 'focus') focusFromHash(); return; }
+    const from = view;
+    view = next;
+    swap(() => {
+      document.body.classList.toggle('view-home', next === 'home');
+      document.body.classList.toggle('view-board', next !== 'home');
+      if (next === 'focus') focusFromHash();
+      else exitFocus();
+      // Back from a listing keeps your spot on the board; everything else starts at the top.
+      if (!(from === 'focus' && next === 'board')) { window.scrollTo(0, 0); requestAnimationFrame(() => window.scrollTo(0, 0)); }
+      if (next === 'board') track('view-board', 'Board screen');
+    });
+  }
+  function goBoard() { if (location.hash === '#board') route(); else location.hash = 'board'; }
+  function goHome() {
+    if (view === 'home') return;
+    history.pushState(null, '', location.pathname + location.search);
+    route();
+  }
+  window.addEventListener('hashchange', route);
+  window.addEventListener('popstate', route);
+  route();
 
-  window.addEventListener('popstate', focusFromHash);
+  // Dialogs ease out instead of vanishing.
+  const nativeClose = HTMLDialogElement.prototype.close;
+  HTMLDialogElement.prototype.close = function (v) {
+    if (!this.open || reduceMotion || this.classList.contains('closing')) return nativeClose.call(this, v);
+    this.classList.add('closing');
+    setTimeout(() => { this.classList.remove('closing'); nativeClose.call(this, v); }, 170);
+  };
 
   if (CFG.contactEmail) {
     $('#footer-contact').innerHTML = `Questions? <a href="mailto:${esc(CFG.contactEmail)}">${esc(CFG.contactEmail)}</a>`;

@@ -696,3 +696,76 @@ h1, h2, h3 { letter-spacing: -.02em; }
   .nav .btn-primary { white-space: nowrap; padding: .5rem .85rem; font-size: .9rem; }
   .brand { font-size: 1.1rem; }
 }
+
+/* ===== v2: screens + motion ===== */
+/* Home shows only the "I am..." choices; the board is its own screen. */
+body.view-home .board, body.view-home .how, body.view-home .stories, body.view-home .footer { display: none; }
+body.view-board .home { display: none; }
+body.focus-mode .home { display: none; }
+body.view-home .home { min-height: calc(100vh - 70px); min-height: calc(100svh - 70px); align-content: center; }
+@media (max-width: 899px) { body.view-home .home { display: flex; flex-direction: column; justify-content: center; } }
+.board-top { display: flex; align-items: center; gap: .9rem; margin: .4rem 0 1rem; flex-wrap: wrap; }
+.board-title { font-size: clamp(1.4rem, 4vw, 1.9rem); margin: 0; letter-spacing: -.03em; }
+.back-home { border: 1px solid var(--line); background: #fff; color: var(--ink); font: inherit; font-weight: 600; font-size: .9rem; padding: .45rem .85rem; border-radius: 999px; cursor: pointer; }
+.back-home:hover { border-color: #cbd5e1; }
+
+/* Screen changes: old screen fades up and out, new one fades and rises in. Header stays put. */
+.site-header { view-transition-name: header; }
+::view-transition-old(root) { animation: vt-out .2s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: vt-in .38s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(14px); } }
+main.view-in { animation: vt-in .38s cubic-bezier(.16, 1, .3, 1) backwards; }
+
+/* First load: the home screen eases in, cards one after another. */
+body.view-home .home-copy { animation: vt-in .5s cubic-bezier(.16, 1, .3, 1) backwards; }
+body.view-home .iam-card { animation: vt-in .5s cubic-bezier(.16, 1, .3, 1) backwards; }
+body.view-home .iam-card:nth-child(1) { animation-delay: .08s; }
+body.view-home .iam-card:nth-child(2) { animation-delay: .14s; }
+body.view-home .iam-card:nth-child(3) { animation-delay: .2s; }
+body.view-home .iam-card:nth-child(4) { animation-delay: .26s; }
+
+/* Pop-ups ease in and out; steps inside the finder slide in. */
+.dialog[open] { animation: dlg-in .32s cubic-bezier(.16, 1, .3, 1); }
+.dialog[open]::backdrop { animation: bd-in .32s ease; }
+.dialog.closing { animation: dlg-out .17s ease-in forwards; }
+.dialog.closing::backdrop { animation: bd-out .17s ease-in forwards; }
+@keyframes dlg-in { from { opacity: 0; transform: translateY(18px) scale(.98); } }
+@keyframes dlg-out { to { opacity: 0; transform: translateY(10px) scale(.985); } }
+@keyframes bd-in { from { opacity: 0; } }
+@keyframes bd-out { to { opacity: 0; } }
+.finder-step:not([hidden]) { animation: step-in .3s cubic-bezier(.16, 1, .3, 1); }
+@keyframes step-in { from { opacity: 0; transform: translateX(14px); } }
+
+/* Taps feel physical. */
+.btn, .iam-card, .city-opt, .seg span, .me-btn, .back-home { transition: transform .12s ease, background .15s, border-color .15s, box-shadow .15s, color .15s; }
+.btn:active, .iam-card:active, .city-opt:active, .me-btn:active, .back-home:active { transform: scale(.975); }
+.seg label:active span { transform: scale(.95); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after, ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; transition: none !important; }
+}
+
+/* Board screen: the browser's jump to #board must not hide the top under the header */
+#board { scroll-margin-top: 90px; }
+
+/* Phones: all four choices fit on one screen, even with the browser's bars showing */
+@media (max-width: 899px) {
+  .home { padding: 1rem 1.1rem 1.25rem; }
+  .home .hero-stats { display: none; }
+  .home h1 { font-size: clamp(1.8rem, 8.4vw, 2.3rem); margin: .8rem 0 .5rem; }
+  .home-sub { font-size: .95rem; margin-bottom: 1.1rem; }
+  .iam { margin-bottom: .55rem; }
+  .iam-cards { gap: .5rem; }
+  .iam-card { padding: .75rem .85rem; border-radius: 16px; gap: .75rem; }
+  .iam-card .ic { width: 40px; height: 40px; border-radius: 12px; }
+  .iam-card .ic svg { width: 20px; height: 20px; }
+  .iam-card .txt b { font-size: .98rem; }
+  .iam-card .txt span { font-size: .85rem; }
+  .home-foot { margin-top: .8rem; font-size: .82rem; }
+}
+@media (max-width: 899px) {
+  body.view-home .feedback-fab { display: none; }
+  .home h1 { font-size: clamp(1.7rem, 8vw, 2.15rem); }
+  .home-sub { margin-bottom: .9rem; }
+}
