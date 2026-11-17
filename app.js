@@ -2295,7 +2295,7 @@
 
   // ---------- "My lease got taken": signed in -> pick your listing -> confirm -> done ----------
   const TAKEABLE = ['approved', 'pending', 'unpaid', 'paused'];
-  var takenPick = null, takenMany = false;
+  var takenPick = null, takenMany = false, takenList = [];
   function takenStep(name, animate) {
     const d = $('#taken-dialog'), box = $('.finder-body', d);
     const from = [...d.querySelectorAll('.finder-step')].find((s) => !s.hidden);
@@ -2321,6 +2321,12 @@
     let data = meData;
     try { data = (await fetchMe()) || meData; } catch (_) { /* use what we have */ }
     const list = ((data && data.listings) || []).filter((l) => TAKEABLE.includes(l.status));
+    // Preview site: listings aren't really saved, so let its demo trial plans stand in for them
+    if (window.TAKEOVER_PREVIEW) {
+      if (!planData) { const pj = await planFetch({ action: 'list' }); if (pj.ok) planData = pj.plans || []; }
+      (planData || []).filter((p) => p.preview).forEach((p) => list.push({ id: 'preview:' + p.id, complex: p.complex || 'Your listing', rent: 0, status: 'approved', subStatus: p.status, availableFrom: '', photo: '', preview: true }));
+    }
+    takenList = list;
     takenMany = list.length > 1;
     if (!list.length) {
       $('#taken-email').textContent = session.user.email;
@@ -2331,7 +2337,7 @@
     $('#taken-list').innerHTML = list.map((l) =>
       '<button type="button" class="taken-opt" data-taken-pick="' + esc(l.id) + '">' +
         '<span class="taken-thumb">' + (l.photo ? '<img src="' + esc(photoUrl(l.photo)) + '" alt="" loading="lazy">' : '🏠') + '</span>' +
-        '<span><b>' + esc(l.complex) + '</b><small>' + money(l.rent) + '/mo · Move in ' + esc(shortDate(l.availableFrom)) + '</small></span><span class="arrow">›</span>' +
+        '<span><b>' + esc(l.complex) + '</b><small>' + (l.preview ? 'Preview listing (test mode)' : money(l.rent) + '/mo · Move in ' + esc(shortDate(l.availableFrom))) + '</small></span><span class="arrow">›</span>' +
       '</button>').join('');
     takenStep('pick', true);
   }
@@ -2373,7 +2379,7 @@
     if (mt) { const l = ((meData && meData.listings) || []).find((x) => String(x.id) === mt.dataset.meTaken); if (l) { takenMany = false; pickTaken(l); $('#taken-dialog').showModal(); } return; }
     if (e.target.closest('[data-my-listings]')) { const dl = e.target.closest('dialog'); if (dl) dl.close(); return goMyListings(); }
     const pk = e.target.closest('[data-taken-pick]');
-    if (pk) { const l = ((meData && meData.listings) || []).find((x) => String(x.id) === pk.dataset.takenPick); if (l) pickTaken(l); return; }
+    if (pk) { const l = takenList.find((x) => String(x.id) === pk.dataset.takenPick); if (l) pickTaken(l); return; }
     if (e.target.closest('[data-taken-switch]')) {
       $('#taken-dialog').close();
       if (sb) await sb.auth.signOut();
