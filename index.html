@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794932160">
+  <link rel="stylesheet" href="styles.css?v=1794933007">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -131,7 +131,7 @@
     <section id="board" class="board">
       <div class="board-top">
         <button type="button" class="back-home" data-home>← Home</button>
-        <h1 class="board-title">Lease takeovers in San Marcos</h1>
+        <h1 class="board-title" id="board-title">Lease takeovers in San Marcos</h1>
       </div>
       <div class="filters">
         <div class="search-wrap">
@@ -140,6 +140,9 @@
         </div>
 
         <div class="filter-row" id="filter-row">
+          <select id="f-city" class="pill" aria-label="City" hidden>
+            <option value="">All cities</option>
+          </select>
           <select id="f-type" class="pill" aria-label="Room type">
             <option value="">Room type</option>
             <option value="bed">Private room</option>
@@ -237,6 +240,7 @@
           <p class="wiz-sub"><b>7 days free</b>, then $7.99/month until it's taken. Cancel anytime. Most listings go live within minutes and get sent to students who are looking. <span class="already-listed">Already listed? <button type="button" class="link-btn owner-link" data-switch-manage>Edit yours instead</button></span></p>
           <p class="looking-note" id="looking-note" hidden></p>
 
+          <label>City<input name="city" required maxlength="60" list="tx-cities" autocomplete="off" value="San Marcos, TX" placeholder="e.g. San Marcos, TX"></label>
           <label>Apartment complex or address<input name="complex" required maxlength="120" placeholder="e.g. The Retreat, or a street address"></label>
 
           <fieldset class="seg-group">
@@ -436,6 +440,7 @@
         <section class="wiz-step" data-wstep="1">
           <h3 class="wiz-title">Your budget</h3>
           <p class="wiz-sub">Free. We'll send you places that fit as soon as they're listed.</p>
+          <label>City<input name="city" required maxlength="60" list="tx-cities" autocomplete="off" value="San Marcos, TX" placeholder="e.g. San Marcos, TX"></label>
           <label>Max rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
           <fieldset class="seg-group">
             <legend>When do you want to move in?</legend>
@@ -568,23 +573,16 @@
 
       <div class="finder-step" data-step="where">
         <h2 class="finder-title">Where are you looking?</h2>
-        <p class="finder-hint">Pick a city to see what's open.</p>
-        <div class="city-list">
-          <button type="button" class="city-opt" data-city="san-marcos">
-            <span class="city-pin">📍</span>
-            <span class="city-txt"><b>San Marcos, TX</b><small>Near Texas State</small></span>
-            <span class="city-count" id="finder-count"></span>
-          </button>
-          <button type="button" class="city-opt other" data-goto="request">
-            <span class="city-pin">🌎</span>
-            <span class="city-txt"><b>Somewhere else</b><small>We're opening new cities soon</small></span>
-            <span class="arrow">›</span>
-          </button>
-        </div>
+        <p class="finder-hint">Pick a city, or type any city in Texas.</p>
+        <div class="city-list" id="city-list"></div>
+        <form class="city-search" id="city-search" novalidate>
+          <label class="city-search-box"><span class="city-pin">🔎</span><input name="city" list="tx-cities" maxlength="60" autocomplete="off" placeholder="Type another city" aria-label="City"></label>
+          <button type="submit" class="btn btn-primary">Go</button>
+        </form>
       </div>
 
       <form class="finder-step" data-step="filters" id="finder-form" novalidate hidden>
-        <button type="button" class="finder-back" data-goto="where">← San Marcos, TX</button>
+        <button type="button" class="finder-back" data-goto="where" id="finder-city-back">← San Marcos, TX</button>
         <h2 class="finder-title">What are you looking for?</h2>
         <p class="finder-hint">All optional. Skip to see everything.</p>
         <div class="finder-fields">
@@ -616,25 +614,15 @@
         </div>
       </form>
 
-      <form class="finder-step" data-step="request" id="city-form" novalidate hidden>
+      <div class="finder-step" data-step="nocity" hidden>
         <button type="button" class="finder-back" data-goto="where">← Back</button>
-        <h2 class="finder-title">Where should we open next?</h2>
-        <p class="finder-hint">We're starting in San Marcos and opening new cities as people ask. Tell us where, and we'll email you when it opens.</p>
-        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <div class="finder-fields">
-          <label class="f-label">City and state<input name="city" required maxlength="80" placeholder="Austin, TX"></label>
-          <label class="f-label">School <small>(optional)</small><input name="school" maxlength="80" placeholder="UT Austin"></label>
-          <label class="f-label">Email<input type="email" name="email" required maxlength="120" autocomplete="email"></label>
+        <span class="si-badge">📍</span>
+        <h2 class="finder-title">No places in <span id="nocity-name">your city</span> yet</h2>
+        <p class="finder-hint">You could be one of the first. Get an alert the moment one is listed, or list yours if you're leaving a lease there.</p>
+        <div class="taken-options">
+          <button type="button" class="taken-opt" data-nocity-alert><span class="cart-ic">🔔</span><span><b>Get alerts for <span class="nocity-n">this city</span></b><small>Free. We'll text or email you when one fits.</small></span><span class="arrow">›</span></button>
+          <button type="button" class="taken-opt" data-nocity-list><span class="cart-ic">🔑</span><span><b>List my place in <span class="nocity-n">this city</span></b><small>Free for 7 days</small></span><span class="arrow">›</span></button>
         </div>
-        <p class="form-error" hidden></p>
-        <button type="submit" class="btn btn-primary btn-lg btn-block">Tell me when it opens</button>
-      </form>
-
-      <div class="finder-step finder-done" data-step="requested" hidden>
-        <div class="done-check">✓</div>
-        <h2 class="finder-title">You're on the list</h2>
-        <p class="finder-hint">We'll email you when Takeover opens in <b id="requested-city"></b>. The more people ask for a city, the sooner it opens, so share it with friends there.</p>
-        <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
       </div>
 
     </div>
@@ -907,8 +895,9 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=1794932160"></script>
-  <script src="app.js?v=1794932160"></script>
-<script src="/topbar.js?v=1794932160" defer></script>
+  <script src="config.js?v=1794933007"></script>
+  <script src="app.js?v=1794933007"></script>
+<script src="/topbar.js?v=1794933007" defer></script>
+  <datalist id="tx-cities"><option value="San Marcos, TX"><option value="Austin, TX"><option value="Round Rock, TX"><option value="Georgetown, TX"><option value="Pflugerville, TX"><option value="Cedar Park, TX"><option value="Kyle, TX"><option value="Buda, TX"><option value="New Braunfels, TX"><option value="Seguin, TX"><option value="San Antonio, TX"><option value="College Station, TX"><option value="Bryan, TX"><option value="Houston, TX"><option value="Huntsville, TX"><option value="Prairie View, TX"><option value="Dallas, TX"><option value="Denton, TX"><option value="Fort Worth, TX"><option value="Arlington, TX"><option value="Richardson, TX"><option value="Plano, TX"><option value="Waco, TX"><option value="Lubbock, TX"><option value="El Paso, TX"><option value="Corpus Christi, TX"><option value="Kingsville, TX"><option value="Edinburg, TX"><option value="Laredo, TX"><option value="Nacogdoches, TX"><option value="Stephenville, TX"><option value="Commerce, TX"><option value="Canyon, TX"><option value="Abilene, TX"><option value="San Angelo, TX"><option value="Beaumont, TX"><option value="Tyler, TX"><option value="Killeen, TX"><option value="Wichita Falls, TX"><option value="Odessa, TX"><option value="Midland, TX"></datalist>
 </body>
 </html>

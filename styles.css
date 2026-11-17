@@ -1626,3 +1626,15 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .taken-thumb { width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: var(--accent-soft); display: grid; place-items: center; font-size: 1.4rem; }
 .taken-thumb img { width: 100%; height: 100%; object-fit: cover; }
 #taken-dialog .finder-step:not(.finder-done) { text-align: left; }
+
+/* ---------- multi-city ---------- */
+.dd[hidden] { display: none !important; }
+.city-search { display: flex; gap: .55rem; margin-top: .7rem; }
+.city-search-box { flex: 1; display: flex; align-items: center; gap: .55rem; padding: 0 .9rem; min-height: 54px; border: 1px solid var(--line); border-radius: 16px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+.city-search-box:focus-within { border-color: var(--maroon); box-shadow: 0 0 0 3px var(--accent-soft); }
+.city-search-box input { flex: 1; min-width: 0; border: 0 !important; outline: none; background: transparent; font: inherit; font-size: 1rem; padding: .7rem 0; box-shadow: none !important; }
+.city-search .btn { border-radius: 16px; padding-left: 1.3rem; padding-right: 1.3rem; }
+.lc-city { margin: -.15rem 0 .2rem; font-size: .85rem; font-weight: 600; color: var(--muted); }
+#finder-dialog [data-step="nocity"] { text-align: left; }
+.city-search-box .city-pin { width: auto; height: auto; background: none !important; font-size: 1.1rem; box-shadow: none; flex: none; }
+.city-search-box input { background: transparent !important; padding: .7rem 0 !important; border-radius: 0 !important; margin: 0 !important; width: 100%; height: auto; }

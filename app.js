@@ -150,9 +150,28 @@
     toast._t = setTimeout(() => (t.hidden = true), 2500);
   }
 
+  // Cities: "City, ST". Listings from before multi-city have none, so they're San Marcos.
+  const DEFAULT_CITY = 'San Marcos, TX';
+  function normCity(v) {
+    const raw = String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, 60);
+    if (!raw) return DEFAULT_CITY;
+    const parts = raw.split(',').map((x) => x.trim()).filter(Boolean);
+    const city = parts[0].toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
+    const st = parts[1] ? (/^texas$/i.test(parts[1]) ? 'TX' : parts[1].toUpperCase().slice(0, 2)) : 'TX';
+    return city + ', ' + st;
+  }
+  const cityName = (v) => normCity(v).replace(/, TX$/, '');
+  // Cities that have open places, most places first
+  function openCities() {
+    const m = new Map();
+    all.forEach((l) => { if (!l.taken) m.set(l.city, (m.get(l.city) || 0) + 1); });
+    return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([city, n]) => ({ city, n }));
+  }
+
   function normalize(l) {
     return {
       ...l,
+      city: normCity(l.city),
       id: String(l.id),
       rent: Number(l.rent) || 0,
       incentive: Number(l.incentive) || 0,
@@ -224,9 +243,11 @@
     const moveIn = toDate($('#f-movein').value);
     const needIncentive = $('#f-incentive').checked;
     const sort = $('#f-sort').value;
+    const city = $('#f-city').value;
 
     const list = all.filter((l) => {
       if (l.taken) return false;
+      if (city && l.city !== city) return false;
       if (q && !`${l.complex} ${l.description}`.toLowerCase().includes(q)) return false;
       if (type && l.unitType !== type) return false;
       if (gender && l.unitType === 'bed' && l.gender && l.gender !== 'Any' && l.gender !== gender) return false;
@@ -304,6 +325,7 @@
         <div class="lc-body">
           <div class="lc-price">${money(l.rent)}<small>/mo</small></div>
           <h3 class="lc-name">${esc(l.complex)}</h3>
+          ${openCities().length > 1 ? `<p class="lc-city">📍 ${esc(cityName(l.city))}</p>` : ''}
           <p class="lc-meta">${detailBits(l).map(esc).join(' · ')}</p>
           <p class="lc-dates">Move in <b>${esc(move)}</b>${l.leaseEnds ? ' · until ' + esc(fmtDate(l.leaseEnds)) : ''}</p>
           ${interestLine(l, 'interest-line')}
@@ -373,9 +395,19 @@
     const live = all.filter((l) => !l.taken);
     const taken = all.filter((l) => l.taken);
     if (live.length) {
-      $('#live-count').textContent = live.length + (live.length === 1 ? ' place' : ' places') + ' open in San Marcos';
-      $('#finder-count').textContent = live.length + ' open';
+      const cs = openCities();
+      $('#live-count').textContent = live.length + (live.length === 1 ? ' place' : ' places') + ' open ' + (cs.length > 1 ? 'in ' + cs.length + ' cities' : 'in ' + cityName(cs[0].city));
       $('#tb-count').textContent = live.length + ' places';
+    }
+    // City filter: only shown once there's more than one city
+    {
+      const cs = openCities(), sel = $('#f-city'), cur = sel.value;
+      sel.innerHTML = '<option value="">All cities</option>' + cs.map((c) => '<option value="' + esc(c.city) + '">' + esc(cityName(c.city)) + '</option>').join('');
+      if (cur && !cs.some((c) => c.city === cur)) sel.add(new Option(cityName(cur), cur));
+      sel.value = cur;
+      (sel.closest('.dd') || sel).hidden = cs.length < 2 && !cur;
+      const shown = cur || (cs.length === 1 ? cs[0].city : '');
+      $('#board-title').textContent = shown ? 'Lease takeovers in ' + cityName(shown) : 'Lease takeovers';
     }
     const cta = `<div class="alert-cta"><div><b>Don't see the right place?</b><span>Get a text or email the moment one fits your budget and move-in date. Free.</span></div><button type="button" class="btn btn-primary" data-open="waitlist-dialog" data-cta="board">Get alerts</button></div>`;
     const cards = list.map(card);
@@ -403,7 +435,7 @@
     const showLooking = looking >= MIN_LOOKING_TO_SHOW;
     $('#looking-stat').hidden = !showLooking;
     $('#looking-note').hidden = !showLooking;
-    if (live.length) $('#live-count').textContent = live.length + (live.length === 1 ? ' place' : ' places') + ' open' + (showLooking ? ' · ' + looking + ' people looking' : ' in San Marcos');
+    if (live.length) $('#live-count').textContent = live.length + (live.length === 1 ? ' place' : ' places') + ' open' + (showLooking ? ' · ' + looking + ' people looking' : (openCities().length > 1 ? ' in ' + openCities().length + ' cities' : ' in ' + cityName((openCities()[0] || {}).city)));
     if (showLooking) {
       $('#looking-stat').innerHTML = `<span class="pulse"></span><b>${looking}</b> students looking for a place right now`;
       $('#looking-note').innerHTML = `👀 <b>${looking} students</b> are looking for a place right now and get notified when listings like yours go up.`;
@@ -852,7 +884,7 @@
   }
 
   // ---------- wire up ----------
-  ['#f-search', '#f-type', '#f-gender', '#f-arrangement', '#f-max', '#f-movein', '#f-incentive', '#f-sort'].forEach((s) =>
+  ['#f-search', '#f-city', '#f-type', '#f-gender', '#f-arrangement', '#f-max', '#f-movein', '#f-incentive', '#f-sort'].forEach((s) =>
     $(s).addEventListener('input', render)
   );
 
@@ -1216,7 +1248,29 @@
   // ---------- home screen: "I am looking for a place" finder ----------
   const finder = $('#finder-dialog');
   const ff = $('#finder-form');
-  const fOrder = ['where', 'filters', 'request', 'requested'];
+  const fOrder = ['where', 'filters', 'nocity'];
+  var fCity = '';
+  function renderCityList() {
+    const cs = openCities();
+    const list = cs.length ? cs : [{ city: DEFAULT_CITY, n: 0 }];
+    $('#city-list').innerHTML = list.map((c) =>
+      '<button type="button" class="city-opt" data-city="' + esc(c.city) + '"><span class="city-pin">📍</span>' +
+      '<span class="city-txt"><b>' + esc(c.city) + '</b><small>' + (c.city === DEFAULT_CITY ? 'Near Texas State' : 'Lease takeovers') + '</small></span>' +
+      '<span class="city-count">' + (c.n ? c.n + ' open' : '') + '</span></button>').join('');
+  }
+  function pickCity(city) {
+    fCity = normCity(city);
+    const has = openCities().some((c) => c.city === fCity);
+    track('finder/city', 'Finder city: ' + fCity + (has ? '' : ' (none yet)'));
+    if (!has) {
+      $('#nocity-name').textContent = cityName(fCity);
+      $$('#finder-dialog .nocity-n').forEach((x) => (x.textContent = cityName(fCity)));
+      return finderStep('nocity');
+    }
+    $('#finder-city-back').textContent = '← ' + fCity;
+    finderStep('filters');
+    finderFit();
+  }
   function finderStep(step, instant) {
     const cur = finder.querySelector('.finder-step:not([hidden])');
     const nxt = finder.querySelector('.finder-step[data-step="' + step + '"]');
@@ -1225,7 +1279,7 @@
     const dir = fOrder.indexOf(step) >= fOrder.indexOf(cur.dataset.step) ? 1 : -1;
     slideSteps(finder.querySelector('.finder-body'), cur, nxt, dir).then(() => {
       const first = nxt.querySelector('input:not(.hp):not([type=radio])');
-      if (first && step === 'request') first.focus({ preventScroll: true });
+      if (first && step === 'where' && false) first.focus({ preventScroll: true });
     });
   }
   // Move-in choices: Any / Now / by the next Jan, Jun and Aug (sorted), used as "move in by" dates.
@@ -1243,6 +1297,7 @@
   })();
   function applyFinder(useFilters) {
     const v = useFilters ? Object.fromEntries(new FormData(ff).entries()) : {};
+    $('#f-city').value = useFilters || fCity ? fCity : '';
     $('#f-max').value = v.max || '';
     $('#f-type').value = v.type || '';
     $('#f-gender').value = v.gender || '';
@@ -1255,7 +1310,7 @@
   function finderFit() {
     const v = Object.fromEntries(new FormData(ff).entries());
     const max = Number(v.max) || 0, by = toDate(v.when);
-    const n = all.filter((l) => !l.taken && (!max || l.rent <= max) && (!v.type || l.unitType === v.type) &&
+    const n = all.filter((l) => !l.taken && (!fCity || l.city === fCity) && (!max || l.rent <= max) && (!v.type || l.unitType === v.type) &&
       (!v.gender || l.unitType !== 'bed' || !l.gender || l.gender === 'Any' || l.gender === v.gender) &&
       (!by || !toDate(l.availableFrom) || toDate(l.availableFrom) <= by)).length;
     $('#finder-fit').innerHTML = n
@@ -1277,34 +1332,24 @@
   finder.addEventListener('click', (e) => {
     const go = e.target.closest('[data-goto]');
     if (go) return finderStep(go.dataset.goto);
-    if (e.target.closest('[data-city]')) { finderStep('filters'); finderFit(); return; }
+    const cb = e.target.closest('[data-city]');
+    if (cb) return pickCity(cb.dataset.city);
+    if (e.target.closest('[data-nocity-alert]')) { finder.close(); return setTimeout(() => { openDialog('waitlist-dialog'); setTimeout(() => { $('#waitlist-form').city.value = fCity; }, 60); }, 300); }
+    if (e.target.closest('[data-nocity-list]')) { finder.close(); return setTimeout(() => { openDialog('listing-dialog'); setTimeout(() => { $('#listing-form').city.value = fCity; }, 60); }, 300); }
     if (e.target.closest('[data-finder-skip]')) return finderDone(false);
   });
-  $('#city-form').addEventListener('submit', async (e) => {
+  $('#city-search').addEventListener('submit', (e) => {
     e.preventDefault();
-    const f = e.target, err = $('.form-error', f);
-    if (!f.checkValidity()) { err.textContent = 'Please add your city and email.'; err.hidden = false; return; }
-    err.hidden = true;
-    const btn = $('button[type=submit]', f);
-    btn.disabled = true;
-    try {
-      if (!DEMO && !f.website.value) {
-        await fetch(API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({
-          type: 'feedback', message: 'City request: ' + f.city.value.trim() + (f.school.value.trim() ? ' (' + f.school.value.trim() + ')' : ''),
-          contact: f.email.value.trim(), page: 'city-request' }) });
-      }
-      track('city-request', 'City request: ' + f.city.value.trim());
-      $('#requested-city').textContent = f.city.value.trim();
-      f.reset();
-      finderStep('requested');
-    } catch (_) {
-      err.textContent = 'Something went wrong. Try again.';
-      err.hidden = false;
-    } finally { btn.disabled = false; }
+    const v = e.target.city.value.trim();
+    if (!v) return e.target.city.focus();
+    pickCity(v);
+    e.target.reset();
   });
   document.addEventListener('click', (e) => {
     if (e.target.closest('[data-finder]')) {
       track('cta/home-find', 'Home: looking for a place');
+      fCity = '';
+      renderCityList();
       finderStep('where', true);
       finder.showModal();
       return;
@@ -1440,7 +1485,7 @@
   };
 
   // Filter pills light up when they're set; "Clear" resets them.
-  const pillIds = ['#f-type', '#f-gender', '#f-max', '#f-movein', '#f-arrangement'];
+  const pillIds = ['#f-city', '#f-type', '#f-gender', '#f-max', '#f-movein', '#f-arrangement'];
   function syncPills() {
     let any = !!$('#f-search').value.trim() || $('#f-incentive').checked;
     pillIds.forEach((id) => {
