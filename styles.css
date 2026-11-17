@@ -375,7 +375,7 @@ small { color: var(--muted); font-weight: 400; }
   .compare td:first-child { width: auto; }
 }
 
-/* Listing details page (takeoversmtx.com/#l-abc123) */
+/* Listing details page (takeoverleases.com/#l-abc123) */
 body.focus-mode .hero,
 body.focus-mode .board,
 body.focus-mode .how { display: none; }

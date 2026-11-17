@@ -1,4 +1,4 @@
-// Complex pages (takeoversmtx.com/lease-takeover/<complex>).
+// Complex pages (takeoverleases.com/lease-takeover/<complex>).
 // Used two ways: the build script (Node) renders the cards into the HTML so Google sees them,
 // and in the browser it reloads the live listings so visitors never see a stale page.
 (function (root) {

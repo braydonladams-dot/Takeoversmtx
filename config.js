@@ -1,6 +1,6 @@
 // ===== Edit these settings =====
 window.TAKEOVER_CONFIG = {
-  siteName: 'Takeover SMTX',
+  siteName: 'Takeover Leases',
 
   // Paste your Google Apps Script web app URL here (see README, step 2).
   // While this is empty, the site runs in DEMO MODE with sample listings.

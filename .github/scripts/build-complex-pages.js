@@ -8,7 +8,7 @@ const path = require('path');
 const site = path.join(__dirname, '..', '..');
 const C = require(path.join(site, 'complex.js'));
 const { esc, money } = C;
-const ORIGIN = 'https://takeoversmtx.com';
+const ORIGIN = 'https://takeoverleases.com';
 const REG = path.join(__dirname, 'complexes.json');
 const OUT = path.join(site, 'lease-takeover');
 
@@ -70,7 +70,7 @@ function layout({ title, desc, canonical, body, jsonld, scripts = '' }) {
     <a class="tb-item" href="/#board">🔥 New places every week near Texas State <span class="go">→</span></a>
   </div>
   <header class="site-header">
-    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="30" height="30">Takeover<span>SMTX</span></a>
+    <a class="brand" href="/"><img src="/favicon.svg" alt="" width="30" height="30">Takeover<span>Leases</span></a>
     <nav class="nav">
       <a class="btn btn-ghost" href="/#board">Browse</a>
       <a class="btn btn-primary" href="/#list">List your lease</a>
@@ -82,7 +82,7 @@ ${body}
   </main>
 
   <footer class="footer">
-    <p><strong>Takeover SMTX</strong> is an independent listing board. It is not affiliated with Texas State University or any apartment complex. We don't negotiate leases, and every takeover must be approved by the property.</p>
+    <p><strong>Takeover Leases</strong> is an independent listing board. It is not affiliated with Texas State University or any apartment complex. We don't negotiate leases, and every takeover must be approved by the property.</p>
     <p><a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/how-it-works">How it works</a> · <a href="/get-featured">Get featured on Instagram</a></p>
     <p><a class="ig-link" href="https://instagram.com/takeoverleases" target="_blank" rel="noopener">${ig}<span>Follow <b>@takeoverleases</b> on Instagram</span></a></p>
   </footer>
@@ -96,12 +96,12 @@ ${body}
 function faqFor(name) {
   return [
     [`How do I get out of my ${name} lease?`,
-      `Ask the ${name} leasing office whether your lease can be transferred to someone else and what the transfer fee is. Then list your lease on Takeover SMTX (the first 7 days are free). Students looking for a place get alerted when it fits their budget and contact you directly. The new person applies with ${name} like any other transfer.`],
+      `Ask the ${name} leasing office whether your lease can be transferred to someone else and what the transfer fee is. Then list your lease on Takeover Leases (the first 7 days are free). Students looking for a place get alerted when it fits their budget and contact you directly. The new person applies with ${name} like any other transfer.`],
     [`Can I take over a lease at ${name}?`,
       `Yes, when someone is leaving. Every takeover listed above is from a current resident. Tap one to see the photos, the details and how to contact them. You still apply and get approved through the ${name} office.`],
     [`What if nothing is listed at ${name} right now?`,
       `Turn on free alerts with your budget and move-in date. We text or email you the moment a takeover that fits is listed at ${name} or anywhere else in San Marcos.`],
-    ['Does it cost anything?', 'No. Listing your lease and browsing takeovers on Takeover SMTX are both free.'],
+    ['Does it cost anything?', 'No. Listing your lease and browsing takeovers on Takeover Leases are both free.'],
   ];
 }
 
@@ -109,7 +109,7 @@ function complexPage(c, list, all) {
   const name = c.name;
   const canonical = `${ORIGIN}/lease-takeover/${c.slug}`;
   const min = list.length ? Math.min(...list.map((l) => Number(l.rent))) : 0;
-  const title = `${name} Lease Takeovers & Subleases | ${/san marcos/i.test(name) ? 'Takeover SMTX' : 'San Marcos'}`;
+  const title = `${name} Lease Takeovers & Subleases | ${/san marcos/i.test(name) ? 'Takeover Leases' : 'San Marcos'}`;
   const desc = list.length
     ? `${list.length} lease ${list.length === 1 ? 'takeover' : 'takeovers'} at ${inSM(name)} from ${money(min)}/mo. Take over a lease from a current resident, or list yours.`
     : `Lease takeovers and subleases at ${inSM(name)}. Get free alerts when one is listed, or list your own lease free.`;
@@ -173,7 +173,7 @@ ${all.map((c) => `      <a class="panel cp-row" href="/lease-takeover/${c.slug}"
       <a class="btn btn-outline btn-lg" href="/#list">List your lease</a>
     </div>`;
   return layout({
-    title: 'San Marcos Lease Takeovers by Apartment Complex | Takeover SMTX',
+    title: 'San Marcos Lease Takeovers by Apartment Complex | Takeover Leases',
     desc: `Lease takeovers and subleases at ${all.length} San Marcos apartment complexes near Texas State. Find one or list yours.`,
     canonical: `${ORIGIN}/lease-takeover/`, body,
   });

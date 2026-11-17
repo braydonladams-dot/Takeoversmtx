@@ -14,7 +14,7 @@
     { id: 'demo4', submittedAt: '2026-10-30', verified: true, transferConfirmed: false, arrangement: 'unsure', complex: 'Sample Complex C (2x2)', unitType: 'bed', bedrooms: 2, bathrooms: 2, rent: 699, availableFrom: '2027-01-10', leaseEnds: '2027-07-31', gender: 'Any', furnished: 'Yes', incentive: 500, takeoverFee: "Don't know", description: 'Transferring schools. Will cover your first month ($500) if you take it by January.', contactMethod: 'email', contact: 'sample@example.com' },
   ];
 
-  // Show takeoversmtx.com instead of takeoversmtx.com/index.html in the address bar.
+  // Show takeoverleases.com instead of takeoverleases.com/index.html in the address bar.
   if (/\/index\.html$/.test(location.pathname)) history.replaceState(null, '', location.pathname.replace(/index\.html$/, '') + location.search + location.hash);
 
   // Analytics (GoatCounter): counts an event like "view/abc123". Never breaks the page.
@@ -423,7 +423,7 @@
     taken.sort((a, b) => (b.viaUs - a.viaUs) || String(b.takenAt || '').localeCompare(String(a.takenAt || '')));
     $('#taken-listings').innerHTML = taken.map(takenCard).join('');
     $('#taken-wrap').hidden = taken.length === 0;
-    $('#taken-wrap .taken-head').textContent = taken.some((l) => l.viaUs) ? 'Taken through Takeover SMTX' : 'Recently taken';
+    $('#taken-wrap .taken-head').textContent = taken.some((l) => l.viaUs) ? 'Taken through Takeover Leases' : 'Recently taken';
     $('#story-list').innerHTML = stories.map((s) => `
       <figure class="story">
         <blockquote>“${esc(s.quote)}”</blockquote>
@@ -442,7 +442,7 @@
     }
     const n = Number(stats.successes) || 0;
     $('#success-stat').hidden = n === 0;
-    if (n) $('#success-stat').innerHTML = `<b>${n}</b> lease${n === 1 ? '' : 's'} taken over through Takeover SMTX`;
+    if (n) $('#success-stat').innerHTML = `<b>${n}</b> lease${n === 1 ? '' : 's'} taken over through Takeover Leases`;
   }
 
   // A listing someone already took: stamped, faded, not clickable. Shows the site works.
@@ -476,7 +476,7 @@
     );
   }
 
-  // Listing details page: takeoversmtx.com/#l-abc123 (from a card click or a shared link).
+  // Listing details page: takeoverleases.com/#l-abc123 (from a card click or a shared link).
   let boardScroll = null; // where the visitor was on the board, so "back" returns them there
 
   function focusFromHash() {
@@ -492,7 +492,7 @@
     bindPhotoCounters($('#focus-card'));
     $('#focus').hidden = false;
     document.body.classList.add('focus-mode');
-    document.title = l ? `${l.complex} · ${money(l.rent)}/mo | Takeover SMTX` : 'Takeover SMTX';
+    document.title = l ? `${l.complex} · ${money(l.rent)}/mo | Takeover Leases` : 'Takeover Leases';
     if (l) track('view/' + l.id, 'Listing view: ' + l.complex);
     window.scrollTo(0, 0);
   }
@@ -501,7 +501,7 @@
     if ($('#focus').hidden) return;
     $('#focus').hidden = true;
     document.body.classList.remove('focus-mode');
-    document.title = 'Takeover SMTX: San Marcos lease takeovers in one place';
+    document.title = 'Takeover Leases: San Marcos lease takeovers in one place';
     if (boardScroll !== null) {
       const y = boardScroll;
       boardScroll = null;
@@ -2409,7 +2409,7 @@
     const j = await planFetch({ action: 'taken', listingId: takenPick.id });
     if (!j.ok) { err.textContent = "Couldn't mark it taken right now. Try again in a minute, or email team@takeoversmtx.com."; err.hidden = false; b.disabled = false; b.textContent = 'Yes, mark it taken'; return; }
     track('taken/done', 'My lease got taken: marked taken');
-    $('#taken-done-text').textContent = takenPick.complex + ' is off the board' + (['trialing', 'active', 'past_due'].includes(takenPick.subStatus) ? ' and your plan has ended' : '') + '. Thanks for using Takeover SMTX, and good luck with the move! 🍀';
+    $('#taken-done-text').textContent = takenPick.complex + ' is off the board' + (['trialing', 'active', 'past_due'].includes(takenPick.subStatus) ? ' and your plan has ended' : '') + '. Thanks for using Takeover Leases, and good luck with the move! 🍀';
     takenStep('done', true);
     setTimeout(() => celebrate($('#taken-dialog [data-step="done"]')), 250);
     if (meData) meData.listings.forEach((l) => { if (String(l.id) === String(takenPick.id)) l.status = 'taken'; });

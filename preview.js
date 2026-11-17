@@ -1,8 +1,8 @@
-// Preview safety switch. On any host that isn't takeoversmtx.com (the Vercel preview, localhost),
+// Preview safety switch. On any host that isn't takeoverleases.com (the Vercel preview, localhost),
 // nothing is real: forms don't create listings or send emails, and visits don't count in GoatCounter.
 // On the live domain this file does nothing, so it's safe to ship.
 (function () {
-  if (/(^|\.)takeoversmtx\.com$/.test(location.hostname)) return;
+  if (/(^|\.)takeover(leases|smtx)\.com$/.test(location.hostname)) return;
   window.TAKEOVER_PREVIEW = true;
   // GoatCounter: skip the page view and send any events nowhere.
   window.goatcounter = { no_onload: true, endpoint: 'https://preview.invalid/count' };
