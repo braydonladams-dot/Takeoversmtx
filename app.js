@@ -2175,6 +2175,7 @@
       d.querySelector('[data-step="confirm"]').hidden = false;
       d.querySelector('[data-step="why"]').hidden = true;
       $$('#why-list input').forEach((x) => { x.checked = false; });
+      $('#why-list').dataset.picked = '';
       $('#why-note').value = '';
       $('#cancel-next').textContent = p.status === 'trialing' ? 'Cancel free trial' : 'Cancel plan';
       syncWhy();
@@ -2205,7 +2206,13 @@
     b.classList.toggle('btn-primary', taken);
     b.classList.toggle('btn-danger-soft', !taken);
   }
-  $$('#why-list input').forEach((x) => x.addEventListener('change', syncWhy));
+  // Tap the picked answer again to clear it (it's optional, so "none" has to be reachable)
+  $$('#why-list input').forEach((x) => x.addEventListener('click', () => {
+    const list = $('#why-list');
+    if (list.dataset.picked === x.value) { x.checked = false; list.dataset.picked = ''; }
+    else list.dataset.picked = x.value;
+    syncWhy();
+  }));
   $('#cancel-next').addEventListener('click', () => {
     const d = $('#cancel-dialog');
     slideSteps($('.finder-body', d), d.querySelector('[data-step="confirm"]'), d.querySelector('[data-step="why"]'), 1);
