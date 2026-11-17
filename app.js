@@ -2158,7 +2158,7 @@
           ? '<button type="button" class="mc-btn plan-undo" data-plan-resume="' + esc(p.id) + '">↺ Undo cancel <small>Keep it up after ' + pDate(p.periodEnd) + '</small></button>'
           : '<button type="button" class="mc-btn plan-cancel" data-plan-cancel="' + esc(p.id) + '">Cancel plan</button>') + '</div>' +
       '</article>';
-    }).join('') + '<button type="button" class="plan-receipts" data-billing><span>🧾 Receipts &amp; billing history</span><span class="arrow">›</span></button>';
+    }).join('') + '<button type="button" class="plan-receipts" data-receipts><span>🧾 Receipts</span><span class="arrow">›</span></button>';
   }
   document.addEventListener('click', async (e) => {
     const cx = e.target.closest('[data-plan-cancel]');
@@ -2172,11 +2172,16 @@
         : 'No more charges. ' + name + ' stays on the board until ' + pDate(p.periodEnd) + ' (the end of the month you paid for), then comes down. You can undo this until then.';
       const d = $('#cancel-dialog');
       d.dataset.id = p.id;
-      $('#cancel-confirm').disabled = false;
-      $('#cancel-confirm').textContent = p.status === 'trialing' ? 'Cancel free trial' : 'Cancel plan';
+      d.querySelector('[data-step="confirm"]').hidden = false;
+      d.querySelector('[data-step="why"]').hidden = true;
+      $$('#why-list input').forEach((x) => { x.checked = false; });
+      $('#why-note').value = '';
+      $('#cancel-next').textContent = p.status === 'trialing' ? 'Cancel free trial' : 'Cancel plan';
+      syncWhy();
       d.showModal();
       return;
     }
+    if (e.target.closest('[data-receipts]')) openReceipts();
     const rs = e.target.closest('[data-plan-resume]');
     if (rs) {
       rs.disabled = true;
@@ -2187,19 +2192,59 @@
     }
     if (e.target.closest('[data-plan-card]')) openCardDialog();
   });
+  // Step 2 of canceling: a quick, optional "why?"
+  function syncWhy() {
+    const pick = $('#why-list input:checked');
+    const taken = !!pick && pick.value === 'taken';
+    $('#why-taken').hidden = !taken;
+    $('#why-note').hidden = taken;
+    const p = (planData || []).find((x) => x.id === $('#cancel-dialog').dataset.id);
+    const b = $('#cancel-confirm');
+    b.disabled = false;
+    b.textContent = taken ? 'Mark taken & end my plan' : p && p.status === 'trialing' ? 'Cancel free trial' : 'Cancel plan';
+    b.classList.toggle('btn-primary', taken);
+    b.classList.toggle('btn-danger-soft', !taken);
+  }
+  $$('#why-list input').forEach((x) => x.addEventListener('change', syncWhy));
+  $('#cancel-next').addEventListener('click', () => {
+    const d = $('#cancel-dialog');
+    slideSteps($('.finder-body', d), d.querySelector('[data-step="confirm"]'), d.querySelector('[data-step="why"]'), 1);
+  });
   $('#cancel-confirm').addEventListener('click', async () => {
     const d = $('#cancel-dialog'), b = $('#cancel-confirm');
-    b.disabled = true; b.textContent = 'Canceling…';
+    const pick = $('#why-list input:checked');
+    const reason = pick ? pick.value : '';
+    b.disabled = true; b.textContent = reason === 'taken' ? 'Marking it taken…' : 'Canceling…';
     const p = (planData || []).find((x) => x.id === d.dataset.id);
-    const j = await planFetch({ action: 'cancel', id: d.dataset.id });
+    const j = await planFetch({ action: 'cancel', id: d.dataset.id, reason, note: reason === 'taken' ? '' : $('#why-note').value.trim() });
     d.close();
     if (!j.ok) return toast("Couldn't cancel right now. Try again in a minute, or email team@takeoversmtx.com.", 6000);
-    track('plan/cancel', 'Canceled plan');
+    track('plan/cancel' + (reason ? '/' + reason : ''), 'Canceled plan' + (reason ? ': ' + reason : ''));
+    if (j.taken) {
+      toast('Congrats on getting your lease taken! 🎉 Your listing is off the board and your plan has ended.', 7000);
+      planData = null; meData = null; loadMe();
+      return;
+    }
     const failed = p && (p.status === 'past_due' || p.status === 'unpaid');
     toast(failed ? 'Plan canceled. Your listing is coming down.' : "Canceled. You won't be charged again, and your listing stays up until " + pDate(p && (p.status === 'trialing' ? p.trialEnd : p.periodEnd)) + '.', 6500);
     loadPlans();
     if (failed) { meData = null; loadMe(); }
   });
+  async function openReceipts() {
+    const d = $('#receipts-dialog');
+    $('#receipts-list').innerHTML = '<div class="me-loading"><span class="spinner"></span> Loading…</div>';
+    d.showModal();
+    const j = await planFetch({ action: 'receipts' });
+    if (!j.ok) { $('#receipts-list').innerHTML = '<p class="finder-hint">Couldn\'t load your receipts right now. Try again in a minute.</p>'; return; }
+    const rows = j.receipts || [];
+    $('#receipts-list').innerHTML = rows.length ? rows.map((r) =>
+      '<a class="receipt" href="' + esc(r.url || r.pdf || '#') + '" target="_blank" rel="noopener">' +
+        '<span class="receipt-date">' + esc(new Date(r.date * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) + '</span>' +
+        '<span class="receipt-what">' + esc([...new Set(r.items)].join(' + ')) + (r.tax ? '<small>incl. ' + pMoney(r.tax) + ' tax</small>' : '') + '</span>' +
+        '<b class="receipt-amt">' + esc('$' + (r.amount / 100).toFixed(2)) + '</b><span class="arrow">›</span>' +
+      '</a>').join('') + '<p class="si-fine">Tap one to view or download it.</p>'
+      : '<div class="me-empty"><p>No charges yet.</p><small>Your free trial doesn\'t cost anything. Receipts show up here after a payment.</small></div>';
+  }
   const cardErr = (m) => { const e = $('#card-dialog .form-error'); e.textContent = m || ''; e.hidden = !m; };
   async function openCardDialog() {
     const d = $('#card-dialog');
