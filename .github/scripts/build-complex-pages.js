@@ -84,7 +84,7 @@ ${body}
   <footer class="footer">
     <p><strong>Takeover SMTX</strong> is an independent listing board. It is not affiliated with Texas State University or any apartment complex. We don't negotiate leases, and every takeover must be approved by the property.</p>
     <p><a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/how-it-works">How it works</a> · <a href="/get-featured">Get featured on Instagram</a></p>
-    <p><a class="ig-link" href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener">${ig}<span>Follow <b>@takeoversmtx</b> on Instagram</span></a></p>
+    <p><a class="ig-link" href="https://instagram.com/takeoverleases" target="_blank" rel="noopener">${ig}<span>Follow <b>@takeoverleases</b> on Instagram</span></a></p>
   </footer>
   <a class="feedback-fab" href="/#feedback" aria-label="Send feedback">💬 Feedback</a>${scripts}
 <script src="/topbar.js" defer></script>
