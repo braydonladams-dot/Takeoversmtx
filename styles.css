@@ -1612,3 +1612,17 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .receipt-what small { display: block; color: var(--muted); font-weight: 500; font-size: .78rem; }
 .receipt-amt { font-size: 1rem; }
 .receipt .arrow { color: var(--maroon); font-size: 1.2rem; }
+
+/* "My lease got taken" pop-up */
+.taken-list, .taken-options { display: grid; gap: .55rem; margin-top: .6rem; }
+.taken-opt { display: grid; grid-template-columns: auto 1fr auto; gap: .8rem; align-items: center; width: 100%; padding: .8rem .9rem; border: 1px solid var(--line); border-radius: 16px;
+  background: #fff; text-align: left; font: inherit; color: var(--ink); cursor: pointer; transition: border-color .15s, background .15s, transform .15s; }
+.taken-opt:hover { border-color: #c7d2fe; background: #f8faff; }
+.taken-opt:active { transform: scale(.985); }
+.taken-opt b { display: block; font-size: .98rem; }
+.taken-opt small { display: block; color: var(--muted); font-size: .84rem; margin-top: .1rem; }
+.taken-opt .arrow { color: var(--maroon); font-size: 1.3rem; }
+.taken-opt .cart-ic { background: var(--accent-soft); box-shadow: none; }
+.taken-thumb { width: 52px; height: 52px; border-radius: 12px; overflow: hidden; background: var(--accent-soft); display: grid; place-items: center; font-size: 1.4rem; }
+.taken-thumb img { width: 100%; height: 100%; object-fit: cover; }
+#taken-dialog .finder-step:not(.finder-done) { text-align: left; }

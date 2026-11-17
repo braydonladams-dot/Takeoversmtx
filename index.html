@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794896637">
+  <link rel="stylesheet" href="styles.css?v=1794897027">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -110,7 +110,7 @@
             <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M17 6l2 2M15 8l2 2"/></svg></span>
             <span class="txt"><b>Putting my lease up</b><span>Find someone to take it over</span></span><span class="arrow">›</span>
           </button>
-          <button type="button" class="iam-card" data-open="manage-dialog" data-cta="home-taken">
+          <button type="button" class="iam-card" data-taken-flow>
             <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span>
             <span class="txt"><b>My lease got taken</b><span>Take your listing down</span></span><span class="arrow">›</span>
           </button>
@@ -213,7 +213,7 @@
     <p><a href="/how-it-works">How it works</a> · <a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/get-featured">Get featured on Instagram</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
     <p><strong>Takeover SMTX</strong> is an independent listing board. It is not affiliated with Texas State University or any apartment complex. We don't negotiate leases, and every takeover must be approved by the property.</p>
     <p><a class="ig-link" href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><span>Follow <b>@takeoversmtx</b> on Instagram</span></a></p>
-    <p><button type="button" class="link-btn" data-open="manage-dialog">Already listed? Edit your listing or mark it taken</button></p>
+    <p><button type="button" class="link-btn" data-my-listings>Already listed? Edit your listing or mark it taken</button></p>
     <p id="footer-contact"></p>
   </footer>
 
@@ -764,6 +764,49 @@
     </div>
   </dialog>
 
+  <!-- "My lease got taken" (signed in): pick listing -> confirm -> done; or nothing found -> options -->
+  <dialog id="taken-dialog" class="dialog finder">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step" data-step="loading">
+        <div class="me-loading"><span class="spinner"></span> Finding your listings…</div>
+      </div>
+      <div class="finder-step" data-step="pick" hidden>
+        <span class="si-badge">🎉</span>
+        <h2 class="finder-title">Which one got taken?</h2>
+        <p class="finder-hint">Tap the listing someone's taking over.</p>
+        <div class="taken-list" id="taken-list"></div>
+      </div>
+      <div class="finder-step" data-step="confirm" hidden>
+        <span class="si-badge">🔑</span>
+        <h2 class="finder-title" id="taken-confirm-title">Mark it taken?</h2>
+        <p class="finder-hint" id="taken-confirm-text"></p>
+        <p class="form-error" hidden></p>
+        <div class="cancel-actions">
+          <button type="button" class="btn btn-primary btn-lg btn-block" id="taken-yes">Yes, mark it taken</button>
+          <button type="button" class="link-btn" id="taken-back">← Pick a different listing</button>
+        </div>
+      </div>
+      <div class="finder-step finder-done" data-step="done" hidden>
+        <div class="confetti" aria-hidden="true"></div>
+        <div class="cele-badge" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div>
+        <h2 class="finder-title">Congrats, you're free! 🎉</h2>
+        <p class="finder-hint" id="taken-done-text"></p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
+      </div>
+      <div class="finder-step" data-step="none" hidden>
+        <span class="si-badge">🔍</span>
+        <h2 class="finder-title">No listings on this account</h2>
+        <p class="finder-hint">We couldn't find a listing under <b id="taken-email"></b>.</p>
+        <div class="taken-options">
+          <button type="button" class="taken-opt" data-taken-switch><span class="cart-ic">📧</span><span><b>I listed with a different email</b><small>Sign in with that one instead</small></span><span class="arrow">›</span></button>
+          <button type="button" class="taken-opt" data-taken-link><span class="cart-ic">🔗</span><span><b>Email me my edit link</b><small>For listings from before accounts</small></span><span class="arrow">›</span></button>
+          <button type="button" class="taken-opt" data-taken-browse><span class="cart-ic">🏠</span><span><b>I'm looking for a place</b><small>Browse what's open</small></span><span class="arrow">›</span></button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Plan & billing: receipts -->
   <dialog id="receipts-dialog" class="dialog finder">
     <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
@@ -864,8 +907,8 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=1794896637"></script>
-  <script src="app.js?v=1794896637"></script>
-<script src="/topbar.js?v=1794896637" defer></script>
+  <script src="config.js?v=1794897027"></script>
+  <script src="app.js?v=1794897027"></script>
+<script src="/topbar.js?v=1794897027" defer></script>
 </body>
 </html>

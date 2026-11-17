@@ -359,7 +359,7 @@
             </div>
             <p class="detail-note">Tour before committing, and pay rent and fees to the complex, not a stranger. <a href="/how-it-works">How takeovers work →</a></p>
           </div>
-          <div class="owner-note">Is this your listing? <button type="button" class="link-btn owner-link" data-open="manage-dialog">Edit it or take it down</button></div>
+          <div class="owner-note">Is this your listing? <button type="button" class="link-btn owner-link" data-my-listings>Edit it or take it down</button></div>
         </aside>
       </article>
       <div class="detail-bar">
@@ -893,7 +893,7 @@
     if (e.target.closest('[data-remove-proof]')) { proof = null; renderProof(); return; }
     if (e.target.closest('[data-verify-submit]')) { if (proof) track('verify/added', 'Verify screenshot added'); showVerifyStep(false); $('#listing-form').requestSubmit(); return; }
     if (e.target.closest('[data-verify-back]')) { nudged = false; showVerifyStep(false); return; }
-    if (e.target.closest('[data-switch-manage]')) { $('#listing-dialog').close(); openDialog('manage-dialog'); return; }
+    if (e.target.closest('[data-switch-manage]')) { $('#listing-dialog').close(); setTimeout(goMyListings, 300); return; }
     const iv = e.target.closest('[data-interest]');
     if (iv) { e.preventDefault(); openInterest(iv.dataset.interest); return; }
     const rm = e.target.closest('[data-remove-photo]');
@@ -2093,7 +2093,7 @@
         '<div class="mc-actions">' +
           (l.editUrl ? '<button type="button" class="mc-btn" data-me-edit="' + esc(l.editUrl) + '">✏️ Edit</button>' : '') +
           (live ? '<button type="button" class="mc-btn" data-share="' + esc(l.id) + '">↗ Share</button>' : '') +
-          (live && l.takeDownUrl ? '<a class="mc-btn" href="' + esc(l.takeDownUrl) + '" target="_blank" rel="noopener">✓ Mark taken</a>' : '') +
+          (TAKEABLE.includes(l.status) ? '<button type="button" class="mc-btn" data-me-taken="' + esc(l.id) + '">✓ Mark taken</button>' : '') +
         '</div>' +
         (isFeatured ? '<p class="mc-featured">⭐ Featured on Instagram</p>'
           : l.status !== 'taken' && l.status !== 'unpaid' && l.status !== 'paused' ? '<button type="button" class="btn btn-feature btn-block mc-feature" data-feature-pay="' + esc(l.id) + '">⭐ Get featured on Instagram · $10</button>' : '') +
@@ -2293,6 +2293,98 @@
     if (j.retried) { meData = null; loadMe(); }
   });
 
+  // ---------- "My lease got taken": signed in -> pick your listing -> confirm -> done ----------
+  const TAKEABLE = ['approved', 'pending', 'unpaid', 'paused'];
+  var takenPick = null, takenMany = false;
+  function takenStep(name, animate) {
+    const d = $('#taken-dialog'), box = $('.finder-body', d);
+    const from = [...d.querySelectorAll('.finder-step')].find((s) => !s.hidden);
+    const to = d.querySelector('[data-step="' + name + '"]');
+    if (!animate || !from || from === to || !d.open) { d.querySelectorAll('.finder-step').forEach((s) => (s.hidden = s !== to)); return; }
+    slideSteps(box, from, to, name === 'pick' && from.dataset.step === 'confirm' ? -1 : 1);
+  }
+  function needSignIn(then, kind, title) {
+    if (!window.supabase || !CFG.supabaseUrl) return false;
+    if (!authChecked) { setTimeout(then, 250); return true; }
+    if (session) return false;
+    afterSignIn = then; afterKind = kind;
+    openSignIn({ title, hint: "Use the email you listed with. No password, we'll email you a code." });
+    return true;
+  }
+  async function openTaken() {
+    if (!window.supabase || !CFG.supabaseUrl) return openDialog('manage-dialog');
+    if (needSignIn(openTaken, 'taken', 'Sign in to mark your lease taken')) return;
+    track('taken/open', 'My lease got taken: opened');
+    const d = $('#taken-dialog');
+    takenStep('loading');
+    if (!d.open) d.showModal();
+    let data = meData;
+    try { data = (await fetchMe()) || meData; } catch (_) { /* use what we have */ }
+    const list = ((data && data.listings) || []).filter((l) => TAKEABLE.includes(l.status));
+    takenMany = list.length > 1;
+    if (!list.length) {
+      $('#taken-email').textContent = session.user.email;
+      track('taken/none', 'My lease got taken: no listing on account');
+      return takenStep('none', true);
+    }
+    if (list.length === 1) return pickTaken(list[0]);
+    $('#taken-list').innerHTML = list.map((l) =>
+      '<button type="button" class="taken-opt" data-taken-pick="' + esc(l.id) + '">' +
+        '<span class="taken-thumb">' + (l.photo ? '<img src="' + esc(photoUrl(l.photo)) + '" alt="" loading="lazy">' : '🏠') + '</span>' +
+        '<span><b>' + esc(l.complex) + '</b><small>' + money(l.rent) + '/mo · Move in ' + esc(shortDate(l.availableFrom)) + '</small></span><span class="arrow">›</span>' +
+      '</button>').join('');
+    takenStep('pick', true);
+  }
+  function pickTaken(l) {
+    takenPick = l;
+    const onPlan = ['trialing', 'active', 'past_due'].includes(l.subStatus);
+    $('#taken-confirm-title').textContent = 'Mark ' + l.complex + ' taken?';
+    $('#taken-confirm-text').textContent = 'It comes off the board right away and people stop reaching out.' +
+      (onPlan ? (l.subStatus === 'trialing' ? ' Your free trial ends too, so you won\'t be charged.' : ' Your $7.99/mo plan ends too, so you won\'t be charged again.') : '');
+    $('#taken-back').hidden = !takenMany;
+    $('#taken-yes').disabled = false;
+    $('#taken-yes').textContent = 'Yes, mark it taken';
+    $('#taken-dialog .form-error').hidden = true;
+    takenStep('confirm', true);
+  }
+  $('#taken-yes').addEventListener('click', async () => {
+    if (!takenPick) return;
+    const b = $('#taken-yes'), err = $('#taken-dialog .form-error');
+    b.disabled = true; b.textContent = 'Marking it taken…'; err.hidden = true;
+    const j = await planFetch({ action: 'taken', listingId: takenPick.id });
+    if (!j.ok) { err.textContent = "Couldn't mark it taken right now. Try again in a minute, or email team@takeoversmtx.com."; err.hidden = false; b.disabled = false; b.textContent = 'Yes, mark it taken'; return; }
+    track('taken/done', 'My lease got taken: marked taken');
+    $('#taken-done-text').textContent = takenPick.complex + ' is off the board' + (['trialing', 'active', 'past_due'].includes(takenPick.subStatus) ? ' and your plan has ended' : '') + '. Thanks for using Takeover SMTX, and good luck with the move! 🍀';
+    takenStep('done', true);
+    setTimeout(() => celebrate($('#taken-dialog [data-step="done"]')), 250);
+    meData = null; planData = null;
+    if (view === 'me') loadMe();
+    load();
+  });
+  $('#taken-back').addEventListener('click', () => takenStep('pick', true));
+  // Edit / take down links: everything lives in your account now
+  function goMyListings() {
+    if (needSignIn(goMyListings, 'me', 'Sign in to manage your listing')) return;
+    location.hash = 'me';
+  }
+  document.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-taken-flow]')) return openTaken();
+    const mt = e.target.closest('[data-me-taken]');
+    if (mt) { const l = ((meData && meData.listings) || []).find((x) => String(x.id) === mt.dataset.meTaken); if (l) { takenMany = false; pickTaken(l); $('#taken-dialog').showModal(); } return; }
+    if (e.target.closest('[data-my-listings]')) { const dl = e.target.closest('dialog'); if (dl) dl.close(); return goMyListings(); }
+    const pk = e.target.closest('[data-taken-pick]');
+    if (pk) { const l = ((meData && meData.listings) || []).find((x) => String(x.id) === pk.dataset.takenPick); if (l) pickTaken(l); return; }
+    if (e.target.closest('[data-taken-switch]')) {
+      $('#taken-dialog').close();
+      if (sb) await sb.auth.signOut();
+      session = null; meData = null; planData = null; paintAccountBtn();
+      track('taken/switch', 'My lease got taken: switching email');
+      return setTimeout(openTaken, 350);
+    }
+    if (e.target.closest('[data-taken-link]')) { $('#taken-dialog').close(); return setTimeout(() => openDialog('manage-dialog'), 350); }
+    if (e.target.closest('[data-taken-browse]')) { $('#taken-dialog').close(); const f = $('[data-finder]'); return setTimeout(() => (f ? f.click() : goHome()), 350); }
+  });
+
   async function loadMe() {
     if (!sb) { $('#me-loading').hidden = true; $('#me-error').hidden = false; return; }
     if (!authChecked) { pendingMe = true; return; }
@@ -2352,7 +2444,7 @@
         history.replaceState(null, '', location.pathname + location.hash);
         if (session) {
           track('signin/done', 'Signed in (Google)');
-          setTimeout(() => (kind === 'list' ? openDialog('listing-dialog') : (location.hash = 'me')), 300);
+          setTimeout(() => (kind === 'list' ? openDialog('listing-dialog') : kind === 'taken' ? openTaken() : (location.hash = 'me')), 300);
         }
       }
       if (pendingMe || location.hash === '#me') { pendingMe = false; loadMe(); }
