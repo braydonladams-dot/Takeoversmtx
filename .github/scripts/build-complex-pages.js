@@ -56,7 +56,7 @@ function layout({ title, desc, canonical, body, jsonld, scripts = '' }) {
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(desc)}">
   <meta property="og:url" content="${canonical}">
-  <meta property="og:image" content="${ORIGIN}/og-image.png?v=3">
+  <meta property="og:image" content="${ORIGIN}/og-image.png?v=4">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="/styles.css?v=${ver}">
   <script src="/preview.js"></script>
