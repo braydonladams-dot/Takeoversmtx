@@ -13,5 +13,5 @@ window.TAKEOVER_CONFIG = {
   supabaseUrl: 'https://fkflptyzstspweekfihc.supabase.co',
   supabaseKey: 'sb_publishable_RXLgFj5YCEy8yP9Al_UPxw_vNYTX2uU',
   // Stripe publishable key (meant to be public). Test mode until Stripe is fully set up.
-  stripeKey: 'pk_test_51UcYVKA7RQFcJ2PuBAZeWYdXIFOxqqZ9IBdi2D88TJk2vEHYHLHfGNzgXGyiT0abLbm6F0KeWwkU5eFyVcTQ1UST00Dud4s35H',
+  stripeKey: 'pk_live_51UcYVKA7RQFcJ2PuW6aAy1t8HoMRko5wpRnw0lwfKmA0R0V9Wh6sn1uuea1ES0Ky9uIQBLqUKKpPw5OfD4kzNWyV008eht4kZo',
 };
