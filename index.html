@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794892766">
+  <link rel="stylesheet" href="styles.css?v=1794893354">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -678,9 +678,19 @@
         <p class="pay-posted" id="sub-posted" hidden>✓ Your listing is saved. Last step: start your free trial.</p>
         <span class="si-badge">🏠</span>
         <h2 class="finder-title" id="sub-title">Start your 7-day free trial</h2>
-        <div class="pay-summary">
-          <div><b id="sub-listing">Your listing</b><small id="sub-note">Live on the board, sent to students looking, and every interested person in your account.</small></div>
-          <span class="pay-price" id="sub-price">$0<small>today</small></span>
+        <div class="cart" id="sub-cart">
+          <div class="cart-row">
+            <span class="cart-ic">🏠</span>
+            <div><b id="sub-listing">Your listing</b><small id="sub-note">7-day free trial, then $7.99/mo</small></div>
+            <span class="cart-price"><s id="sub-was">$7.99/mo</s><b id="sub-now">$0</b></span>
+          </div>
+          <div class="cart-row" id="sub-cart-feature" hidden>
+            <span class="cart-ic">⭐</span>
+            <div><b>Instagram feature</b><small>Its own slide in this week's Featured post · one time</small></div>
+            <span class="cart-price"><b>$10.00</b></span>
+          </div>
+          <div class="cart-line" id="sub-cart-tax" hidden><span>Tax</span><span id="sub-tax"></span></div>
+          <div class="cart-total"><span>Due today</span><b id="sub-due">$0.00</b></div>
         </div>
         <div id="sub-element" class="pay-element"></div>
         <p class="form-error" hidden></p>
@@ -788,8 +798,8 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=1794892766"></script>
-  <script src="app.js?v=1794892766"></script>
-<script src="/topbar.js?v=1794892766" defer></script>
+  <script src="config.js?v=1794893354"></script>
+  <script src="app.js?v=1794893354"></script>
+<script src="/topbar.js?v=1794893354" defer></script>
 </body>
 </html>

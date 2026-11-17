@@ -1865,7 +1865,9 @@
     }
     const d = $('#sub-dialog');
     // Preview site: the listing isn't really saved, so ask for a test-mode demo trial instead.
-    const reqBody = listingId ? { listingId } : (window.TAKEOVER_PREVIEW && opts.fromListing ? { preview: true, complex: opts.complex || '' } : {});
+    // thenFeature: they picked the $10 Instagram feature, so it goes in the same checkout.
+    const feat = opts.thenFeature ? { feature: true } : {};
+    const reqBody = listingId ? { listingId, ...feat } : (window.TAKEOVER_PREVIEW && opts.fromListing ? { preview: true, complex: opts.complex || '', ...feat } : feat);
     const ask = () => fetch(CFG.supabaseUrl + '/functions/v1/listing-subscribe', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
@@ -1888,15 +1890,29 @@
     $('#sub-listing').textContent = j.listing.complex;
     $('#sub-done-listing').textContent = j.listing.complex;
     const ends = j.trialEnd ? new Date(j.trialEnd * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-    $('#sub-title').textContent = j.trial ? 'Start your 7-day free trial' : 'Put your listing back up';
-    $('#sub-price').innerHTML = j.trial ? '$0<small>today</small>' : '$7.99<small>/mo + tax</small>';
-    $('#sub-btn').textContent = j.trial ? 'Start free trial' : 'Restart · $7.99/mo';
-    $('#sub-fine').textContent = j.trial
-      ? 'Free until ' + ends + ', then $7.99/month plus tax until you cancel. Cancel anytime in your account, and marking your listing taken cancels it automatically.'
-      : '$7.99/month plus tax until you cancel. Cancel anytime in your account, and marking your listing taken cancels it automatically.';
-    $('#sub-done-trial').textContent = j.trial ? 'Your free trial runs until ' + ends + '.' : '';
-    $('#sub-next-feature').hidden = !opts.thenFeature;
-    $('#sub-done-btn').textContent = opts.thenFeature ? 'Skip for now' : 'Done';
+    // The cart: listing (trial: $7.99/mo crossed out, $0 today) + optional $10 feature + tax = due today
+    const money = (c) => '$' + (c / 100).toFixed(2);
+    const cart = j.cart || { monthly: 799, dueToday: 0, tax: 0 };
+    const monthly = money(cart.monthly || 799).replace('.00', '');
+    const hasFeature = !!j.feature;
+    $('#sub-title').textContent = j.trial ? (hasFeature ? 'Your free trial + feature' : 'Start your 7-day free trial') : 'Put your listing back up';
+    $('#sub-note').textContent = j.trial ? '7-day free trial, then ' + monthly + '/mo' : 'Back on the board · ' + monthly + '/mo';
+    $('#sub-was').textContent = monthly + '/mo';
+    $('#sub-was').hidden = !j.trial;
+    $('#sub-now').textContent = j.trial ? '$0' : monthly + '/mo';
+    $('#sub-cart-feature').hidden = !hasFeature;
+    $('#sub-cart-tax').hidden = !cart.tax;
+    $('#sub-tax').textContent = money(cart.tax || 0);
+    const due = j.trial ? (cart.dueToday || 0) : (cart.dueToday || cart.monthly || 799);
+    $('#sub-due').textContent = money(due);
+    $('#sub-btn').textContent = j.trial ? (due ? 'Start trial · Pay ' + money(due) : 'Start free trial') : 'Restart · ' + money(due);
+    const after = j.trial ? 'Free until ' + ends + ', then ' + monthly + '/month plus tax until you cancel.' : monthly + '/month plus tax until you cancel.';
+    $('#sub-fine').textContent = (hasFeature ? 'The $10 feature is one time. ' : '') + after + ' Cancel anytime in your account, and marking your listing taken cancels it automatically.';
+    $('#sub-done-trial').textContent = (j.trial ? 'Your free trial runs until ' + ends + '.' : '') + (hasFeature ? " It'll also be in this week's Featured post on @takeoversmtx." : '');
+    // Only offer the feature afterwards if they wanted it but it couldn't go in this cart
+    const offerLater = !!opts.thenFeature && !hasFeature && !j.featured;
+    $('#sub-next-feature').hidden = !offerLater;
+    $('#sub-done-btn').textContent = offerLater ? 'Skip for now' : 'Done';
     $('#sub-element').innerHTML = '<div class="me-loading"><span class="spinner"></span> Loading secure checkout…</div>';
     $('#sub-btn').disabled = true;
     subErr('');

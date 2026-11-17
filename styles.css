@@ -1510,3 +1510,20 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .form-success .feature-cta, .form-success .feature-pay { animation-delay: .28s; }
 .form-success.is-edit .next-steps, .form-success.is-edit .feature-cta, .form-success.is-edit .cele-sub, .form-success.is-edit .confetti { display: none; }
 .finder-done .si-fine { margin: -.2rem 0 1.2rem; }
+
+/* ---------- trial checkout cart ---------- */
+.cart { border: 1px solid #dbe3ff; border-radius: 16px; background: linear-gradient(135deg, #f7f9ff, #fdf6ff); margin: .2rem 0 1.3rem; overflow: hidden; }
+.cart-row { display: grid; grid-template-columns: 40px 1fr auto; gap: .8rem; align-items: center; padding: .95rem 1.05rem; }
+.cart-row + .cart-row { border-top: 1px dashed #d6ddf5; }
+.cart-ic { width: 40px; height: 40px; border-radius: 12px; background: #fff; display: grid; place-items: center; font-size: 1.15rem; box-shadow: 0 1px 2px rgba(15, 23, 42, .06); }
+.cart-row b { display: block; font-size: 1rem; line-height: 1.25; }
+.cart-row small { display: block; color: var(--muted); font-size: .83rem; line-height: 1.35; margin-top: .12rem; }
+.cart-price { text-align: right; white-space: nowrap; line-height: 1.15; }
+.cart-price s { display: block; color: var(--muted); font-size: .85rem; font-weight: 500; text-decoration-thickness: 1.5px; text-decoration-color: #ef4444; }
+.cart-price s[hidden] { display: none; }
+.cart-price b { font-size: 1.1rem; font-weight: 800; letter-spacing: -.01em; }
+.cart-line, .cart-total { display: flex; justify-content: space-between; padding: .55rem 1.05rem; font-size: .9rem; color: var(--muted); }
+.cart-line[hidden] { display: none; }
+.cart-total { border-top: 1px solid #dbe3ff; background: rgba(255, 255, 255, .7); padding: .85rem 1.05rem; color: var(--ink); font-weight: 600; align-items: baseline; }
+.cart-total b { font-size: 1.3rem; font-weight: 800; letter-spacing: -.02em; }
+#sub-dialog [data-step="pay"] .si-badge { display: none; }
