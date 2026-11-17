@@ -826,7 +826,7 @@
       $('.form-success', form.closest('dialog')).hidden = false;
       track('submitted/' + type, 'Submitted: ' + type);
       if (type === 'waitlist') offerSave('#waitlist-dialog', data.email);
-      if (type === 'listing' && data.wantsFeature && !editing) featurePay('', { fromListing: true });
+      if (type === 'listing' && !editing) startTrial('', { fromListing: true, thenFeature: !!data.wantsFeature });
     } catch (e) {
       console.error(e);
       err.textContent = 'Something went wrong. Check your connection and try again.';
@@ -1839,6 +1839,105 @@
       payErr("Your payment is processing. We'll email you as soon as it's done.");
     }
   });
+  // ---------- $7.99/month listing: 7-day free trial, card up front ----------
+  var subState = null, subOpts = {};
+  const subErr = (msg) => { const e = $('#sub-dialog .form-error'); e.textContent = msg || ''; e.hidden = !msg; };
+  async function startTrial(listingId, opts) {
+    opts = opts || {};
+    subOpts = opts;
+    if (!session) { afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me'; return openSignIn({ title: 'Sign in to finish your listing' }); }
+    const d = $('#sub-dialog');
+    const ask = () => fetch(CFG.supabaseUrl + '/functions/v1/listing-subscribe', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify(listingId ? { listingId } : {}),
+    }).then((r) => r.json()).catch(() => ({}));
+    // Free / grandfathered listings skip straight on (to the feature, if they picked it).
+    let j = await ask();
+    for (let i = 0; i < 4 && !j.ok && j.error === 'no listing' && opts.fromListing; i++) {
+      await new Promise((res) => setTimeout(res, 2500));
+      j = await ask();
+    }
+    if (!j.ok) {
+      if (j.error === 'not needed' || j.error === 'no listing') { if (opts.thenFeature) featurePay('', { fromListing: true }); return; }
+      return toast("Couldn't start the trial. Try again from your account in a minute.", 6000);
+    }
+    d.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el.dataset.step !== 'pay'));
+    $('#sub-posted').hidden = !opts.fromListing;
+    $('#sub-listing').textContent = j.listing.complex;
+    $('#sub-done-listing').textContent = j.listing.complex;
+    const ends = j.trialEnd ? new Date(j.trialEnd * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    $('#sub-title').textContent = j.trial ? 'Start your 7-day free trial' : 'Put your listing back up';
+    $('#sub-price').innerHTML = j.trial ? '$0<small>today</small>' : '$7.99<small>/mo + tax</small>';
+    $('#sub-btn').textContent = j.trial ? 'Start free trial' : 'Restart · $7.99/mo';
+    $('#sub-fine').textContent = j.trial
+      ? 'Free until ' + ends + ', then $7.99/month plus tax until you cancel. Cancel anytime in your account, and marking your listing taken cancels it automatically.'
+      : '$7.99/month plus tax until you cancel. Cancel anytime in your account, and marking your listing taken cancels it automatically.';
+    $('#sub-done-trial').textContent = j.trial ? 'Your free trial runs until ' + ends + '.' : '';
+    $('#sub-next-feature').hidden = !opts.thenFeature;
+    $('#sub-done-btn').textContent = opts.thenFeature ? 'Skip for now' : 'Done';
+    $('#sub-element').innerHTML = '<div class="me-loading"><span class="spinner"></span> Loading secure checkout…</div>';
+    $('#sub-btn').disabled = true;
+    subErr('');
+    const others = [...document.querySelectorAll('dialog[open]')].filter((x) => x !== d);
+    others.forEach((x) => x.close());
+    setTimeout(() => d.showModal(), others.length ? 360 : 0);
+    track('trial/open', 'Trial pop-up opened');
+    try {
+      const StripeCtor = await loadStripe();
+      stripeJs = stripeJs || StripeCtor(CFG.stripeKey);
+      const elements = stripeJs.elements({ clientSecret: j.clientSecret, appearance: PAY_LOOK, fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' }] });
+      const pe = elements.create('payment', { layout: 'tabs', wallets: { applePay: 'auto', googlePay: 'auto' } });
+      $('#sub-element').innerHTML = '';
+      pe.mount('#sub-element');
+      pe.on('ready', () => { $('#sub-btn').disabled = false; });
+      subState = { elements, mode: j.mode, listingId: String(j.listing.id) };
+    } catch (e) {
+      console.error(e);
+      subErr("Couldn't load the card form. Check your connection and try again.");
+    }
+  }
+  $('#sub-btn').addEventListener('click', async () => {
+    if (!subState || !stripeJs) return;
+    const btn = $('#sub-btn'), label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'One sec…';
+    subErr('');
+    const args = { elements: subState.elements, redirect: 'if_required', confirmParams: { return_url: location.origin + '/?subscribed=1#me' } };
+    const res = subState.mode === 'setup' ? await stripeJs.confirmSetup(args) : await stripeJs.confirmPayment(args);
+    if (res.error) {
+      subErr(res.error.message || "That card didn't go through. Try another one.");
+      btn.disabled = false;
+      btn.textContent = label;
+      return;
+    }
+    track('trial/started', 'Trial started');
+    meData = null; // refresh the account page next time
+    const d = $('#sub-dialog');
+    slideSteps($('.finder-body', d), d.querySelector('[data-step="pay"]'), d.querySelector('[data-step="done"]'), 1);
+  });
+  $('#sub-next-feature').addEventListener('click', () => featurePay(subState ? subState.listingId : '', { fromListing: false }));
+  $('#sub-dialog').addEventListener('close', () => {
+    const done = !$('#sub-dialog [data-step="done"]').hidden;
+    if (subOpts.fromListing && !done) toast("Your listing is saved but won't go live until you start your free trial. You can finish from your account.", 7000);
+    if (done && view === 'me') loadMe();
+    subOpts = {};
+  });
+  document.addEventListener('click', async (e) => {
+    const t = e.target.closest('[data-start-trial]');
+    if (t) return startTrial(t.dataset.startTrial);
+    if (e.target.closest('[data-billing]')) {
+      const r = await fetch(CFG.supabaseUrl + '/functions/v1/billing-portal', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' }, body: '{}',
+      }).then((x) => x.json()).catch(() => ({}));
+      if (r.ok && r.url) location.href = r.url; else toast("Couldn't open billing right now. Try again in a minute.");
+    }
+  });
+  if (/[?&]subscribed=1/.test(location.search)) {
+    history.replaceState(null, '', location.pathname + location.hash);
+    setTimeout(() => toast("You're live! ✅ Your free trial has started."), 700);
+  }
+
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-feature-pay]');
     if (b) featurePay(b.dataset.featurePay || '');
@@ -1868,7 +1967,16 @@
     return j;
   }
 
-  const STATUS = { approved: ['Live', 'live'], pending: ['In review', 'review'], taken: ['Taken', 'taken'] };
+  const STATUS = { approved: ['Live', 'live'], pending: ['In review', 'review'], taken: ['Taken', 'taken'], unpaid: ['Not live yet', 'review'], paused: ['Paused', 'taken'] };
+  function subLine(l) {
+    const s = l.subStatus;
+    if (l.status === 'unpaid') return '<p class="mc-sub-line warn">Start your free trial to put it on the board.</p>';
+    if (l.status === 'paused') return '<p class="mc-sub-line warn">Paused: your $7.99/mo plan ended. Restart to put it back up.</p>';
+    if (s === 'trialing') return '<p class="mc-sub-line">Free trial · ends ' + esc(shortDate(l.trialEnds) || 'soon') + ', then $7.99/mo</p>';
+    if (s === 'active') return '<p class="mc-sub-line">$7.99/mo · active</p>';
+    if (s === 'past_due') return '<p class="mc-sub-line warn">Payment didn\'t go through. Tap Billing to update your card.</p>';
+    return '';
+  }
   const WHO = { Female: 'girls', Male: 'guys' };
   function renderMe(d) {
     const featured = d.featured || [];
@@ -1899,6 +2007,9 @@
             '<span class="me-status ' + s[1] + '">' + esc(s[0]) + '</span>' +
           '</div>' +
         '</div>' +
+        subLine(l) +
+        (l.status === 'unpaid' ? '<button type="button" class="btn btn-primary btn-block mc-feature" data-start-trial="' + esc(l.id) + '">Start 7-day free trial</button>' :
+          l.status === 'paused' ? '<button type="button" class="btn btn-primary btn-block mc-feature" data-start-trial="' + esc(l.id) + '">Restart · $7.99/mo</button>' : '') +
         people +
         '<div class="mc-actions">' +
           (l.editUrl ? '<button type="button" class="mc-btn" data-me-edit="' + esc(l.editUrl) + '">✏️ Edit</button>' : '') +
@@ -1906,7 +2017,7 @@
           (live && l.takeDownUrl ? '<a class="mc-btn" href="' + esc(l.takeDownUrl) + '" target="_blank" rel="noopener">✓ Mark taken</a>' : '') +
         '</div>' +
         (isFeatured ? '<p class="mc-featured">⭐ Featured on Instagram</p>'
-          : l.status !== 'taken' ? '<button type="button" class="btn btn-feature btn-block mc-feature" data-feature-pay="' + esc(l.id) + '">⭐ Get featured on Instagram · $10</button>' : '') +
+          : l.status !== 'taken' && l.status !== 'unpaid' && l.status !== 'paused' ? '<button type="button" class="btn btn-feature btn-block mc-feature" data-feature-pay="' + esc(l.id) + '">⭐ Get featured on Instagram · $10</button>' : '') +
       '</article>';
     }).join('') : '<div class="me-empty"><p>No listings under <b>' + esc(d.email) + '</b> yet.</p><small>Listed with a different email? Sign in with that one to see it here.</small></div>';
 
@@ -1921,6 +2032,7 @@
       (i.rent ? ' <span class="muted">· ' + money(i.rent) + '/mo</span>' : '') + (i.status === 'taken' ? ' <em class="me-status taken">Taken</em>' : '') + '</span><span class="arrow">›</span></a>').join('')
       : '<div class="me-empty"><p>Nothing yet.</p><small>Tap "I\'m interested" on a listing and it shows up here.</small></div>';
 
+    $('[data-billing]').hidden = !d.listings.some((l) => l.subStatus);
     $('#me-body').hidden = false;
     $('#me-loading').hidden = true;
     ls.set('tsmtx_seen_int', String(totalInterested())); // you've seen everyone who's interested

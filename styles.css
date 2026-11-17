@@ -1463,3 +1463,9 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
   .hiw-compare, .hiw-safe { grid-template-columns: 1fr; }
   .hiw-list li { padding: 1rem; }
 }
+
+/* Listing subscription bits on the account page */
+.mc-sub-line { margin: -.3rem 0 0; font-size: .88rem; color: var(--muted); padding: .55rem .75rem; border-radius: 12px; background: var(--input); }
+.mc-sub-line.warn { background: #fef3c7; color: #92400e; font-weight: 600; }
+#sub-dialog .btn-block, #sub-dialog .btn-feature { width: 100%; margin-bottom: .5rem; }
+#sub-dialog .form-error { margin: 0 0 1rem; }

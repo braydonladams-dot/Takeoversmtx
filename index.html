@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1794871420">
+  <link rel="stylesheet" href="styles.css?v=1794892257">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -65,6 +65,7 @@
       <div class="me-head">
         <span class="me-avatar" id="me-avatar">?</span>
         <div class="me-who"><b id="me-email"></b><small id="me-stats">Signed in</small></div>
+        <button type="button" class="me-signout" data-billing hidden>Billing</button>
         <button type="button" class="me-signout" data-signout>Sign out</button>
       </div>
       <div id="me-loading" class="me-loading"><span class="spinner"></span> Loading your stuff…</div>
@@ -230,7 +231,7 @@
       <div class="wiz-steps">
         <section class="wiz-step" data-wstep="1">
           <h3 class="wiz-title">The place</h3>
-          <p class="wiz-sub">Most listings go live within minutes and get posted on <b>@takeoversmtx</b>. <span class="already-listed">Already listed? <button type="button" class="link-btn owner-link" data-switch-manage>Edit yours instead</button></span></p>
+          <p class="wiz-sub"><b>7 days free</b>, then $7.99/month until it's taken. Cancel anytime. Most listings go live within minutes and get posted on <b>@takeoversmtx</b>. <span class="already-listed">Already listed? <button type="button" class="link-btn owner-link" data-switch-manage>Edit yours instead</button></span></p>
           <p class="looking-note" id="looking-note" hidden></p>
 
           <label>Apartment complex or address<input name="complex" required maxlength="120" placeholder="e.g. The Retreat, or a street address"></label>
@@ -667,6 +668,33 @@
     </div>
   </dialog>
 
+  <!-- $7.99/month listing: 7-day free trial, card up front -->
+  <dialog id="sub-dialog" class="dialog finder pay">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step" data-step="pay">
+        <p class="pay-posted" id="sub-posted" hidden>✓ Your listing is saved. Last step: start your free trial.</p>
+        <span class="si-badge">🏠</span>
+        <h2 class="finder-title" id="sub-title">Start your 7-day free trial</h2>
+        <div class="pay-summary">
+          <div><b id="sub-listing">Your listing</b><small id="sub-note">Live on the board, sent to students looking, and every interested person in your account.</small></div>
+          <span class="pay-price" id="sub-price">$0<small>today</small></span>
+        </div>
+        <div id="sub-element" class="pay-element"></div>
+        <p class="form-error" hidden></p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="sub-btn" disabled>Start free trial</button>
+        <p class="si-fine" id="sub-fine">Free for 7 days, then $7.99/month plus tax until you cancel. Cancel anytime in your account, and marking your listing taken cancels it automatically.</p>
+      </div>
+      <div class="finder-step finder-done" data-step="done" hidden>
+        <div class="done-check">✓</div>
+        <h2 class="finder-title">You're live!</h2>
+        <p class="finder-hint"><b id="sub-done-listing">Your listing</b> will be on the board within a minute, and we'll email you your link. <span id="sub-done-trial"></span></p>
+        <button type="button" class="btn btn-feature btn-lg btn-block" id="sub-next-feature" hidden>⭐ Next: get featured on Instagram · $10</button>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close id="sub-done-btn">Done</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- $10 Instagram feature: pay right here (Stripe card form inside our own pop-up) -->
   <dialog id="pay-dialog" class="dialog finder pay">
     <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
@@ -756,8 +784,8 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=1794871420"></script>
-  <script src="app.js?v=1794871420"></script>
+  <script src="config.js?v=1794892257"></script>
+  <script src="app.js?v=1794892257"></script>
 <script src="/topbar.js?v=1794857363" defer></script>
 </body>
 </html>
