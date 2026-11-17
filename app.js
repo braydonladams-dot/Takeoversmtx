@@ -2318,12 +2318,16 @@
     const d = $('#taken-dialog');
     takenStep('loading');
     if (!d.open) d.showModal();
-    let data = meData;
-    try { data = (await fetchMe()) || meData; } catch (_) { /* use what we have */ }
-    const list = ((data && data.listings) || []).filter((l) => TAKEABLE.includes(l.status));
+    // Both lookups at once; if we already have them (fetched when the page loaded), don't wait at all.
+    const needPlans = !!window.TAKEOVER_PREVIEW;
+    const fresh = Promise.all([
+      fetchMe().catch(() => null),
+      needPlans ? planFetch({ action: 'list' }).then((pj) => { if (pj.ok) planData = pj.plans || []; }) : null,
+    ]);
+    if (!meData || (needPlans && !planData)) await fresh;
+    const list = ((meData && meData.listings) || []).filter((l) => TAKEABLE.includes(l.status));
     // Preview site: listings aren't really saved, so let its demo trial plans stand in for them
-    if (window.TAKEOVER_PREVIEW) {
-      if (!planData) { const pj = await planFetch({ action: 'list' }); if (pj.ok) planData = pj.plans || []; }
+    if (needPlans) {
       (planData || []).filter((p) => p.preview).forEach((p) => list.push({ id: 'preview:' + p.id, complex: p.complex || 'Your listing', rent: 0, status: 'approved', subStatus: p.status, availableFrom: '', photo: '', preview: true }));
     }
     takenList = list;
@@ -2363,7 +2367,9 @@
     $('#taken-done-text').textContent = takenPick.complex + ' is off the board' + (['trialing', 'active', 'past_due'].includes(takenPick.subStatus) ? ' and your plan has ended' : '') + '. Thanks for using Takeover SMTX, and good luck with the move! 🍀';
     takenStep('done', true);
     setTimeout(() => celebrate($('#taken-dialog [data-step="done"]')), 250);
-    meData = null; planData = null;
+    if (meData) meData.listings.forEach((l) => { if (String(l.id) === String(takenPick.id)) l.status = 'taken'; });
+    if (planData) planData = planData.filter((p) => 'preview:' + p.id !== takenPick.id && String(p.listingId) !== String(takenPick.id));
+    fetchMe().catch(() => {});
     if (view === 'me') loadMe();
     load();
   });
@@ -2454,7 +2460,7 @@
         }
       }
       if (pendingMe || location.hash === '#me') { pendingMe = false; loadMe(); }
-      else if (session) fetchMe().then(paintAccountBtn).catch(() => {});
+      else if (session) { fetchMe().then(paintAccountBtn).catch(() => {}); if (window.TAKEOVER_PREVIEW) loadPlans(); }
     });
     sb.auth.onAuthStateChange((_event, s) => { session = s; if (!s) meData = null; paintAccountBtn(); });
   } else {
