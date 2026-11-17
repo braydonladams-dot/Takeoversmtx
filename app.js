@@ -153,7 +153,7 @@
   // Cities: "City, ST". Listings from before multi-city have none, so they're San Marcos.
   const DEFAULT_CITY = 'San Marcos, TX';
   function normCity(v) {
-    const raw = String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, 60);
+    const raw = String(v == null || typeof v === 'boolean' || /^(true|false)$/i.test(String(v).trim()) ? '' : v).replace(/\s+/g, ' ').trim().slice(0, 60);
     if (!raw) return DEFAULT_CITY;
     const parts = raw.split(',').map((x) => x.trim()).filter(Boolean);
     const city = parts[0].toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase());
