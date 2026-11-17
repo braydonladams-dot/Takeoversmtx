@@ -1469,3 +1469,44 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .mc-sub-line.warn { background: #fef3c7; color: #92400e; font-weight: 600; }
 #sub-dialog .btn-block, #sub-dialog .btn-feature { width: 100%; margin-bottom: .5rem; }
 #sub-dialog .form-error { margin: 0 0 1rem; }
+
+/* ---------- "You're listed!" celebration ---------- */
+.form-success { position: relative; }
+.cele { position: relative; text-align: center; padding: .4rem 0 .2rem; }
+.cele h2 { margin: .2rem 0 .35rem; font-size: 1.75rem; letter-spacing: -.03em; }
+.cele-sub { margin: 0 auto; max-width: 30ch; color: var(--muted); font-size: 1.02rem; line-height: 1.5; }
+.cele-badge { width: 84px; height: 84px; margin: .3rem auto .9rem; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 30% 25%, #4f7bff, #2f5bea 60%, #2448c4); box-shadow: 0 14px 34px -10px rgba(47, 91, 234, .6), 0 0 0 10px #eef2ff; }
+.cele-badge svg { width: 46px; height: 46px; fill: none; stroke: #fff; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
+.cele-badge circle { stroke: rgba(255, 255, 255, .25); stroke-width: 2; }
+.cele-badge path { stroke-dasharray: 40; stroke-dashoffset: 0; }
+.cele-badge.pop { animation: badge-pop .6s cubic-bezier(.2, 1.6, .4, 1) both; }
+.cele-badge.pop path { animation: check-draw .5s .28s ease-out both; }
+@keyframes badge-pop { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes check-draw { from { stroke-dashoffset: 40; } }
+.confetti { position: absolute; left: 50%; top: 60px; width: 0; height: 0; pointer-events: none; z-index: 3; }
+.confetti i { position: absolute; width: 8px; height: 13px; border-radius: 2px; opacity: 0;
+  animation-name: confetti-fly; animation-timing-function: cubic-bezier(.15, .7, .4, 1); animation-fill-mode: both; }
+@keyframes confetti-fly {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  35% { transform: translate(calc(var(--dx) * .7), var(--up)) rotate(calc(var(--r) * .4)); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--down)) rotate(var(--r)); opacity: 0; }
+}
+.finder-done { position: relative; }
+.finder-done .confetti { top: 70px; }
+.next-steps { list-style: none; margin: .2rem 0 0; padding: 0; display: grid; gap: 0; }
+.next-steps li { display: grid; grid-template-columns: 34px 1fr; gap: .8rem; position: relative; padding-bottom: 1rem; }
+.next-steps li:last-child { padding-bottom: 0; }
+.next-steps li:not(:last-child)::before { content: ''; position: absolute; left: 16px; top: 34px; bottom: 2px; width: 2px; background: var(--line); border-radius: 2px; }
+.next-steps li.is-done:not(:last-child)::before { background: linear-gradient(#22c55e, var(--line)); }
+.ns-dot { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: .9rem;
+  background: var(--accent-soft); color: var(--maroon); }
+.next-steps li.is-done .ns-dot { background: #dcfce7; color: var(--green); }
+.next-steps b { display: block; font-size: 1rem; margin: .35rem 0 .15rem; }
+.next-steps small { display: block; color: var(--muted); font-size: .9rem; line-height: 1.5; }
+.next-steps small b { display: inline; font-size: inherit; margin: 0; color: var(--ink); font-weight: 600; }
+.form-success .cele, .form-success .next-steps, .form-success .feature-cta, .form-success .feature-pay { animation: card-in .5s both; }
+.form-success .next-steps { animation-delay: .15s; }
+.form-success .feature-cta, .form-success .feature-pay { animation-delay: .28s; }
+.form-success.is-edit .next-steps, .form-success.is-edit .feature-cta, .form-success.is-edit .cele-sub, .form-success.is-edit .confetti { display: none; }
+.finder-done .si-fine { margin: -.2rem 0 1.2rem; }

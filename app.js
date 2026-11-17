@@ -638,7 +638,8 @@
     placeVerifyCard(false);
     $('#edit-takedown').hidden = true;
     $('#listing-title').textContent = 'List your lease';
-    $('#listing-success-title').textContent = "You're all set.";
+    $('#listing-success-title').textContent = "You're listed! 🎉";
+    $('#listing-dialog .form-success').classList.remove('is-edit');
     $('button[type=submit]', f).textContent = 'Submit listing';
     if (/^#edit-/.test(location.hash)) history.replaceState(null, '', location.pathname);
   }
@@ -771,6 +772,7 @@
         if (!out.ok) throw new Error(out.error || 'failed');
         form.hidden = true;
         $('#listing-success-title').textContent = out.status === 'pending' ? 'Saved. We will give it a quick look.' : 'Your changes are saved.';
+        $('.form-success', form.closest('dialog')).classList.add('is-edit');
         $('.form-success', form.closest('dialog')).hidden = false;
         track('edited/listing', 'Edited listing');
         load(); // the form resets itself when the dialog closes (endEdit)
@@ -819,14 +821,26 @@
           body: JSON.stringify(data),
         });
       }
+      track('submitted/' + type, 'Submitted: ' + type);
+      // Monthly fee on? Go straight to the free-trial pop-up (no "you're listed" until it's really going live).
+      if (type === 'listing' && !editing) {
+        btn.textContent = 'Finishing up…';
+        const trialOpened = await startTrial('', { fromListing: true, thenFeature: !!data.wantsFeature, complex: data.complex });
+        if (trialOpened) { form.reset(); clearPhotos(); return; }
+      }
       form.reset();
       if (type === 'waitlist') { syncNotifyBy(); resetWhen(); }
       if (type === 'listing') clearPhotos();
       form.hidden = true;
-      $('.form-success', form.closest('dialog')).hidden = false;
-      track('submitted/' + type, 'Submitted: ' + type);
+      const ok = $('.form-success', form.closest('dialog'));
+      ok.hidden = false;
+      if (type === 'listing' && !editing) {
+        const sub = $('#listing-success-sub');
+        if (sub) sub.textContent = data.complex ? 'Nice work. Your place at ' + data.complex + ' will be on the board in a few minutes.' : 'Nice work. Your place will be on the board in a few minutes.';
+        celebrate(ok);
+        if (data.wantsFeature) setTimeout(() => featurePay('', { fromListing: true }), 1600);
+      }
       if (type === 'waitlist') offerSave('#waitlist-dialog', data.email);
-      if (type === 'listing' && !editing) startTrial('', { fromListing: true, thenFeature: !!data.wantsFeature });
     } catch (e) {
       console.error(e);
       err.textContent = 'Something went wrong. Check your connection and try again.';
@@ -1845,12 +1859,17 @@
   async function startTrial(listingId, opts) {
     opts = opts || {};
     subOpts = opts;
-    if (!session) { afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me'; return openSignIn({ title: 'Sign in to finish your listing' }); }
+    if (!session) {
+      if (opts.fromListing) return false;
+      afterSignIn = () => { location.hash = 'me'; }; afterKind = 'me'; openSignIn({ title: 'Sign in to finish your listing' }); return false;
+    }
     const d = $('#sub-dialog');
+    // Preview site: the listing isn't really saved, so ask for a test-mode demo trial instead.
+    const reqBody = listingId ? { listingId } : (window.TAKEOVER_PREVIEW && opts.fromListing ? { preview: true, complex: opts.complex || '' } : {});
     const ask = () => fetch(CFG.supabaseUrl + '/functions/v1/listing-subscribe', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify(listingId ? { listingId } : {}),
+      body: JSON.stringify(reqBody),
     }).then((r) => r.json()).catch(() => ({}));
     // Free / grandfathered listings skip straight on (to the feature, if they picked it).
     let j = await ask();
@@ -1859,8 +1878,10 @@
       j = await ask();
     }
     if (!j.ok) {
-      if (j.error === 'not needed' || j.error === 'no listing') { if (opts.thenFeature) featurePay('', { fromListing: true }); return; }
-      return toast("Couldn't start the trial. Try again from your account in a minute.", 6000);
+      // From the listing form, the caller shows "You're listed" (and the feature pop-up if they picked it).
+      if (j.error === 'not needed' || j.error === 'no listing') return false;
+      toast("Couldn't start the trial. Try again from your account in a minute.", 6000);
+      return false;
     }
     d.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el.dataset.step !== 'pay'));
     $('#sub-posted').hidden = !opts.fromListing;
@@ -1896,6 +1917,25 @@
       console.error(e);
       subErr("Couldn't load the card form. Check your connection and try again.");
     }
+    return true;
+  }
+  // Confetti burst + check-mark pop for the "you're listed" moments
+  function celebrate(root) {
+    const box = root && root.querySelector('.confetti');
+    if (!box) return;
+    box.innerHTML = '';
+    const colors = ['#2f5bea', '#7c9cff', '#f5b301', '#22c55e', '#ec4899', '#38bdf8'];
+    for (let i = 0; i < 100; i++) {
+      const p = document.createElement('i');
+      const dx = (Math.random() - 0.5) * 520, up = 120 + Math.random() * 160, down = 260 + Math.random() * 260;
+      p.style.cssText = `background:${colors[i % colors.length]};--dx:${dx}px;--up:${-up}px;--down:${down}px;--r:${(Math.random() - 0.5) * 1080}deg;` +
+        `animation-delay:${Math.random() * 0.18}s;animation-duration:${1.5 + Math.random() * 0.9}s;` +
+        (i % 3 === 0 ? 'border-radius:50%;width:7px;height:7px;' : '');
+      box.appendChild(p);
+    }
+    const badge = root.querySelector('.cele-badge');
+    if (badge) { badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop'); }
+    setTimeout(() => { box.innerHTML = ''; }, 3000);
   }
   $('#sub-btn').addEventListener('click', async () => {
     if (!subState || !stripeJs) return;
@@ -1915,6 +1955,7 @@
     meData = null; // refresh the account page next time
     const d = $('#sub-dialog');
     slideSteps($('.finder-body', d), d.querySelector('[data-step="pay"]'), d.querySelector('[data-step="done"]'), 1);
+    setTimeout(() => celebrate(d.querySelector('[data-step="done"]')), 250);
   });
   $('#sub-next-feature').addEventListener('click', () => featurePay(subState ? subState.listingId : '', { fromListing: false }));
   $('#sub-dialog').addEventListener('close', () => {
