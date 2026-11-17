@@ -2053,7 +2053,7 @@
     if (l.status === 'paused') return '<p class="mc-sub-line warn">Paused: your $7.99/mo plan ended. Restart to put it back up.</p>';
     if (s === 'trialing') return '<p class="mc-sub-line">Free trial · ends ' + esc(shortDate(l.trialEnds) || 'soon') + ', then $7.99/mo</p>';
     if (s === 'active') return '<p class="mc-sub-line">$7.99/mo · active</p>';
-    if (s === 'past_due') return '<p class="mc-sub-line warn">Payment didn\'t go through. Tap Billing to update your card.</p>';
+    if (s === 'past_due') return '<p class="mc-sub-line warn">Payment didn\'t go through. Update your card in Plan &amp; billing below.</p>';
     return '';
   }
   const WHO = { Female: 'girls', Male: 'guys' };
@@ -2111,12 +2111,134 @@
       (i.rent ? ' <span class="muted">· ' + money(i.rent) + '/mo</span>' : '') + (i.status === 'taken' ? ' <em class="me-status taken">Taken</em>' : '') + '</span><span class="arrow">›</span></a>').join('')
       : '<div class="me-empty"><p>Nothing yet.</p><small>Tap "I\'m interested" on a listing and it shows up here.</small></div>';
 
-    $('[data-billing]').hidden = !d.listings.some((l) => l.subStatus);
+    renderPlans();
     $('#me-body').hidden = false;
     $('#me-loading').hidden = true;
     ls.set('tsmtx_seen_int', String(totalInterested())); // you've seen everyone who's interested
     paintAccountBtn();
   }
+
+  // ---------- Plan & billing (trial / monthly plan: see it, change card, cancel) ----------
+  var planData = null, planCard = null;
+  const planFetch = (body) => fetch(CFG.supabaseUrl + '/functions/v1/my-plan', {
+    method: 'POST', headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  }).then((r) => r.json()).catch(() => ({}));
+  async function loadPlans() {
+    if (!session || !CFG.supabaseUrl) return;
+    const j = await planFetch({ action: 'list' });
+    if (j.ok) { planData = j.plans || []; renderPlans(); }
+  }
+  const pDate = (t) => (t ? new Date(t * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
+  const pMoney = (c) => '$' + (c / 100).toFixed(2).replace(/\.00$/, '');
+  const BRANDS = { visa: 'Visa', mastercard: 'Mastercard', amex: 'Amex', discover: 'Discover' };
+  const planName = (p) => { const l = ((meData && meData.listings) || []).find((x) => String(x.id) === String(p.listingId)); return (l && l.complex) || p.complex || 'Your listing'; };
+  function renderPlans() {
+    const sec = $('#me-plan-section');
+    if (!sec) return;
+    const plans = planData || [];
+    sec.hidden = !plans.length;
+    if (!plans.length) return;
+    $('#me-plan').innerHTML = plans.map((p) => {
+      const trial = p.status === 'trialing', failed = p.status === 'past_due' || p.status === 'unpaid';
+      const pill = p.cancelAtEnd ? ['Ends ' + pDate(p.periodEnd), 'ending'] : failed ? ['Payment failed', 'failed'] : trial ? ['Free trial', 'trial'] : ['Active', 'active'];
+      const rows = p.cancelAtEnd ? [['Stays up until', pDate(p.periodEnd)], ['Charges', 'None, your plan is canceled']]
+        : trial ? [['Free trial ends', pDate(p.trialEnd)], ['Then', pMoney(p.amount) + '/mo + tax']]
+        : failed ? [['Last payment', "Didn't go through"]]
+        : [['Next charge', pDate(p.periodEnd) + ' · ' + pMoney(p.amount) + ' + tax']];
+      const c = p.card;
+      const card = c ? (c.wallet === 'apple_pay' ? 'Apple Pay · ' : c.wallet === 'google_pay' ? 'Google Pay · ' : '') + (BRANDS[c.brand] || c.brand) + ' •••• ' + c.last4 : 'No card on file';
+      return '<article class="plan-card' + (failed ? ' is-failed' : '') + '">' +
+        '<div class="plan-top"><span class="cart-ic">🏠</span><div><b>' + esc(planName(p)) + '</b><small>Listing plan · ' + pMoney(p.amount) + '/mo</small></div>' +
+          '<span class="plan-pill ' + pill[1] + '">' + esc(pill[0]) + '</span></div>' +
+        (failed ? '<p class="mc-sub-line warn">Update your card and we\'ll try it again right away.</p>' : '') +
+        '<dl class="plan-rows">' + rows.map((r) => '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') +
+          '<div><dt>Card</dt><dd>' + esc(card) + ' <button type="button" class="plan-link" data-plan-card>Change</button></dd></div></dl>' +
+        '<div class="plan-actions">' + (p.cancelAtEnd
+          ? '<button type="button" class="mc-btn" data-plan-resume="' + esc(p.id) + '">↺ Keep my plan</button>'
+          : '<button type="button" class="mc-btn plan-cancel" data-plan-cancel="' + esc(p.id) + '">Cancel plan</button>') + '</div>' +
+      '</article>';
+    }).join('') + '<button type="button" class="plan-receipts" data-billing><span>🧾 Receipts &amp; billing history</span><span class="arrow">›</span></button>';
+  }
+  document.addEventListener('click', async (e) => {
+    const cx = e.target.closest('[data-plan-cancel]');
+    if (cx) {
+      const p = (planData || []).find((x) => x.id === cx.dataset.planCancel);
+      if (!p) return;
+      const name = planName(p), failed = p.status === 'past_due' || p.status === 'unpaid';
+      $('#cancel-title').textContent = p.status === 'trialing' ? 'Cancel your free trial?' : 'Cancel your plan?';
+      $('#cancel-text').textContent = failed ? name + ' comes down from the board now, and we won\'t try your card again.'
+        : p.status === 'trialing' ? "You won't be charged anything. " + name + ' stays on the board until ' + pDate(p.trialEnd) + ', then comes down. You can undo this until then.'
+        : 'No more charges. ' + name + ' stays on the board until ' + pDate(p.periodEnd) + ' (the end of the month you paid for), then comes down. You can undo this until then.';
+      const d = $('#cancel-dialog');
+      d.dataset.id = p.id;
+      $('#cancel-confirm').disabled = false;
+      $('#cancel-confirm').textContent = p.status === 'trialing' ? 'Cancel free trial' : 'Cancel plan';
+      d.showModal();
+      return;
+    }
+    const rs = e.target.closest('[data-plan-resume]');
+    if (rs) {
+      rs.disabled = true;
+      const j = await planFetch({ action: 'resume', id: rs.dataset.planResume });
+      toast(j.ok ? "You're all set. Your plan continues as normal ✅" : "Couldn't undo that right now. Try again in a minute.");
+      loadPlans();
+      return;
+    }
+    if (e.target.closest('[data-plan-card]')) openCardDialog();
+  });
+  $('#cancel-confirm').addEventListener('click', async () => {
+    const d = $('#cancel-dialog'), b = $('#cancel-confirm');
+    b.disabled = true; b.textContent = 'Canceling…';
+    const p = (planData || []).find((x) => x.id === d.dataset.id);
+    const j = await planFetch({ action: 'cancel', id: d.dataset.id });
+    d.close();
+    if (!j.ok) return toast("Couldn't cancel right now. Try again in a minute, or email team@takeoversmtx.com.", 6000);
+    track('plan/cancel', 'Canceled plan');
+    const failed = p && (p.status === 'past_due' || p.status === 'unpaid');
+    toast(failed ? 'Plan canceled. Your listing is coming down.' : "Canceled. You won't be charged again, and your listing stays up until " + pDate(p && (p.status === 'trialing' ? p.trialEnd : p.periodEnd)) + '.', 6500);
+    loadPlans();
+    if (failed) { meData = null; loadMe(); }
+  });
+  const cardErr = (m) => { const e = $('#card-dialog .form-error'); e.textContent = m || ''; e.hidden = !m; };
+  async function openCardDialog() {
+    const d = $('#card-dialog');
+    cardErr('');
+    $('#card-btn').disabled = true;
+    $('#card-btn').textContent = 'Save card';
+    const failed = (planData || []).some((p) => p.status === 'past_due' || p.status === 'unpaid');
+    $('#card-hint').textContent = failed ? "We'll use this card from now on and retry your last payment right away." : 'Your plan will use this card from now on.';
+    $('#card-element').innerHTML = '<div class="me-loading"><span class="spinner"></span> Loading secure form…</div>';
+    d.showModal();
+    const j = await planFetch({ action: 'card' });
+    if (!j.ok) return cardErr("Couldn't load the card form. Try again in a minute.");
+    try {
+      const StripeCtor = await loadStripe();
+      stripeJs = stripeJs || StripeCtor(CFG.stripeKey);
+      const elements = stripeJs.elements({ clientSecret: j.clientSecret, appearance: PAY_LOOK, fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' }] });
+      const pe = elements.create('payment', { layout: 'tabs', wallets: { applePay: 'auto', googlePay: 'auto' } });
+      $('#card-element').innerHTML = '';
+      pe.mount('#card-element');
+      pe.on('ready', () => { $('#card-btn').disabled = false; });
+      planCard = elements;
+    } catch (e) {
+      console.error(e);
+      cardErr("Couldn't load the card form. Check your connection and try again.");
+    }
+  }
+  $('#card-btn').addEventListener('click', async () => {
+    if (!planCard) return;
+    const b = $('#card-btn');
+    b.disabled = true; b.textContent = 'Saving…'; cardErr('');
+    const res = await stripeJs.confirmSetup({ elements: planCard, redirect: 'if_required', confirmParams: { return_url: location.origin + '/#me' } });
+    if (res.error) { cardErr(res.error.message || "That card didn't work. Try another one."); b.disabled = false; b.textContent = 'Save card'; return; }
+    const j = await planFetch({ action: 'setcard', setupIntent: res.setupIntent.id });
+    $('#card-dialog').close();
+    if (!j.ok) return toast("Your card was saved but we couldn't switch your plan to it. Email team@takeoversmtx.com and we'll fix it.", 7000);
+    track('plan/card', 'Updated card');
+    toast(j.retried ? 'Card updated ✅ We retried your payment with it.' : 'Card updated ✅', 5000);
+    loadPlans();
+    if (j.retried) { meData = null; loadMe(); }
+  });
 
   async function loadMe() {
     if (!sb) { $('#me-loading').hidden = true; $('#me-error').hidden = false; return; }
@@ -2130,6 +2252,7 @@
     $('#me-error').hidden = true;
     if (meData) renderMe(meData);
     else { $('#me-loading').hidden = false; $('#me-body').hidden = true; }
+    loadPlans();
     try {
       const d = await fetchMe();
       if (d) renderMe(d);

@@ -1551,3 +1551,34 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .form .feature-offer label.fo-handle { max-height: 0; min-height: 0; opacity: 0; margin-top: -1rem; overflow: hidden; border-width: 0; pointer-events: none;
   transform: translateY(-6px); transition: max-height .45s cubic-bezier(.2, .8, .2, 1), opacity .3s, margin .45s cubic-bezier(.2, .8, .2, 1), transform .45s cubic-bezier(.2, .8, .2, 1), min-height .45s; }
 .form .feature-offer.on label.fo-handle { max-height: 60px; min-height: 50px; opacity: 1; margin-top: 0; border-width: 1px; pointer-events: auto; transform: none; }
+
+/* ---------- account: Plan & billing ---------- */
+.plan-card { display: grid; gap: .85rem; padding: 1rem; border: 1px solid var(--line); border-radius: 20px; background: #fff; animation: card-in .45s both; }
+.plan-card.is-failed { border-color: #fecaca; }
+.plan-top { display: grid; grid-template-columns: 40px 1fr auto; gap: .75rem; align-items: center; }
+.plan-top .cart-ic { background: var(--accent-soft); box-shadow: none; }
+.plan-top b { display: block; font-size: 1.02rem; }
+.plan-top small { display: block; color: var(--muted); font-size: .84rem; margin-top: .1rem; }
+.plan-pill { padding: .28rem .6rem; border-radius: 999px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.plan-pill.trial { background: var(--accent-soft); color: var(--maroon); }
+.plan-pill.active { background: #dcfce7; color: var(--green); }
+.plan-pill.failed { background: #fee2e2; color: #b91c1c; }
+.plan-pill.ending { background: #f1f5f9; color: #475569; }
+.plan-rows { margin: 0; display: grid; border-radius: 14px; background: #f8fafc; padding: .2rem .9rem; }
+.plan-rows > div { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .6rem 0; font-size: .9rem; }
+.plan-rows > div + div { border-top: 1px solid var(--line); }
+.plan-rows dt { color: var(--muted); }
+.plan-rows dd { margin: 0; font-weight: 600; text-align: right; display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; justify-content: flex-end; }
+.plan-link { border: 0; background: none; padding: 0; color: var(--maroon); font: 600 .85rem/1 inherit; cursor: pointer; }
+.plan-link:hover { text-decoration: underline; }
+.plan-actions { display: grid; }
+.plan-cancel { color: #b91c1c; }
+.plan-cancel:hover { border-color: #fecaca !important; background: #fef2f2 !important; }
+.plan-receipts { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: .85rem 1rem; border: 1px solid var(--line); border-radius: 16px;
+  background: #fff; font: 600 .92rem/1.2 inherit; color: var(--ink); cursor: pointer; transition: border-color .15s, background .15s; }
+.plan-receipts:hover { border-color: #c7d2fe; background: #f8fafc; }
+.plan-receipts .arrow { color: var(--maroon); font-size: 1.3rem; }
+.cancel-actions { display: grid; gap: .6rem; margin-top: .4rem; }
+.btn-danger-soft { background: #fff; color: #b91c1c; border: 1px solid #fecaca; }
+.btn-danger-soft:hover { background: #fef2f2; }
+#cancel-dialog .finder-step, #card-dialog .finder-step { text-align: left; }
