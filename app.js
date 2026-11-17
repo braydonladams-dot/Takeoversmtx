@@ -2141,7 +2141,7 @@
     $('#me-plan').innerHTML = plans.map((p) => {
       const trial = p.status === 'trialing', failed = p.status === 'past_due' || p.status === 'unpaid';
       const pill = p.cancelAtEnd ? ['Ends ' + pDate(p.periodEnd), 'ending'] : failed ? ['Payment failed', 'failed'] : trial ? ['Free trial', 'trial'] : ['Active', 'active'];
-      const rows = p.cancelAtEnd ? [['Stays up until', pDate(p.periodEnd)], ['Charges', 'None, your plan is canceled']]
+      const rows = p.cancelAtEnd ? [['Next charge', 'None']]
         : trial ? [['Free trial ends', pDate(p.trialEnd)], ['Then', pMoney(p.amount) + '/mo + tax']]
         : failed ? [['Last payment', "Didn't go through"]]
         : [['Next charge', pDate(p.periodEnd) + ' · ' + pMoney(p.amount) + ' + tax']];
@@ -2151,10 +2151,11 @@
         '<div class="plan-top"><span class="cart-ic">🏠</span><div><b>' + esc(planName(p)) + '</b><small>Listing plan · ' + pMoney(p.amount) + '/mo</small></div>' +
           '<span class="plan-pill ' + pill[1] + '">' + esc(pill[0]) + '</span></div>' +
         (failed ? '<p class="mc-sub-line warn">Update your card and we\'ll try it again right away.</p>' : '') +
+        (p.cancelAtEnd ? '<p class="plan-canceled"><b>✓ ' + (p.status === 'trialing' ? 'Free trial canceled' : 'Plan canceled') + '</b>You won\'t be charged. ' + esc(planName(p)) + ' stays on the board until ' + pDate(p.periodEnd) + ', then comes down.</p>' : '') +
         '<dl class="plan-rows">' + rows.map((r) => '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>').join('') +
           '<div><dt>Card</dt><dd>' + esc(card) + ' <button type="button" class="plan-link" data-plan-card>Change</button></dd></div></dl>' +
         '<div class="plan-actions">' + (p.cancelAtEnd
-          ? '<button type="button" class="mc-btn" data-plan-resume="' + esc(p.id) + '">↺ Keep my plan</button>'
+          ? '<button type="button" class="mc-btn plan-undo" data-plan-resume="' + esc(p.id) + '">↺ Undo cancel <small>Keep it up after ' + pDate(p.periodEnd) + '</small></button>'
           : '<button type="button" class="mc-btn plan-cancel" data-plan-cancel="' + esc(p.id) + '">Cancel plan</button>') + '</div>' +
       '</article>';
     }).join('') + '<button type="button" class="plan-receipts" data-billing><span>🧾 Receipts &amp; billing history</span><span class="arrow">›</span></button>';
@@ -2180,7 +2181,7 @@
     if (rs) {
       rs.disabled = true;
       const j = await planFetch({ action: 'resume', id: rs.dataset.planResume });
-      toast(j.ok ? "You're all set. Your plan continues as normal ✅" : "Couldn't undo that right now. Try again in a minute.");
+      toast(j.ok ? "Cancel undone ✅ Your listing stays up and your plan continues." : "Couldn't undo that right now. Try again in a minute.");
       loadPlans();
       return;
     }
