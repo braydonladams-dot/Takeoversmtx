@@ -96,7 +96,7 @@ ${body}
 function faqFor(name) {
   return [
     [`How do I get out of my ${name} lease?`,
-      `Ask the ${name} leasing office whether your lease can be transferred to someone else and what the transfer fee is. Then list your lease free on Takeover SMTX. Students looking for a place get alerted when it fits their budget and contact you directly. The new person applies with ${name} like any other transfer.`],
+      `Ask the ${name} leasing office whether your lease can be transferred to someone else and what the transfer fee is. Then list your lease on Takeover SMTX (the first 7 days are free). Students looking for a place get alerted when it fits their budget and contact you directly. The new person applies with ${name} like any other transfer.`],
     [`Can I take over a lease at ${name}?`,
       `Yes, when someone is leaving. Every takeover listed above is from a current resident. Tap one to see the photos, the details and how to contact them. You still apply and get approved through the ${name} office.`],
     [`What if nothing is listed at ${name} right now?`,
@@ -111,7 +111,7 @@ function complexPage(c, list, all) {
   const min = list.length ? Math.min(...list.map((l) => Number(l.rent))) : 0;
   const title = `${name} Lease Takeovers & Subleases | ${/san marcos/i.test(name) ? 'Takeover SMTX' : 'San Marcos'}`;
   const desc = list.length
-    ? `${list.length} lease ${list.length === 1 ? 'takeover' : 'takeovers'} at ${inSM(name)} from ${money(min)}/mo. Take over a lease from a current resident, or list yours free.`
+    ? `${list.length} lease ${list.length === 1 ? 'takeover' : 'takeovers'} at ${inSM(name)} from ${money(min)}/mo. Take over a lease from a current resident, or list yours.`
     : `Lease takeovers and subleases at ${inSM(name)}. Get free alerts when one is listed, or list your own lease free.`;
   const faq = faqFor(name);
   const others = all.filter((o) => o.slug !== c.slug)
@@ -132,7 +132,7 @@ function complexPage(c, list, all) {
     <div class="two-col cp-ctas">
       <section class="panel">
         <h2>Need out of your ${esc(name)} lease?</h2>
-        <p>List it free in about 2 minutes. Students looking for a place get alerted when it fits their budget.</p>
+        <p>List it in about 2 minutes, free for the first 7 days. Students looking for a place get alerted when it fits their budget.</p>
         <a class="btn btn-primary" href="/#list">List your lease</a>
       </section>
       <section class="panel">
@@ -174,7 +174,7 @@ ${all.map((c) => `      <a class="panel cp-row" href="/lease-takeover/${c.slug}"
     </div>`;
   return layout({
     title: 'San Marcos Lease Takeovers by Apartment Complex | Takeover SMTX',
-    desc: `Lease takeovers and subleases at ${all.length} San Marcos apartment complexes near Texas State. Find one or list yours free.`,
+    desc: `Lease takeovers and subleases at ${all.length} San Marcos apartment complexes near Texas State. Find one or list yours.`,
     canonical: `${ORIGIN}/lease-takeover/`, body,
   });
 }
