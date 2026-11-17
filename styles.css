@@ -1547,3 +1547,7 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .cart-add-price { font-weight: 700; color: var(--maroon); white-space: nowrap; }
 .cart-row + .cart-add { margin-top: .1rem; }
 .cart-remove:disabled, .cart-add:disabled { opacity: .55; cursor: progress; }
+/* the "@your Instagram" box only appears once "Yes, feature it" is picked */
+.form .feature-offer label.fo-handle { max-height: 0; min-height: 0; opacity: 0; margin-top: -1rem; overflow: hidden; border-width: 0; pointer-events: none;
+  transform: translateY(-6px); transition: max-height .45s cubic-bezier(.2, .8, .2, 1), opacity .3s, margin .45s cubic-bezier(.2, .8, .2, 1), transform .45s cubic-bezier(.2, .8, .2, 1), min-height .45s; }
+.form .feature-offer.on label.fo-handle { max-height: 60px; min-height: 50px; opacity: 1; margin-top: 0; border-width: 1px; pointer-events: auto; transform: none; }

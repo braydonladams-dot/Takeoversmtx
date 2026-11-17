@@ -796,7 +796,7 @@
     }
     if (type === 'listing') data.photos = photos.map((p) => p.dataUrl.split(',')[1]);
     if (type === 'listing' && proof) data.proof = proof.split(',')[1];
-    if (type === 'listing') data.tagInstagram = $('#ig-tag').value.trim();
+    if (type === 'listing') data.tagInstagram = $('#feature-offer [name=wantsFeature][value=true]:checked') ? $('#ig-tag').value.trim() : '';
     if (type === 'listing') {
       const pick = $('#feature-offer [name=wantsFeature]:checked');
       data.wantsFeature = !!pick && pick.value === 'true';
