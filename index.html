@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="build" content="v2">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Takeover SMTX: San Marcos lease takeovers in one place</title>
   <meta name="description" content="Every San Marcos lease takeover in one place. Find a cheaper place near Texas State, or get out of your lease.">
@@ -15,22 +16,33 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://takeoversmtx.com/og-image.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <meta name="theme-color" content="#6b1f2a">
-  <link rel="stylesheet" href="styles.css?v=1794867987">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=1794899670">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
-<body>
+<body class="first-load">
   <div id="demo-banner" class="banner" hidden>
     Demo mode: these are sample listings. Connect your Google Sheet to go live (see README).
   </div>
 
+  <div class="topbar" id="topbar">
+    <a class="tb-item" href="/get-featured">⭐ <b>New:</b> get your place featured on our Instagram <span class="go">→</span></a>
+    <button type="button" class="tb-item" data-open="waitlist-dialog" data-cta="topbar">🔔 Get a text the moment a place fits your budget <span class="go">→</span></button>
+    <button type="button" class="tb-item" data-finder>🔥 <b id="tb-count">New places</b>&nbsp;open near Texas State <span class="go">→</span></button>
+  </div>
   <header class="site-header">
-    <a class="brand" href="#"><img src="favicon.svg" alt="" width="30" height="30">Takeover<span>SMTX</span></a>
+    <a class="brand" href="/" data-home><img src="favicon.svg" alt="" width="30" height="30">Takeover<span>SMTX</span></a>
     <nav class="nav">
-      <a class="btn btn-ghost" href="/how-it-works">How it works</a>
-      <button class="btn btn-ghost" data-open="waitlist-dialog">Get alerts</button>
+      <a class="btn btn-ghost nav-wide" href="/how-it-works">How it works</a>
+      <button class="btn btn-ghost nav-wide" data-open="waitlist-dialog">Get alerts</button>
       <button class="btn btn-primary" data-open="listing-dialog">List your lease</button>
+      <button type="button" class="me-btn" data-account aria-label="Your account" title="Your account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      </button>
     </nav>
   </header>
 
@@ -45,17 +57,69 @@
       </div>
     </section>
 
-    <section class="hero">
-      <h1>Every San Marcos lease takeover, in one place.</h1>
-      <p>Taking over a lease is often cheaper than signing a new one, and some people will even pay you to take theirs.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="#board">Browse takeovers</a>
-        <button class="btn btn-outline btn-lg" data-open="listing-dialog">Get out of my lease</button>
+    <section id="me" class="me-page" hidden>
+      <div class="board-top">
+        <button type="button" class="back-home" data-home>← Home</button>
+        <h1 class="board-title">Your account</h1>
       </div>
-      <a class="text-link" href="/how-it-works">New here? See how it works →</a>
-      <div class="hero-stats">
-        <p id="looking-stat" class="looking-stat" hidden></p>
-        <p id="success-stat" class="success-stat" hidden></p>
+      <div class="me-head">
+        <span class="me-avatar" id="me-avatar">?</span>
+        <div class="me-who"><b id="me-email"></b><small id="me-stats">Signed in</small></div>
+        <button type="button" class="me-signout" data-signout>Sign out</button>
+      </div>
+      <div id="me-loading" class="me-loading"><span class="spinner"></span> Loading your stuff…</div>
+      <div id="me-body" hidden>
+        <section class="me-section">
+          <div class="me-section-head"><h2>Your listings</h2><button type="button" class="btn btn-outline btn-sm" data-open="listing-dialog">+ List a place</button></div>
+          <div id="me-listings" class="me-list"></div>
+        </section>
+        <section class="me-section" id="me-plan-section" hidden>
+          <div class="me-section-head"><h2>Plan &amp; billing</h2></div>
+          <div id="me-plan" class="me-list"></div>
+        </section>
+        <section class="me-section">
+          <div class="me-section-head"><h2>Your alerts</h2><button type="button" class="btn btn-outline btn-sm" data-open="waitlist-dialog">+ New alert</button></div>
+          <div id="me-alerts" class="me-list"></div>
+        </section>
+        <section class="me-section">
+          <div class="me-section-head"><h2>Places you're interested in</h2></div>
+          <div id="me-interests" class="me-list"></div>
+        </section>
+      </div>
+      <p id="me-error" class="empty" hidden>Couldn't load your account right now. <button type="button" class="link-btn" data-me-retry>Try again</button></p>
+    </section>
+
+    <section class="home">
+      <div class="home-copy">
+        <span class="live-pill"><span class="dot"></span><span id="live-count">Lease takeovers in San Marcos</span></span>
+        <h1>Get out of your lease. <em>Or take over someone else's.</em></h1>
+        <p class="home-sub">Lease takeovers are often cheaper than a new lease, and some people will even pay you to take theirs.</p>
+        <div class="hero-stats">
+          <p id="looking-stat" class="looking-stat" hidden></p>
+          <p id="success-stat" class="success-stat" hidden></p>
+        </div>
+      </div>
+      <div class="home-pick">
+        <p class="iam">I am…</p>
+        <div class="iam-cards">
+          <button type="button" class="iam-card primary" data-finder>
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+            <span class="txt"><b>Looking for a place</b><span>Take over a lease, often for less</span></span><span class="arrow">›</span>
+          </button>
+          <button type="button" class="iam-card" data-open="listing-dialog" data-cta="home-list">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M17 6l2 2M15 8l2 2"/></svg></span>
+            <span class="txt"><b>Putting my lease up</b><span>Find someone to take it over</span></span><span class="arrow">›</span>
+          </button>
+          <button type="button" class="iam-card" data-taken-flow>
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span>
+            <span class="txt"><b>My lease got taken</b><span>Take your listing down</span></span><span class="arrow">›</span>
+          </button>
+          <a class="iam-card" href="#board" data-browse>
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span>
+            <span class="txt"><b>Just browsing</b><span>See every listing</span></span><span class="arrow">›</span>
+          </a>
+        </div>
+        <p class="home-foot">Free to look around. <a href="/how-it-works">How it works →</a></p>
       </div>
     </section>
 
@@ -65,49 +129,53 @@
     </section>
 
     <section id="board" class="board">
+      <div class="board-top">
+        <button type="button" class="back-home" data-home>← Home</button>
+        <h1 class="board-title">Lease takeovers in San Marcos</h1>
+      </div>
       <div class="filters">
         <div class="search-wrap">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input type="search" id="f-search" placeholder="Search by complex, street, or keyword" aria-label="Search">
         </div>
 
-        <div class="filter-grid">
-          <label class="fl"><span>Room</span>
-            <select id="f-type">
-              <option value="">Any</option>
-              <option value="bed">Shared (by the bed)</option>
-              <option value="unit">Whole unit</option>
-            </select>
-          </label>
-          <label class="fl"><span>Lease</span>
-            <select id="f-arrangement">
-              <option value="">Any</option>
-              <option value="takeover">Takeovers only</option>
-              <option value="sublease">Subleases only</option>
-            </select>
-          </label>
-          <label class="fl"><span>Max rent</span>
-            <span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits id="f-max" maxlength="5" placeholder="Any"></span>
-          </label>
-          <label class="fl"><span>Move in by</span>
-            <input type="date" id="f-movein">
-          </label>
-          <label class="fl"><span>Sort by</span>
-            <select id="f-sort">
-              <option value="new">Newest</option>
-              <option value="cheap">Lowest rent</option>
-              <option value="incentive">Biggest incentive</option>
-              <option value="soon">Available soonest</option>
-            </select>
-          </label>
+        <div class="filter-row" id="filter-row">
+          <select id="f-type" class="pill" aria-label="Room type">
+            <option value="">Room type</option>
+            <option value="bed">Private room</option>
+            <option value="unit">Whole place</option>
+          </select>
+          <select id="f-gender" class="pill" aria-label="Roommates">
+            <option value="">Roommates</option>
+            <option value="Female">Girls</option>
+            <option value="Male">Guys</option>
+          </select>
+          <label class="pill money-pill" aria-label="Max rent"><span>$</span><input type="text" inputmode="numeric" autocomplete="off" data-digits id="f-max" maxlength="5" placeholder="Max rent"></label>
+          <select id="f-movein" class="pill" aria-label="Move in by">
+            <option value="">Move in</option>
+          </select>
+          <select id="f-arrangement" class="pill" aria-label="Lease type">
+            <option value="">Lease type</option>
+            <option value="takeover">Takeovers</option>
+            <option value="sublease">Subleases</option>
+          </select>
           <label class="chip">
             <input type="checkbox" id="f-incentive">
-            <span>$ Cash incentive</span>
+            <span>$ Incentive</span>
           </label>
+          <button type="button" class="clear-filters" id="f-clear" hidden>Clear</button>
+        </div>
+        <div class="sort-row">
+          <p id="result-count" class="muted"></p>
+          <select id="f-sort" class="sort-select" aria-label="Sort">
+            <option value="new">Newest first</option>
+            <option value="cheap">Lowest rent</option>
+            <option value="incentive">Biggest incentive</option>
+            <option value="soon">Available soonest</option>
+          </select>
         </div>
       </div>
 
-      <p id="result-count" class="muted"></p>
       <div id="listings" class="grid"></div>
       <div id="taken-wrap" hidden>
         <h2 class="taken-head">Taken through Takeover SMTX</h2>
@@ -124,7 +192,7 @@
     <section class="how">
       <div>
         <h3>Stuck in a lease?</h3>
-        <p>List it in two minutes. Every listing is checked for scams, then sent to students who are looking. A cash incentive or a Verified badge gets it taken faster.</p>
+        <p>List it in two minutes. Every listing is checked for scams, then sent to students who are looking. Good photos and a small cash incentive get it taken faster.</p>
       </div>
       <div>
         <h3>Looking for a place?</h3>
@@ -137,149 +205,180 @@
     </section>
   </main>
 
+  <footer class="mini-footer">
+    <span>Questions? <a href="mailto:team@takeoversmtx.com">team@takeoversmtx.com</a></span>
+    <nav><a href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener">Instagram</a><a href="/how-it-works">How it works</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+  </footer>
   <footer class="footer">
-    <p><a href="/how-it-works">How it works</a> · <a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+    <p><a href="/how-it-works">How it works</a> · <a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/get-featured">Get featured on Instagram</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
     <p><strong>Takeover SMTX</strong> is an independent listing board. It is not affiliated with Texas State University or any apartment complex. We don't negotiate leases, and every takeover must be approved by the property.</p>
     <p><a class="ig-link" href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><span>Follow <b>@takeoversmtx</b> on Instagram</span></a></p>
-    <p><button type="button" class="link-btn" data-open="manage-dialog">Already listed? Edit your listing or mark it taken</button></p>
+    <p><button type="button" class="link-btn" data-my-listings>Already listed? Edit your listing or mark it taken</button></p>
     <p id="footer-contact"></p>
   </footer>
 
   <!-- List your lease -->
   <dialog id="listing-dialog" class="dialog">
-    <form id="listing-form" class="form" novalidate>
+    <form id="listing-form" class="form wizard" novalidate>
       <div class="dialog-head">
-        <h2 id="listing-title">List your lease</h2>
+        <div class="wiz-head">
+          <h2 id="listing-title">List your lease</h2>
+          <span class="wiz-count" id="wiz-count">Step 1 of 4</span>
+        </div>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+        <div class="wiz-progress" aria-hidden="true"><span id="wiz-bar"></span></div>
       </div>
-      <p class="muted">Most listings go live within a few minutes and get posted on our Instagram, <b>@takeoversmtx</b>. Every listing is checked for scams and spam.</p>
-      <p class="already-listed">Already listed? <button type="button" class="link-btn owner-link" data-switch-manage>Edit yours instead</button></p>
-      <p class="looking-note" id="looking-note" hidden></p>
 
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <div class="form-section">
-        <h3>About you</h3>
-        <div class="row">
-          <label>Your name <small class="hint">· only your first name is shown</small><input name="name" required maxlength="80" autocomplete="name"></label>
-          <label>Email <small class="hint">· private, for verification</small><input type="email" name="email" required placeholder="you@email.com" maxlength="120" autocomplete="email"></label>
-        </div>
-      </div>
+      <div class="wiz-steps">
+        <section class="wiz-step" data-wstep="1">
+          <h3 class="wiz-title">The place</h3>
+          <p class="wiz-sub"><b>7 days free</b>, then $7.99/month until it's taken. Cancel anytime. Most listings go live within minutes and get sent to students who are looking. <span class="already-listed">Already listed? <button type="button" class="link-btn owner-link" data-switch-manage>Edit yours instead</button></span></p>
+          <p class="looking-note" id="looking-note" hidden></p>
 
-      <div class="form-section">
-        <h3>The place</h3>
-        <label>Apartment complex or address<input name="complex" required maxlength="120" placeholder="Complex name, or street address for a house"></label>
+          <label>Apartment complex or address<input name="complex" required maxlength="120" placeholder="e.g. The Retreat, or a street address"></label>
 
-        <fieldset class="seg-group">
-          <legend>Room type</legend>
-          <div class="choice-cards two compact">
-            <label class="choice"><input type="radio" name="unitType" value="bed" checked><span>Shared (by the bed)</span></label>
-            <label class="choice"><input type="radio" name="unitType" value="unit"><span>Whole unit</span></label>
+          <fieldset class="seg-group">
+            <legend>Room type</legend>
+            <div class="choice-cards two compact">
+              <label class="choice"><input type="radio" name="unitType" value="bed" checked><span>Private room<small>Shared apartment</small></span></label>
+              <label class="choice"><input type="radio" name="unitType" value="unit"><span>Whole place<small>The entire unit</small></span></label>
+            </div>
+          </fieldset>
+
+          <div class="row pair">
+            <label>Bedrooms<input type="text" inputmode="numeric" autocomplete="off" data-digits name="bedrooms" maxlength="2" pattern="[0-9]{1,2}" required placeholder="4"></label>
+            <label>Bathrooms<input type="text" inputmode="decimal" autocomplete="off" data-decimal name="bathrooms" maxlength="4" pattern="[0-9]{1,2}(\.5)?" required placeholder="4"></label>
           </div>
-        </fieldset>
+          <fieldset class="seg-group" id="gender-field">
+            <legend>Roommates</legend>
+            <div class="choice-cards three compact">
+              <label class="choice"><input type="radio" name="gender" value="Any" checked><span>Any</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Female"><span>Girls</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Male"><span>Guys</span></label>
+            </div>
+          </fieldset>
 
-        <div class="row three">
-          <label>Bedrooms<input type="text" inputmode="numeric" autocomplete="off" data-digits name="bedrooms" maxlength="2" pattern="[0-9]{1,2}" required placeholder="e.g. 4"></label>
-          <label>Bathrooms<input type="text" inputmode="decimal" autocomplete="off" data-decimal name="bathrooms" maxlength="4" pattern="[0-9]{1,2}(\.5)?" required placeholder="e.g. 4"></label>
-          <label id="gender-field">Roommates
-            <select name="gender">
-              <option value="Any">Any / N/A</option>
-              <option value="Female">Female</option>
-              <option value="Male">Male</option>
-            </select>
-          </label>
-        </div>
+          <fieldset class="seg-group">
+            <legend>Furnished?</legend>
+            <div class="choice-cards two compact">
+              <label class="choice"><input type="radio" name="furnished" value="Yes" checked><span>Yes</span></label>
+              <label class="choice"><input type="radio" name="furnished" value="No"><span>No</span></label>
+            </div>
+          </fieldset>
+        </section>
 
-        <fieldset class="seg-group">
-          <legend>Furnished?</legend>
-          <div class="choice-cards two compact">
-            <label class="choice"><input type="radio" name="furnished" value="Yes" checked><span>Yes</span></label>
-            <label class="choice"><input type="radio" name="furnished" value="No"><span>No</span></label>
+        <section class="wiz-step" data-wstep="2" hidden>
+          <h3 class="wiz-title">Lease details</h3>
+          <p class="wiz-sub">The money and the dates. You can change these later.</p>
+
+          <fieldset class="seg-group">
+            <legend>Takeover or sublease?</legend>
+            <div class="choice-cards stack">
+              <label class="choice"><input type="radio" name="arrangement" value="takeover" checked><span>Takeover<small>The lease goes into their name</small></span></label>
+              <label class="choice"><input type="radio" name="arrangement" value="sublease"><span>Sublease<small>You stay on the lease, they pay you</small></span></label>
+              <label class="choice"><input type="radio" name="arrangement" value="unsure"><span>Not sure<small>Whatever the complex allows</small></span></label>
+            </div>
+          </fieldset>
+
+          <div class="row">
+            <label>Rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="rent" maxlength="5" pattern="[1-9][0-9]{0,4}" required placeholder="650"></span></label>
+            <label>Cash incentive<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="incentive" maxlength="5" placeholder="0"></span><small class="help">Optional. Gets it taken faster.</small></label>
           </div>
-        </fieldset>
-      </div>
 
-      <div class="form-section">
-        <h3>Lease details</h3>
-        <fieldset class="seg-group">
-          <legend>Takeover or sublease?</legend>
-          <div class="choice-cards">
-            <label class="choice"><input type="radio" name="arrangement" value="takeover" checked><span>Takeover<small>The lease goes into their name</small></span></label>
-            <label class="choice"><input type="radio" name="arrangement" value="sublease"><span>Sublease<small>You stay on the lease, they pay you</small></span></label>
-            <label class="choice"><input type="radio" name="arrangement" value="unsure"><span>Not sure<small>Whatever the complex allows</small></span></label>
+          <div class="row">
+            <label>Available from<input type="date" name="availableFrom" required><small class="help">First day someone can move in.</small></label>
+            <label>Lease ends<input type="date" name="leaseEnds" required></label>
           </div>
-        </fieldset>
 
-        <div class="row">
-          <label>Rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="rent" maxlength="5" pattern="[1-9][0-9]{0,4}" required placeholder="650"></span></label>
-          <label>Cash incentive <small class="hint">· optional</small><span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="incentive" maxlength="5" placeholder="0"></span></label>
-        </div>
+          <label>Transfer fee your complex charges<input name="takeoverFee" maxlength="200" placeholder="e.g. $300, or &quot;don't know&quot;"><small class="help">Optional.</small></label>
+        </section>
 
-        <div class="row">
-          <label>Available from <button type="button" class="help-tip has-tip" aria-label="What does available from mean?" data-tip-title="Available from" data-tip="The first day someone could move in and take over your lease. If it's open now, just pick today.">?</button><input type="date" name="availableFrom" required></label>
-          <label>Lease ends<input type="date" name="leaseEnds" required></label>
-        </div>
+        <section class="wiz-step" data-wstep="3" hidden>
+          <h3 class="wiz-title">Photos</h3>
+          <p class="wiz-sub">Listings with photos get taken much faster. Bedroom, living room, kitchen and the view are good picks.</p>
+          <div class="photo-field">
+            <div class="photo-previews" id="photo-previews"></div>
+            <label class="photo-add" id="photo-add">
+              <span class="photo-add-ic">+</span><span><b>Add photos</b><small>Up to 8</small></span>
+              <input type="file" id="photo-input" accept="image/*" multiple hidden>
+            </label>
+          </div>
+          <label>Description <small class="hint">optional</small><textarea name="description" rows="4" maxlength="800" placeholder="Room size, roommates, parking, utilities, why you're leaving..."></textarea></label>
+        </section>
 
-        <label>Transfer fee your complex charges<input name="takeoverFee" maxlength="200" placeholder="e.g. $300, or &quot;don't know&quot;"></label>
-      </div>
-
-      <div class="form-section">
-        <h3>Photos &amp; description</h3>
-        <div class="photo-field">
-          <span class="label">Photos <small class="hint">· up to 8, optional</small></span>
-          <p class="photo-note">Listings with photos get taken faster. Bedroom, living room, kitchen and the view are good picks.</p>
-          <div class="photo-previews" id="photo-previews"></div>
-          <label class="photo-add btn btn-outline btn-sm" id="photo-add">+ Add photos
-            <input type="file" id="photo-input" accept="image/*" multiple hidden>
-          </label>
-        </div>
-
-        <label>Description<textarea name="description" rows="3" maxlength="800" placeholder="Room size, roommates, parking, utilities, why you're leaving..."></textarea></label>
-      </div>
-
-      <div class="form-section verify-slot" id="verify-slot" hidden></div>
-
-      <div class="form-section">
-        <h3>How people reach you</h3>
-        <div class="row">
-          <label>Contact method
-            <select name="contactMethod" required>
-              <option value="text">Text</option>
-              <option value="instagram">Instagram</option>
-              <option value="snapchat">Snapchat</option>
-              <option value="email">Email</option>
-            </select>
-          </label>
-          <label>Number or handle <small class="hint">· only shared with people who tap "I&#39;m interested"</small><input type="tel" inputmode="tel" autocomplete="tel" data-phone name="contact" required maxlength="120" placeholder="512-555-0123"></label>
-        </div>
+        <section class="wiz-step" data-wstep="4" hidden>
+          <h3 class="wiz-title">About you</h3>
+          <p class="wiz-sub">How people interested in your place can reach you.</p>
+          <div class="row">
+            <label>Your name<input name="name" required maxlength="80" autocomplete="name"><small class="help">Only your first name is shown.</small></label>
+            <label>Email<input type="email" name="email" required placeholder="you@email.com" maxlength="120" autocomplete="email"><small class="help">Private. We send your listing link here.</small></label>
+          </div>
+          <fieldset class="seg-group">
+            <legend>How should people reach you?</legend>
+            <div class="choice-cards four compact contact-pick">
+              <label class="choice"><input type="radio" name="contactMethod" value="text" checked><span><i>💬</i>Text</span></label>
+              <label class="choice"><input type="radio" name="contactMethod" value="instagram"><span><i>📸</i>Instagram</span></label>
+              <label class="choice"><input type="radio" name="contactMethod" value="snapchat"><span><i>👻</i>Snapchat</span></label>
+              <label class="choice"><input type="radio" name="contactMethod" value="email"><span><i>✉️</i>Email</span></label>
+            </div>
+          </fieldset>
+          <label>Number or handle<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="contact" required maxlength="120" placeholder="512-555-0123"><small class="help">Only shared when someone taps "I'm interested".</small></label>
+          <div class="form-section verify-slot" id="verify-slot" hidden></div>
+        </section>
       </div>
 
       <p class="form-error" hidden></p>
-      <button type="submit" class="btn btn-primary btn-block btn-lg">Submit listing</button>
+      <div class="wiz-nav">
+        <button type="button" class="btn btn-ghost btn-lg" data-wiz-back>Back</button>
+        <button type="button" class="btn btn-primary btn-lg" data-wiz-next>Next</button>
+        <button type="submit" class="btn btn-primary btn-lg" data-wiz-submit hidden>Submit listing</button>
+      </div>
     </form>
     <div id="verify-step" class="form verify-step" hidden>
       <div class="dialog-head">
         <h2>One last thing</h2>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
       </div>
-      <div class="verify-card" id="verify-card">
-        <div class="verify-head">
-          <span class="verify-badge">✓ Verified lease</span>
-          <span class="verify-sub">Verified listings get more messages</span>
-        </div>
-        <p>Add a screenshot of your lease or resident portal showing <b>your name, the complex, and your lease dates</b>. It takes 30 seconds.</p>
+      <!-- Lease screenshot upload is turned off for new listings (kept hidden so editing old listings still works). -->
+      <div class="verify-card" id="verify-card" hidden>
         <div id="proof-preview" class="proof-preview" hidden></div>
         <label class="btn btn-gold btn-sm" id="proof-add">+ Add lease screenshot
           <input type="file" id="proof-input" accept="image/*" hidden>
         </label>
-        <p class="verify-private">🔒 Only we see it. Never shown on the site, deleted after we check.</p>
       </div>
-      <div class="ig-tag-card">
-        <p class="ig-tag-head"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><b>Want to be tagged on Instagram?</b></p>
-        <p>We post every listing on <b>@takeoversmtx</b>. Add your handle and we'll tag you so it shows up for your followers too.</p>
-        <label class="ig-tag-input"><span>@</span><input type="text" id="ig-tag" maxlength="31" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="yourhandle"></label>
+
+      <div class="feature-offer" id="feature-offer">
+        <div class="fo-top">
+          <div class="fo-copy">
+            <span class="fo-kicker">⭐ Optional · $10 one time</span>
+            <h3>Get featured on Instagram</h3>
+            <p>Put your place in front of way more students with its own slide in that week's <b>Featured places</b> post on <b>@takeoversmtx</b>. One payment, no subscription.</p>
+          </div>
+          <div class="fo-mock" aria-hidden="true">
+            <span class="fo-mock-badge">⭐ FEATURED</span>
+            <small>THIS WEEK</small>
+            <strong id="fo-mock-name">Your place</strong>
+            <span class="fo-mock-price" id="fo-mock-price">$—<small>/mo</small></span>
+          </div>
+        </div>
+
+        <ul class="fo-perks">
+          <li><span>🖼️</span><div><b>Your own slide</b><small>Photos, rent and move-in date, front and center.</small></div></li>
+          <li><span>🏷️</span><div><b>Tagged to you</b><small>It shows up for your followers and their friends too.</small></div></li>
+          <li><span>🔗</span><div><b>Links to your listing</b><small>Anyone interested taps straight through to you.</small></div></li>
+          <li><span>✏️</span><div><b>Kept up to date</b><small>Taken before the week's up? We update your slide.</small></div></li>
+        </ul>
+
+        <div class="fo-choice">
+          <label><input type="radio" name="wantsFeature" value="true"><span><b>Yes, feature it</b><small>+$10 one time</small></span></label>
+          <label><input type="radio" name="wantsFeature" value="false" checked><span><b>No thanks</b><small>Just my listing</small></span></label>
+        </div>
+        <label class="ig-tag-input fo-handle"><span>@</span><input type="text" id="ig-tag" maxlength="31" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="your Instagram, so we can tag you"></label>
+        <a class="fo-more" href="/get-featured" target="_blank" rel="noopener">More about features →</a>
       </div>
-      <p class="verify-optional">Both are optional.</p>
+
       <div class="verify-actions">
         <button type="button" class="btn btn-primary btn-block btn-lg" id="verify-submit" data-verify-submit>Submit listing</button>
         <button type="button" class="link-btn verify-back" data-verify-back>&larr; Back to my listing</button>
@@ -290,81 +389,117 @@
         <p><b>Lease taken or not available anymore?</b> Take your listing down so people stop reaching out.</p>
         <a id="edit-takedown-link" class="btn btn-outline btn-sm" href="#">Take my listing down</a>
       </div>
-      <h2 id="listing-success-title">You're all set.</h2>
-      <p>Your listing should be on the board within a few minutes. We'll email you your link (from <b>Braydon from Takeover SMTX</b>) once it's live.</p>
-      <p class="spam-note">📩 Don't see it? Check your <b>spam</b> or <b>promotions</b> folder, and mark it "Not spam" so you get our check-ins too.</p>
-      <p>Once it's up, share it everywhere. Every share helps it get taken faster.</p>
-      <div class="ig-repost">
-        <p><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><b>We're posting your listing on our Instagram too.</b></p>
-        <p>Follow <b>@takeoversmtx</b> and repost it to your story when it goes up. Your friends' friends are the people most likely to take it.</p>
-        <a class="btn btn-primary btn-sm" href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener">Follow @takeoversmtx</a>
+      <div class="cele">
+        <div class="confetti" aria-hidden="true"></div>
+        <div class="cele-badge" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div>
+        <h2 id="listing-success-title">You're listed! 🎉</h2>
+        <p class="cele-sub" id="listing-success-sub">Nice work. Your place will be on the board in a few minutes.</p>
       </div>
-      <button type="button" class="btn btn-primary" data-close>Done</button>
+      <ol class="next-steps">
+        <li class="is-done"><span class="ns-dot">✓</span><div><b>Submitted</b><small>We've got your listing and photos.</small></div></li>
+        <li><span class="ns-dot">2</span><div><b>Goes live on the board</b><small>We'll email your link from <b>Braydon from Takeover SMTX</b>. Not in your inbox? Check spam or promotions.</small></div></li>
+        <li><span class="ns-dot">3</span><div><b>Share your link</b><small>Group chats, your story, roommate pages. Every share helps it get taken faster.</small></div></li>
+      </ol>
+      <div class="feature-pay" id="feature-pay" hidden>
+        <span class="fo-star">⭐</span>
+        <div>
+          <b>One more step to get featured</b>
+          <p>Pay the one-time $10 and your place goes in this week's Featured places post.</p>
+          <button type="button" class="btn btn-primary" data-feature-pay>Pay $10 and get featured</button>
+          <small class="secure-note">🔒 Secure checkout by Stripe</small>
+        </div>
+      </div>
+      <a class="feature-cta" id="feature-cta" href="/get-featured" data-cta="feature">
+        <span class="gf-ic">⭐</span>
+        <span><b>Want more eyes on it?</b><small>Get featured in our weekly Instagram post. $10 one time.</small></span>
+        <span class="arrow">›</span>
+      </a>
+      <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
     </div>
   </dialog>
 
   <!-- Waitlist -->
   <dialog id="waitlist-dialog" class="dialog">
-    <form id="waitlist-form" class="form" novalidate>
+    <form id="waitlist-form" class="form wizard" novalidate>
       <div class="dialog-head">
-        <h2>Get alerted</h2>
+        <div class="wiz-head">
+          <h2>Get alerts</h2>
+          <span class="wiz-count">Step 1 of 3</span>
+        </div>
         <button type="button" class="icon-btn" data-close aria-label="Close">&times;</button>
+        <div class="wiz-progress" aria-hidden="true"><span></span></div>
       </div>
-      <p class="muted">Free. We'll send you places that fit your budget and move-in date as soon as they're listed.</p>
 
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <label>Max rent / month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
-        <fieldset class="seg-group">
-          <legend>When do you want to move in?</legend>
-          <div class="choice-cards compact" id="movein-chips"></div>
-          <label id="movein-date-field" hidden>Move-in date<input type="date" name="moveIn" required></label>
-        </fieldset>
-        <p class="fit-count" id="fit-count" hidden></p>
+      <div class="wiz-steps">
+        <section class="wiz-step" data-wstep="1">
+          <h3 class="wiz-title">Your budget</h3>
+          <p class="wiz-sub">Free. We'll send you places that fit as soon as they're listed.</p>
+          <label>Max rent per month<span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="maxRent" maxlength="5" required placeholder="800"></span></label>
+          <fieldset class="seg-group">
+            <legend>When do you want to move in?</legend>
+            <div class="choice-cards compact" id="movein-chips"></div>
+            <label id="movein-date-field" hidden>Move-in date<input type="date" name="moveIn" required></label>
+          </fieldset>
+          <p class="fit-count" id="fit-count" hidden></p>
+        </section>
 
-      <fieldset class="seg-group">
-        <legend>I'm a <button type="button" class="help-tip has-tip" aria-label="Why we ask" data-tip-title="Why we ask" data-tip="Lots of places are girls-only or guys-only, so this keeps you from getting alerts you can't take.">?</button></legend>
-        <div class="choice-cards three compact">
-          <label class="choice"><input type="radio" name="gender" value="Female" required><span>Girl</span></label>
-          <label class="choice"><input type="radio" name="gender" value="Male"><span>Guy</span></label>
-          <label class="choice"><input type="radio" name="gender" value="Other"><span>Rather not say</span></label>
-        </div>
-      </fieldset>
+        <section class="wiz-step" data-wstep="2" hidden>
+          <h3 class="wiz-title">About you</h3>
+          <p class="wiz-sub">Lots of places are girls-only or guys-only, so this keeps you from getting alerts you can't take.</p>
+          <fieldset class="seg-group">
+            <legend>I'm a</legend>
+            <div class="choice-cards three compact">
+              <label class="choice"><input type="radio" name="gender" value="Female" required><span>Girl</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Male"><span>Guy</span></label>
+              <label class="choice"><input type="radio" name="gender" value="Other"><span>Rather not say</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="seg-group">
+            <legend>Room type</legend>
+            <div class="choice-cards three compact">
+              <label class="choice"><input type="radio" name="unitType" value="either" checked><span>Either</span></label>
+              <label class="choice"><input type="radio" name="unitType" value="bed"><span>Private room</span></label>
+              <label class="choice"><input type="radio" name="unitType" value="unit"><span>Whole place</span></label>
+            </div>
+          </fieldset>
+          <label>Preferred complexes or area <small class="hint">optional</small><input name="complexes" maxlength="200" placeholder="e.g. Cabana Beach, near campus"></label>
+          <label>Anything else? <small class="hint">optional</small><textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
+        </section>
 
-      <label>First name <small class="muted">(optional)</small><input name="name" maxlength="80" autocomplete="given-name"></label>
-
-      <fieldset class="seg-group">
-        <legend>Send alerts by</legend>
-        <div class="choice-cards two compact">
-          <label class="choice"><input type="radio" name="notifyBy" value="email" checked><span>Email</span></label>
-          <label class="choice"><input type="radio" name="notifyBy" value="text"><span>Text</span></label>
-        </div>
-      </fieldset>
-      <label id="waitlist-email-field">Email<input type="email" name="email" maxlength="120" autocomplete="email" placeholder="you@email.com"></label>
-      <label id="waitlist-phone-field" hidden>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
-
-      <details class="more-prefs">
-        <summary>More preferences <small>(optional)</small></summary>
-        <div class="more-prefs-body">
-          <label>Lease type
-            <select name="unitType">
-              <option value="either">Either</option>
-              <option value="bed">By the bed (shared unit)</option>
-              <option value="unit">Whole unit</option>
-            </select>
-          </label>
-          <label>Preferred complexes or area<input name="complexes" maxlength="200"></label>
-          <label>Anything else?<textarea name="notes" rows="2" maxlength="500" placeholder="Pets, parking, roommate preferences..."></textarea></label>
-        </div>
-      </details>
+        <section class="wiz-step" data-wstep="3" hidden>
+          <h3 class="wiz-title">Where should we send them?</h3>
+          <p class="wiz-sub">You'll only hear from us when a place fits.</p>
+          <fieldset class="seg-group">
+            <legend>Send alerts by</legend>
+            <div class="choice-cards two compact">
+              <label class="choice"><input type="radio" name="notifyBy" value="email" checked><span>Email</span></label>
+              <label class="choice"><input type="radio" name="notifyBy" value="text"><span>Text</span></label>
+            </div>
+          </fieldset>
+          <label id="waitlist-email-field">Email<input type="email" name="email" maxlength="120" autocomplete="email" placeholder="you@email.com"></label>
+          <label id="waitlist-phone-field" hidden>Phone<input type="tel" inputmode="tel" autocomplete="tel" data-phone name="phone" maxlength="12" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="512-555-0123"></label>
+          <label>First name <small class="hint">optional</small><input name="name" maxlength="80" autocomplete="given-name"></label>
+        </section>
+      </div>
 
       <p class="form-error" hidden></p>
-      <button type="submit" class="btn btn-primary btn-block">Alert me</button>
+      <div class="wiz-nav">
+        <button type="button" class="btn btn-ghost btn-lg" data-wiz-back>Back</button>
+        <button type="button" class="btn btn-primary btn-lg" data-wiz-next>Next</button>
+        <button type="submit" class="btn btn-primary btn-lg" data-wiz-submit hidden>Alert me</button>
+      </div>
     </form>
     <div class="form-success" hidden>
       <h2>You're on the list.</h2>
       <p id="waitlist-success-text">We'll let you know when something matching what you want is listed.</p>
       <div id="waitlist-fits" class="fits" hidden></div>
+<div class="save-acct" hidden>
+        <span class="save-ic">💾</span>
+        <div><b>Save this to an account</b><small>See and change your alerts anytime. No password, just a code to your email.</small></div>
+        <button type="button" class="btn btn-primary btn-sm" data-save-acct>Save</button>
+      </div>
       <p class="ig-note"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.3" fill="currentColor"/></svg><span>Follow <a href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener"><b>@takeoversmtx</b></a> on Instagram to see new places first.</span></p>
       <p class="spam-note" id="waitlist-spam-note" hidden>📩 Our emails come from <b>Braydon from Takeover SMTX</b>. If you don't see one, check your <b>spam</b> or <b>promotions</b> folder and mark it "Not spam."</p>
       <button type="button" class="btn btn-primary" data-close>Done</button>
@@ -397,6 +532,11 @@
       <h2>Here's how to reach <span class="interest-first">them</span></h2>
       <p class="muted">We also sent them your info, so they may reach out first. Mention you found it on Takeover SMTX.</p>
       <div id="interest-contact" class="interest-contact"></div>
+      <div class="save-acct" hidden>
+        <span class="save-ic">💾</span>
+        <div><b>Save this to an account</b><small>Keep track of places you're interested in. No password, just a code to your email.</small></div>
+        <button type="button" class="btn btn-primary btn-sm" data-save-acct>Save</button>
+      </div>
       <button type="button" class="btn btn-outline" data-close>Done</button>
     </div>
   </dialog>
@@ -420,6 +560,292 @@
       <button type="button" class="btn btn-primary" data-close>Done</button>
     </div>
   </dialog>
+
+  <!-- "Looking for a place": where -> optional filters -> results (or alerts if nothing fits) -->
+  <dialog id="finder-dialog" class="dialog finder">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+
+      <div class="finder-step" data-step="where">
+        <h2 class="finder-title">Where are you looking?</h2>
+        <p class="finder-hint">Pick a city to see what's open.</p>
+        <div class="city-list">
+          <button type="button" class="city-opt" data-city="san-marcos">
+            <span class="city-pin">📍</span>
+            <span class="city-txt"><b>San Marcos, TX</b><small>Near Texas State</small></span>
+            <span class="city-count" id="finder-count"></span>
+          </button>
+          <button type="button" class="city-opt other" data-goto="request">
+            <span class="city-pin">🌎</span>
+            <span class="city-txt"><b>Somewhere else</b><small>We're opening new cities soon</small></span>
+            <span class="arrow">›</span>
+          </button>
+        </div>
+      </div>
+
+      <form class="finder-step" data-step="filters" id="finder-form" novalidate hidden>
+        <button type="button" class="finder-back" data-goto="where">← San Marcos, TX</button>
+        <h2 class="finder-title">What are you looking for?</h2>
+        <p class="finder-hint">All optional. Skip to see everything.</p>
+        <div class="finder-fields">
+          <label class="f-label">Max rent per month
+            <span class="money"><input type="text" inputmode="numeric" autocomplete="off" data-digits name="max" maxlength="5" placeholder="Any"></span>
+          </label>
+          <fieldset class="seg-group"><legend>Room</legend>
+            <div class="seg">
+              <label><input type="radio" name="type" value="" checked><span>Any</span></label>
+              <label><input type="radio" name="type" value="bed"><span>Private room</span></label>
+              <label><input type="radio" name="type" value="unit"><span>Whole place</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="seg-group"><legend>Roommates</legend>
+            <div class="seg">
+              <label><input type="radio" name="gender" value="" checked><span>Any</span></label>
+              <label><input type="radio" name="gender" value="Female"><span>Girls</span></label>
+              <label><input type="radio" name="gender" value="Male"><span>Guys</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="seg-group"><legend>Move in by</legend>
+            <div class="seg" id="finder-when"></div>
+          </fieldset>
+        </div>
+        <p class="fit-count" id="finder-fit"></p>
+        <div class="finder-actions">
+          <button type="button" class="btn btn-ghost btn-lg" data-finder-skip>Skip</button>
+          <button type="submit" class="btn btn-primary btn-lg">Show places</button>
+        </div>
+      </form>
+
+      <form class="finder-step" data-step="request" id="city-form" novalidate hidden>
+        <button type="button" class="finder-back" data-goto="where">← Back</button>
+        <h2 class="finder-title">Where should we open next?</h2>
+        <p class="finder-hint">We're starting in San Marcos and opening new cities as people ask. Tell us where, and we'll email you when it opens.</p>
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="finder-fields">
+          <label class="f-label">City and state<input name="city" required maxlength="80" placeholder="Austin, TX"></label>
+          <label class="f-label">School <small>(optional)</small><input name="school" maxlength="80" placeholder="UT Austin"></label>
+          <label class="f-label">Email<input type="email" name="email" required maxlength="120" autocomplete="email"></label>
+        </div>
+        <p class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Tell me when it opens</button>
+      </form>
+
+      <div class="finder-step finder-done" data-step="requested" hidden>
+        <div class="done-check">✓</div>
+        <h2 class="finder-title">You're on the list</h2>
+        <p class="finder-hint">We'll email you when Takeover opens in <b id="requested-city"></b>. The more people ask for a city, the sooner it opens, so share it with friends there.</p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
+      </div>
+
+    </div>
+  </dialog>
+
+  <dialog id="signin-dialog" class="dialog finder">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <form class="finder-step" data-step="email" id="signin-email" novalidate>
+        <span class="si-badge">👋</span>
+        <h2 class="finder-title" id="signin-title">Sign in to Takeover</h2>
+        <p class="finder-hint" id="signin-hint">See your listings, who's interested, and your alerts in one place. No password, we'll email you a code.</p>
+        <div class="google-wrap" id="google-wrap" hidden>
+          <button type="button" class="btn-google" data-google><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg><span>Continue with Google</span></button>
+          <div class="or"><span>or use your email</span></div>
+        </div>
+        <div class="finder-fields">
+          <label class="f-label">Email<input type="email" name="email" required maxlength="120" autocomplete="email" placeholder="you@email.com"></label>
+        </div>
+        <p class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Email me a code</button>
+        <p class="si-fine">New here? Same button, it creates your account.</p>
+      </form>
+      <form class="finder-step" data-step="code" id="signin-code" novalidate hidden>
+        <button type="button" class="finder-back" data-si-back>← Use a different email</button>
+        <span class="si-badge">📬</span>
+        <h2 class="finder-title">Check your email</h2>
+        <p class="finder-hint">We sent a code to <b id="signin-sent-to"></b>. It's from <b>Takeover SMTX</b>.</p>
+        <div class="finder-fields">
+          <label class="f-label">Code<input name="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="••••••••"></label>
+        </div>
+        <p class="form-error" hidden></p>
+        <button type="submit" class="btn btn-primary btn-lg btn-block">Sign in</button>
+        <p class="si-fine">Don't see it? Check your <b>Junk</b> or <b>Spam</b> folder. <button type="button" class="link-btn" data-si-resend>Resend code</button></p>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- $7.99/month listing: 7-day free trial, card up front -->
+  <dialog id="sub-dialog" class="dialog finder pay">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step" data-step="pay">
+        <p class="pay-posted" id="sub-posted" hidden>✓ Your listing is saved. Last step: start your free trial.</p>
+        <span class="si-badge">🏠</span>
+        <h2 class="finder-title" id="sub-title">Start your 7-day free trial</h2>
+        <div class="cart" id="sub-cart">
+          <div class="cart-row">
+            <span class="cart-ic">🏠</span>
+            <div><b id="sub-listing">Your listing</b><small id="sub-note">7-day free trial, then $7.99/mo</small></div>
+            <span class="cart-price"><s id="sub-was">$7.99/mo</s><b id="sub-now">$0</b></span>
+          </div>
+          <div class="cart-row" id="sub-cart-feature" hidden>
+            <span class="cart-ic">⭐</span>
+            <div><b>Instagram feature</b><small>Its own slide in this week's Featured post · one time</small></div>
+            <span class="cart-price"><b>$10.00</b><button type="button" class="cart-remove" id="sub-feature-remove">Remove</button></span>
+          </div>
+          <button type="button" class="cart-add" id="sub-feature-add" hidden><span class="cart-ic">⭐</span><span><b>Add the Instagram feature</b><small>Its own slide in this week's Featured post</small></span><span class="cart-add-price">+ $10</span></button>
+          <div class="cart-line" id="sub-cart-tax" hidden><span>Tax</span><span id="sub-tax"></span></div>
+          <div class="cart-total"><span>Due today</span><b id="sub-due">$0.00</b></div>
+        </div>
+        <div id="sub-element" class="pay-element"></div>
+        <p class="form-error" hidden></p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="sub-btn" disabled>Start free trial</button>
+        <p class="si-fine" id="sub-fine">Free for 7 days, then $7.99/month plus tax until you cancel. Cancel anytime in your account, and marking your listing taken cancels it automatically.</p>
+      </div>
+      <div class="finder-step finder-done" data-step="done" hidden>
+        <div class="confetti" aria-hidden="true"></div>
+        <div class="cele-badge" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div>
+        <h2 class="finder-title">You're listed! 🎉</h2>
+        <p class="finder-hint"><b id="sub-done-listing">Your listing</b> will be on the board in a few minutes, and we'll email you your link. <span id="sub-done-trial"></span></p>
+        <p class="si-fine">Share your link everywhere once it's up. Every share helps it get taken faster.</p>
+        <button type="button" class="btn btn-feature btn-lg btn-block" id="sub-next-feature" hidden>⭐ Next: get featured on Instagram · $10</button>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close id="sub-done-btn">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- $10 Instagram feature: pay right here (Stripe card form inside our own pop-up) -->
+  <!-- Plan & billing: change card -->
+  <dialog id="card-dialog" class="dialog finder pay">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step">
+        <span class="si-badge">💳</span>
+        <h2 class="finder-title">Update your card</h2>
+        <p class="finder-hint" id="card-hint">Your plan will use this card from now on.</p>
+        <div id="card-element" class="pay-element"></div>
+        <p class="form-error" hidden></p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="card-btn" disabled>Save card</button>
+        <p class="si-fine">🔒 Secure by Stripe. Your card never touches our site.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Plan & billing: cancel -->
+  <dialog id="cancel-dialog" class="dialog finder">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step" data-step="confirm">
+        <span class="si-badge">👋</span>
+        <h2 class="finder-title" id="cancel-title">Cancel your plan?</h2>
+        <p class="finder-hint" id="cancel-text"></p>
+        <div class="cancel-actions">
+          <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Keep my plan</button>
+          <button type="button" class="btn btn-danger-soft btn-block" id="cancel-next">Cancel plan</button>
+        </div>
+      </div>
+      <div class="finder-step" data-step="why" hidden>
+        <span class="si-badge">💬</span>
+        <h2 class="finder-title">Quick question</h2>
+        <p class="finder-hint">Why are you canceling? Totally optional.</p>
+        <div class="why-list" id="why-list">
+          <label class="why"><input type="radio" name="cancelWhy" value="taken"><span>🎉 Someone's taking my lease</span></label>
+          <label class="why"><input type="radio" name="cancelWhy" value="elsewhere"><span>🤝 Found someone another way</span></label>
+          <label class="why"><input type="radio" name="cancelWhy" value="interest"><span>😴 Not getting enough interest</span></label>
+          <label class="why"><input type="radio" name="cancelWhy" value="price"><span>💸 Too expensive</span></label>
+          <label class="why"><input type="radio" name="cancelWhy" value="other"><span>✏️ Something else</span></label>
+        </div>
+        <textarea id="why-note" class="why-note" rows="2" maxlength="400" placeholder="Anything we could do better? (optional)"></textarea>
+        <p class="why-taken" id="why-taken" hidden>Congrats! 🎉 We'll mark your listing taken, take it off the board, and end your plan now. No more charges.</p>
+        <div class="cancel-actions">
+          <button type="button" class="btn btn-danger-soft btn-lg btn-block" id="cancel-confirm">Cancel plan</button>
+          <button type="button" class="link-btn" data-close>Never mind, keep my plan</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- "My lease got taken" (signed in): pick listing -> confirm -> done; or nothing found -> options -->
+  <dialog id="taken-dialog" class="dialog finder">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step" data-step="loading">
+        <div class="me-loading"><span class="spinner"></span> Finding your listings…</div>
+      </div>
+      <div class="finder-step" data-step="pick" hidden>
+        <span class="si-badge">🎉</span>
+        <h2 class="finder-title">Which one got taken?</h2>
+        <p class="finder-hint">Tap the listing someone's taking over.</p>
+        <div class="taken-list" id="taken-list"></div>
+      </div>
+      <div class="finder-step" data-step="confirm" hidden>
+        <span class="si-badge">🔑</span>
+        <h2 class="finder-title" id="taken-confirm-title">Mark it taken?</h2>
+        <p class="finder-hint" id="taken-confirm-text"></p>
+        <p class="form-error" hidden></p>
+        <div class="cancel-actions">
+          <button type="button" class="btn btn-primary btn-lg btn-block" id="taken-yes">Yes, mark it taken</button>
+          <button type="button" class="link-btn" id="taken-back">← Pick a different listing</button>
+        </div>
+      </div>
+      <div class="finder-step finder-done" data-step="done" hidden>
+        <div class="confetti" aria-hidden="true"></div>
+        <div class="cele-badge" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div>
+        <h2 class="finder-title">Congrats, you're free! 🎉</h2>
+        <p class="finder-hint" id="taken-done-text"></p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
+      </div>
+      <div class="finder-step" data-step="none" hidden>
+        <span class="si-badge">🔍</span>
+        <h2 class="finder-title">No listings on this account</h2>
+        <p class="finder-hint">We couldn't find a listing under <b id="taken-email"></b>.</p>
+        <div class="taken-options">
+          <button type="button" class="taken-opt" data-taken-switch><span class="cart-ic">📧</span><span><b>I listed with a different email</b><small>Sign in with that one instead</small></span><span class="arrow">›</span></button>
+          <button type="button" class="taken-opt" data-taken-link><span class="cart-ic">🔗</span><span><b>Email me my edit link</b><small>For listings from before accounts</small></span><span class="arrow">›</span></button>
+          <button type="button" class="taken-opt" data-taken-browse><span class="cart-ic">🏠</span><span><b>I'm looking for a place</b><small>Browse what's open</small></span><span class="arrow">›</span></button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Plan & billing: receipts -->
+  <dialog id="receipts-dialog" class="dialog finder">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step">
+        <span class="si-badge">🧾</span>
+        <h2 class="finder-title">Receipts</h2>
+        <div id="receipts-list" class="receipts"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="pay-dialog" class="dialog finder pay">
+    <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
+    <div class="finder-body">
+      <div class="finder-step" data-step="pay">
+        <p class="pay-posted" id="pay-posted" hidden>✓ Your listing is submitted. Last step: your feature.</p>
+        <span class="si-badge">⭐</span>
+        <h2 class="finder-title">Get featured on Instagram</h2>
+        <div class="pay-summary">
+          <div><b id="pay-listing">Your listing</b><small>Its own slide in this week's Featured places post on @takeoversmtx</small></div>
+          <span class="pay-price">$10<small>one time</small></span>
+        </div>
+        <div id="pay-element" class="pay-element"></div>
+        <p class="form-error" hidden></p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="pay-btn" disabled>Pay $10</button>
+        <p class="si-fine">🔒 Secure payment by Stripe. Your card never touches our site.</p>
+      </div>
+      <div class="finder-step finder-done" data-step="done" hidden>
+        <div class="done-check">✓</div>
+        <h2 class="finder-title">You're featured!</h2>
+        <p class="finder-hint">We'll add <b id="pay-done-listing">your place</b> to this week's Featured places post on @takeoversmtx. Your receipt is on its way to your email.</p>
+        <p class="finder-hint" id="pay-done-posted" hidden>Your listing will be on the board within a few minutes, and we'll email you your link.</p>
+        <button type="button" class="btn btn-primary btn-lg btn-block" data-close>Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <!-- Feedback -->
   <button type="button" class="feedback-fab" data-open="feedback-dialog" aria-label="Send feedback">💬 Feedback</button>
@@ -456,16 +882,17 @@
       <input type="hidden" name="listingId">
       <input type="hidden" name="listingName">
 
-      <label>What's wrong?
-        <select name="reason" required>
-          <option value="taken">It's already taken</option>
-          <option value="wrong">Info is wrong (price, dates, fee)</option>
-          <option value="scam">Looks like a scam</option>
-          <option value="other">Something else</option>
-        </select>
-      </label>
-      <label>Details <small>(optional)</small><textarea name="details" rows="3" maxlength="800"></textarea></label>
-      <label>Your contact, if we can follow up <small>(optional)</small><input name="contact" maxlength="120"></label>
+      <fieldset class="seg-group">
+        <legend>What's wrong?</legend>
+        <div class="report-reasons">
+          <label class="rr"><input type="radio" name="reason" value="taken" required><span><i>🏁</i><em><b>It's already taken</b></em></span></label>
+          <label class="rr"><input type="radio" name="reason" value="wrong"><span><i>✏️</i><em><b>Info is wrong</b><small>Price, dates or fee</small></em></span></label>
+          <label class="rr"><input type="radio" name="reason" value="scam"><span><i>🚩</i><em><b>Looks like a scam</b><small>Asked for money before a tour, fake photos...</small></em></span></label>
+          <label class="rr"><input type="radio" name="reason" value="other"><span><i>💬</i><em><b>Something else</b></em></span></label>
+        </div>
+      </fieldset>
+      <label>Details <small class="hint">optional</small><textarea name="details" rows="3" maxlength="800" placeholder="Anything that helps us check it"></textarea></label>
+      <label>Your contact, if we can follow up <small class="hint">optional</small><input name="contact" maxlength="120" placeholder="Phone or email"></label>
 
       <p class="form-error" hidden></p>
       <button type="submit" class="btn btn-primary btn-block">Send report</button>
@@ -479,7 +906,9 @@
 
   <div id="toast" class="toast" hidden></div>
 
-  <script src="config.js?v=1794867987"></script>
-  <script src="app.js?v=1794867987"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js?v=1794899670"></script>
+  <script src="app.js?v=1794899670"></script>
+<script src="/topbar.js?v=1794899670" defer></script>
 </body>
 </html>

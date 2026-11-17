@@ -8,4 +8,10 @@ window.TAKEOVER_CONFIG = {
 
   // Where people can reach you with questions (shown in the footer).
   contactEmail: 'team@takeoversmtx.com',
+
+  // Accounts + payments (Supabase). The publishable key is meant to be public; real access is locked by Row Level Security.
+  supabaseUrl: 'https://fkflptyzstspweekfihc.supabase.co',
+  supabaseKey: 'sb_publishable_RXLgFj5YCEy8yP9Al_UPxw_vNYTX2uU',
+  // Stripe publishable key (meant to be public). Test mode until Stripe is fully set up.
+  stripeKey: 'pk_live_51UcYVKA7RQFcJ2PuW6aAy1t8HoMRko5wpRnw0lwfKmA0R0V9Wh6sn1uuea1ES0Ky9uIQBLqUKKpPw5OfD4kzNWyV008eht4kZo',
 };

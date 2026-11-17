@@ -49,7 +49,10 @@ function layout({ title, desc, canonical, body, jsonld, scripts = '' }) {
   <meta name="description" content="${esc(desc)}">
   <link rel="canonical" href="${canonical}">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <meta name="theme-color" content="#6b1f2a">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(desc)}">
   <meta property="og:url" content="${canonical}">
@@ -61,6 +64,11 @@ function layout({ title, desc, canonical, body, jsonld, scripts = '' }) {
   <script type="application/ld+json">${JSON.stringify(jsonld)}</script>` : ''}
 </head>
 <body>
+  <div class="topbar" id="topbar">
+    <a class="tb-item" href="/get-featured">⭐ <b>New:</b> get your place featured on our Instagram <span class="go">→</span></a>
+    <a class="tb-item" href="/#alerts">🔔 Get a text the moment a place fits your budget <span class="go">→</span></a>
+    <a class="tb-item" href="/#board">🔥 New places every week near Texas State <span class="go">→</span></a>
+  </div>
   <header class="site-header">
     <a class="brand" href="/"><img src="/favicon.svg" alt="" width="30" height="30">Takeover<span>SMTX</span></a>
     <nav class="nav">
@@ -75,10 +83,11 @@ ${body}
 
   <footer class="footer">
     <p><strong>Takeover SMTX</strong> is an independent listing board. It is not affiliated with Texas State University or any apartment complex. We don't negotiate leases, and every takeover must be approved by the property.</p>
-    <p><a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/how-it-works">How it works</a></p>
+    <p><a href="/lease-takeover/">Lease takeovers by complex</a> · <a href="/how-it-works">How it works</a> · <a href="/get-featured">Get featured on Instagram</a></p>
     <p><a class="ig-link" href="https://instagram.com/takeoversmtx" target="_blank" rel="noopener">${ig}<span>Follow <b>@takeoversmtx</b> on Instagram</span></a></p>
   </footer>
   <a class="feedback-fab" href="/#feedback" aria-label="Send feedback">💬 Feedback</a>${scripts}
+<script src="/topbar.js" defer></script>
 </body>
 </html>
 `;
@@ -87,7 +96,7 @@ ${body}
 function faqFor(name) {
   return [
     [`How do I get out of my ${name} lease?`,
-      `Ask the ${name} leasing office whether your lease can be transferred to someone else and what the transfer fee is. Then list your lease free on Takeover SMTX. Students looking for a place get alerted when it fits their budget and contact you directly. The new person applies with ${name} like any other transfer.`],
+      `Ask the ${name} leasing office whether your lease can be transferred to someone else and what the transfer fee is. Then list your lease on Takeover SMTX (the first 7 days are free). Students looking for a place get alerted when it fits their budget and contact you directly. The new person applies with ${name} like any other transfer.`],
     [`Can I take over a lease at ${name}?`,
       `Yes, when someone is leaving. Every takeover listed above is from a current resident. Tap one to see the photos, the details and how to contact them. You still apply and get approved through the ${name} office.`],
     [`What if nothing is listed at ${name} right now?`,
@@ -102,7 +111,7 @@ function complexPage(c, list, all) {
   const min = list.length ? Math.min(...list.map((l) => Number(l.rent))) : 0;
   const title = `${name} Lease Takeovers & Subleases | ${/san marcos/i.test(name) ? 'Takeover SMTX' : 'San Marcos'}`;
   const desc = list.length
-    ? `${list.length} lease ${list.length === 1 ? 'takeover' : 'takeovers'} at ${inSM(name)} from ${money(min)}/mo. Take over a lease from a current resident, or list yours free.`
+    ? `${list.length} lease ${list.length === 1 ? 'takeover' : 'takeovers'} at ${inSM(name)} from ${money(min)}/mo. Take over a lease from a current resident, or list yours.`
     : `Lease takeovers and subleases at ${inSM(name)}. Get free alerts when one is listed, or list your own lease free.`;
   const faq = faqFor(name);
   const others = all.filter((o) => o.slug !== c.slug)
@@ -123,7 +132,7 @@ function complexPage(c, list, all) {
     <div class="two-col cp-ctas">
       <section class="panel">
         <h2>Need out of your ${esc(name)} lease?</h2>
-        <p>List it free in about 2 minutes. Students looking for a place get alerted when it fits their budget.</p>
+        <p>List it in about 2 minutes, free for the first 7 days. Students looking for a place get alerted when it fits their budget.</p>
         <a class="btn btn-primary" href="/#list">List your lease</a>
       </section>
       <section class="panel">
@@ -165,7 +174,7 @@ ${all.map((c) => `      <a class="panel cp-row" href="/lease-takeover/${c.slug}"
     </div>`;
   return layout({
     title: 'San Marcos Lease Takeovers by Apartment Complex | Takeover SMTX',
-    desc: `Lease takeovers and subleases at ${all.length} San Marcos apartment complexes near Texas State. Find one or list yours free.`,
+    desc: `Lease takeovers and subleases at ${all.length} San Marcos apartment complexes near Texas State. Find one or list yours.`,
     canonical: `${ORIGIN}/lease-takeover/`, body,
   });
 }
@@ -198,7 +207,7 @@ ${all.map((c) => `      <a class="panel cp-row" href="/lease-takeover/${c.slug}"
   fs.writeFileSync(path.join(OUT, 'index.html'), indexPage(all, live.length));
   fs.readdirSync(OUT).forEach((f) => { if (!keep.has(f)) fs.rmSync(path.join(OUT, f)); });
 
-  const urls = ['/', '/how-it-works', '/privacy', '/terms', '/lease-takeover/', ...all.map((c) => '/lease-takeover/' + c.slug)];
+  const urls = ['/', '/how-it-works', '/get-featured', '/privacy', '/terms', '/lease-takeover/', ...all.map((c) => '/lease-takeover/' + c.slug)];
   fs.writeFileSync(path.join(site, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${ORIGIN}${u}</loc></url>`).join('\n')}
