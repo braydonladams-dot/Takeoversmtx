@@ -1084,6 +1084,7 @@
     $('#wiz-count').textContent = 'Step ' + n + ' of ' + wizSteps.length;
     $('#wiz-bar').style.width = (n / wizSteps.length) * 100 + '%';
     $('[data-wiz-back]', lf).style.visibility = n > 1 ? 'visible' : 'hidden';
+    $('[data-wiz-back]', lf).closest('.wiz-nav').classList.toggle('wiz-first', n === 1);
     $('[data-wiz-next]', lf).hidden = n === wizSteps.length;
     $('[data-wiz-submit]', lf).hidden = n !== wizSteps.length;
     $('.form-error', lf).hidden = true;
@@ -1175,6 +1176,7 @@
       $('.wiz-count', form).textContent = 'Step ' + n + ' of ' + steps.length;
       $('.wiz-progress span', form).style.width = (n / steps.length) * 100 + '%';
       $('[data-wiz-back]', form).style.visibility = n > 1 ? 'visible' : 'hidden';
+      $('[data-wiz-back]', form).closest('.wiz-nav').classList.toggle('wiz-first', n === 1);
       $('[data-wiz-next]', form).hidden = n === steps.length;
       $('[data-wiz-submit]', form).hidden = n !== steps.length;
       $('.form-error', form).hidden = true;
@@ -1374,6 +1376,9 @@
   function slideSteps(box, from, to, dir) {
     if (reduceMotion || !to.animate) { from.hidden = true; to.hidden = false; return Promise.resolve(); }
     box.getAnimations().forEach((a) => a.finish());
+    // Scrolled down (e.g. at the pay button)? Glide back up so the next screen isn't off-view while the pop-up shrinks.
+    const dlg = box.closest('dialog');
+    if (dlg && dlg.scrollTop > 0) dlg.scrollTo({ top: 0, behavior: 'smooth' });
     const h0 = box.offsetHeight;
     const top = from.offsetTop, left = from.offsetLeft, w = from.offsetWidth;
     const keep = from.getAttribute('style') || '';
@@ -1901,6 +1906,9 @@
     $('#sub-was').hidden = !j.trial;
     $('#sub-now').textContent = j.trial ? '$0' : monthly + '/mo';
     $('#sub-cart-feature').hidden = !hasFeature;
+    $('#sub-feature-add').hidden = hasFeature || !!j.featured;
+    $('#sub-feature-remove').disabled = $('#sub-feature-add').disabled = false;
+    subListingId = listingId;
     $('#sub-cart-tax').hidden = !cart.tax;
     $('#sub-tax').textContent = money(cart.tax || 0);
     const due = j.trial ? (cart.dueToday || 0) : (cart.dueToday || cart.monthly || 799);
@@ -1916,10 +1924,12 @@
     $('#sub-element').innerHTML = '<div class="me-loading"><span class="spinner"></span> Loading secure checkout…</div>';
     $('#sub-btn').disabled = true;
     subErr('');
-    const others = [...document.querySelectorAll('dialog[open]')].filter((x) => x !== d);
-    others.forEach((x) => x.close());
-    setTimeout(() => d.showModal(), others.length ? 360 : 0);
-    track('trial/open', 'Trial pop-up opened');
+    if (!d.open) {
+      const others = [...document.querySelectorAll('dialog[open]')].filter((x) => x !== d);
+      others.forEach((x) => x.close());
+      setTimeout(() => d.showModal(), others.length ? 360 : 0);
+      track('trial/open', 'Trial pop-up opened');
+    }
     try {
       const StripeCtor = await loadStripe();
       stripeJs = stripeJs || StripeCtor(CFG.stripeKey);
@@ -1953,6 +1963,18 @@
     if (badge) { badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop'); }
     setTimeout(() => { box.innerHTML = ''; }, 3000);
   }
+  // Remove / add the $10 feature right in the cart: rebuilds the checkout with or without it
+  var subListingId = '';
+  async function toggleFeature(on) {
+    $('#sub-feature-remove').disabled = $('#sub-feature-add').disabled = true;
+    $('#sub-btn').disabled = true;
+    $('#sub-due').textContent = '…';
+    track(on ? 'trial/feature-add' : 'trial/feature-remove', on ? 'Added feature in cart' : 'Removed feature in cart');
+    const ok = await startTrial(subListingId, { ...subOpts, thenFeature: on });
+    if (!ok) $('#sub-feature-remove').disabled = $('#sub-feature-add').disabled = false;
+  }
+  $('#sub-feature-remove').addEventListener('click', () => toggleFeature(false));
+  $('#sub-feature-add').addEventListener('click', () => toggleFeature(true));
   $('#sub-btn').addEventListener('click', async () => {
     if (!subState || !stripeJs) return;
     const btn = $('#sub-btn'), label = btn.textContent;

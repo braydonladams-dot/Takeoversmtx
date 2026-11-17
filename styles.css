@@ -1527,3 +1527,23 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .cart-total { border-top: 1px solid #dbe3ff; background: rgba(255, 255, 255, .7); padding: .85rem 1.05rem; color: var(--ink); font-weight: 600; align-items: baseline; }
 .cart-total b { font-size: 1.3rem; font-weight: 800; letter-spacing: -.02em; }
 #sub-dialog [data-step="pay"] .si-badge { display: none; }
+/* step 1 has no Back: Next takes the whole row */
+.wiz-nav.wiz-first [data-wiz-back] { display: none; }
+.wiz-nav.wiz-first [data-wiz-next], .wiz-nav.wiz-first [data-wiz-submit] { grid-column: 1 / -1; }
+/* confetti must never stretch the pop-up's scroll area */
+.form-success, .finder-done { overflow: hidden; overflow: clip; overflow-clip-margin: 0; }
+/* cart: remove / add the feature */
+.cart-remove { display: block; margin: .25rem 0 0 auto; padding: .2rem .55rem; border: 0; border-radius: 999px; background: #fff; color: var(--muted);
+  font: 600 .75rem/1.2 inherit; cursor: pointer; box-shadow: inset 0 0 0 1px var(--line); transition: color .15s, box-shadow .15s, background .15s; }
+.cart-remove:hover { color: #dc2626; background: #fef2f2; box-shadow: inset 0 0 0 1px #fecaca; }
+.cart-add { display: grid; grid-template-columns: 40px 1fr auto; gap: .8rem; align-items: center; width: calc(100% - 1.4rem); margin: 0 .7rem .7rem;
+  padding: .7rem .75rem; border: 1.5px dashed #c7d2fe; border-radius: 14px; background: rgba(255, 255, 255, .6); text-align: left; font: inherit; color: var(--ink); cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s; }
+.cart-add:hover { border-color: var(--maroon); background: #fff; }
+.cart-add:active { transform: scale(.99); }
+.cart-add[hidden] { display: none; }
+.cart-add b { display: block; font-size: .95rem; }
+.cart-add small { display: block; color: var(--muted); font-size: .8rem; margin-top: .1rem; }
+.cart-add-price { font-weight: 700; color: var(--maroon); white-space: nowrap; }
+.cart-row + .cart-add { margin-top: .1rem; }
+.cart-remove:disabled, .cart-add:disabled { opacity: .55; cursor: progress; }
