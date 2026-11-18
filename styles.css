@@ -1665,6 +1665,7 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
   .iam-cards { gap: .95rem !important; }
   .iam-card { padding: 1.2rem 1.1rem !important; gap: 1rem !important; border-radius: 20px !important; }
   .home-foot { margin-top: 1.8rem !important; }
-  footer, .site-footer { padding-top: 2rem !important; padding-bottom: 2.4rem !important; }
-  footer nav, .site-footer nav { margin-top: .8rem; row-gap: .6rem; }
+  footer, .site-footer { padding-top: 1.2rem !important; padding-bottom: 1.5rem !important; font-size: .8rem !important; }
+  footer nav, .site-footer nav { margin-top: .45rem; row-gap: .4rem; }
+  footer nav a, footer a { font-size: inherit !important; }
 }
