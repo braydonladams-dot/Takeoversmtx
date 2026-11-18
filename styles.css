@@ -1638,3 +1638,17 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 #finder-dialog [data-step="nocity"] { text-align: left; }
 .city-search-box .city-pin { width: auto; height: auto; background: none !important; font-size: 1.1rem; box-shadow: none; flex: none; }
 .city-search-box input { background: transparent !important; padding: .7rem 0 !important; border-radius: 0 !important; margin: 0 !important; width: 100%; height: auto; }
+
+/* ---------- phone header: roomier ---------- */
+.show-sm { display: none; }
+@media (max-width: 520px) {
+  .site-header { padding: .65rem 1rem !important; gap: .5rem !important; }
+  .site-header .brand { font-size: 1.05rem !important; gap: .45rem !important; letter-spacing: -.02em; }
+  .site-header .brand img { width: 28px !important; height: 28px !important; }
+  .site-header .brand span { font-size: .6em !important; padding: .14rem .42rem !important; margin-left: .3rem !important; }
+  .site-header .nav { gap: .45rem !important; }
+  .site-header .nav-list { font-size: .92rem !important; padding: .5rem .9rem !important; min-height: 0 !important; height: 38px; border-radius: 12px !important; }
+  .site-header .me-btn { width: 38px !important; height: 38px !important; }
+  .hide-sm { display: none; }
+  .show-sm { display: inline; }
+}
