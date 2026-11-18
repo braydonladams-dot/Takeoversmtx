@@ -188,6 +188,12 @@
     'Commerce, TX': ['A&M-Commerce', '#002F5F', '#FFC72C'],
   };
   const schoolFor = (city) => SCHOOLS[normCity(city)] || null;
+  var boardCity = '';
+  function setSchoolTheme(city) {
+    const sc = city && schoolFor(city), b = document.body;
+    b.classList.toggle('school-theme', !!sc);
+    if (sc) { b.style.setProperty('--sc1', sc[1]); b.style.setProperty('--sc2', sc[2]); }
+  }
   // style + class for anything tinted with a city's school colors
   const schoolAttr = (city) => { const sc = schoolFor(city); return sc ? ` style="--sc1:${sc[1]};--sc2:${sc[2]}"` : ''; };
   // Cities that have open places, most places first
@@ -437,7 +443,9 @@
       sel.value = cur;
       (sel.closest('.dd') || sel).hidden = cs.length < 2 && !cur;
       const shown = cur || (cs.length === 1 ? cs[0].city : '');
-      $('#board-title').textContent = shown ? 'Lease takeovers in ' + cityName(shown) : 'Lease takeovers';
+      $('#board-title').innerHTML = shown ? 'Lease takeovers in <span class="bt-city">' + esc(cityName(shown)) + '</span>' : 'Lease takeovers';
+      boardCity = shown;
+      if (view === 'board') setSchoolTheme(shown);
       const sc = shown && schoolFor(shown), bs = $('#board-school');
       if (bs) {
         bs.hidden = !sc;
@@ -527,6 +535,7 @@
     bindPhotoCounters($('#focus-card'));
     $('#focus').hidden = false;
     document.body.classList.add('focus-mode');
+    setSchoolTheme(l && !l.taken ? l.city : '');
     document.title = l ? `${l.complex} · ${money(l.rent)}/mo | Takeover Leases` : 'Takeover Leases';
     if (l) track('view/' + l.id, 'Listing view: ' + l.complex);
     window.scrollTo(0, 0);
@@ -536,7 +545,8 @@
     if ($('#focus').hidden) return;
     $('#focus').hidden = true;
     document.body.classList.remove('focus-mode');
-    document.title = 'Takeover Leases: San Marcos lease takeovers in one place';
+    setSchoolTheme(view === 'board' ? boardCity : '');
+    document.title = 'Takeover Leases: Texas lease takeovers in one place';
     if (boardScroll !== null) {
       const y = boardScroll;
       boardScroll = null;
@@ -1431,6 +1441,8 @@
       document.body.classList.toggle('view-home', next === 'home');
       document.body.classList.toggle('view-board', next === 'board' || next === 'focus');
       document.body.classList.toggle('view-me', next === 'me');
+      if (next === 'home' || next === 'me') setSchoolTheme('');
+      if (next === 'board') setSchoolTheme(boardCity);
       $('#me').hidden = next !== 'me';
       if (next === 'me') loadMe();
       if (next === 'focus') focusFromHash();

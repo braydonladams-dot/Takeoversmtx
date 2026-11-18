@@ -1684,3 +1684,39 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
 .board-top .board-title + .school-badge { order: 3; }
 .detail-intro .school-badge { margin: .15rem 0 .6rem; }
 .city-opt .school-dot { width: 22px; height: 22px; }
+
+/* ---------- school theme: a city's board + its listing pages wear that school's colors ---------- */
+body.school-theme { --sc-tint: color-mix(in srgb, var(--sc1) 9%, #fff); --sc-soft: color-mix(in srgb, var(--sc1) 18%, #fff); }
+/* main buttons */
+body.school-theme #focus .btn-primary, body.school-theme #board .lcard .btn-primary, body.school-theme .detail-bar .btn-primary {
+  background: var(--sc1) !important; border-color: var(--sc1) !important; color: #fff !important;
+  box-shadow: 0 10px 24px -12px var(--sc1) !important; }
+body.school-theme #focus .btn-primary:hover, body.school-theme #board .lcard .btn-primary:hover { filter: brightness(1.12); }
+body.school-theme #focus .btn-outline { color: var(--sc1) !important; border-color: var(--sc1) !important; background: #fff !important; }
+body.school-theme #focus .btn-outline:hover { background: var(--sc-tint) !important; }
+/* price card: school bar on top */
+body.school-theme .action-card { position: relative; overflow: hidden; border-color: var(--sc-soft); }
+body.school-theme .action-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 6px;
+  background: linear-gradient(90deg, var(--sc1) 0 62%, var(--sc2) 62% 100%); }
+body.school-theme .action-card .detail-rent { color: var(--sc1); }
+/* badge: filled pill */
+body.school-theme .school-badge { background: var(--sc1); border-color: var(--sc1); color: #fff; padding: .38rem .85rem .38rem .5rem; }
+body.school-theme .school-badge i { background: var(--sc2); box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
+/* links + accents */
+body.school-theme #focus a:not(.btn), body.school-theme #focus .link-btn, body.school-theme #focus .back-link,
+body.school-theme #board .back-home, body.school-theme .owner-note .link-btn { color: var(--sc1) !important; }
+body.school-theme .thumb-btn.active { border-color: var(--sc1) !important; }
+body.school-theme .detail-section h2 { position: relative; padding-bottom: .5rem; }
+body.school-theme .detail-section h2::after { content: ''; position: absolute; left: 0; bottom: 0; width: 42px; height: 4px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--sc1) 0 60%, var(--sc2) 60% 100%); }
+body.school-theme .fact-ic { background: var(--sc-tint); }
+body.school-theme .owner-note { background: var(--sc-tint); }
+body.school-theme .detail-bar .bar-price b { color: var(--sc1); }
+/* board */
+body.school-theme #board .bt-city { color: var(--sc1); }
+body.school-theme #board .lcard.has-school::before { height: 6px; }
+body.school-theme #board .lc-price { color: var(--sc1); }
+body.school-theme #board .dd-btn.on, body.school-theme #board .pill.on, body.school-theme #board .chip input:checked + span {
+  background: var(--sc-tint) !important; border-color: var(--sc1) !important; color: var(--sc1) !important; }
+body.school-theme #board .alert-cta { background: linear-gradient(135deg, var(--sc-tint), #fff); border-color: var(--sc-soft); }
+body.school-theme #board .alert-cta .btn-primary { background: var(--sc1) !important; border-color: var(--sc1) !important; }
