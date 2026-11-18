@@ -1720,3 +1720,21 @@ body.school-theme #board .dd-btn.on, body.school-theme #board .pill.on, body.sch
   background: var(--sc-tint) !important; border-color: var(--sc1) !important; color: var(--sc1) !important; }
 body.school-theme #board .alert-cta { background: linear-gradient(135deg, var(--sc-tint), #fff); border-color: var(--sc-soft); }
 body.school-theme #board .alert-cta .btn-primary { background: var(--sc1) !important; border-color: var(--sc1) !important; }
+
+/* ---------- school theme, full page (everything but the logo) ---------- */
+body.school-theme {
+  --maroon: var(--sc1);
+  --maroon-dark: color-mix(in srgb, var(--sc1) 78%, #000);
+  --accent-soft: var(--sc-tint);
+}
+body.school-theme .topbar { background: linear-gradient(90deg, color-mix(in srgb, var(--sc1) 72%, #000) 0%, var(--sc1) 55%, color-mix(in srgb, var(--sc1) 55%, var(--sc2)) 100%); }
+body.school-theme .btn-primary { background: var(--sc1); border-color: var(--sc1); box-shadow: 0 1px 2px color-mix(in srgb, var(--sc1) 30%, transparent); }
+body.school-theme .btn-primary:hover { background: color-mix(in srgb, var(--sc1) 85%, #000); border-color: color-mix(in srgb, var(--sc1) 85%, #000); }
+body.school-theme .nav .btn-ghost, body.school-theme .nav a:not(.btn-primary) { color: var(--sc1); }
+body.school-theme .me-btn.signed-in { background: linear-gradient(135deg, var(--sc1), color-mix(in srgb, var(--sc1) 55%, var(--sc2))); }
+body.school-theme .feedback-fab { background: var(--sc1) !important; box-shadow: 0 8px 22px -8px var(--sc1) !important; }
+body.school-theme #f-search:focus, body.school-theme .search-wrap:focus-within { border-color: var(--sc1) !important; box-shadow: 0 0 0 3px var(--sc-tint) !important; }
+body.school-theme .dd-menu .dd-opt.sel, body.school-theme .dd-menu .dd-opt:hover { color: var(--sc1); background: var(--sc-tint); }
+body.school-theme .lc-incentive { box-shadow: 0 0 0 2px #fff; }
+/* the logo stays Takeover Leases blue */
+body.school-theme .brand span { background: linear-gradient(135deg, #2f5bea, #7c3aed) !important; color: #fff !important; }
