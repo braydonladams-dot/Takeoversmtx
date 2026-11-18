@@ -161,6 +161,35 @@
     return city + ', ' + st;
   }
   const cityName = (v) => normCity(v).replace(/, TX$/, '');
+  // Each city's main school: shown as a "Near ..." badge and color accents on that city's listings.
+  const SCHOOLS = {
+    'San Marcos, TX': ['Texas State', '#501214', '#B5975A'],
+    'Austin, TX': ['UT Austin', '#BF5700', '#333F48'],
+    'San Antonio, TX': ['UTSA', '#F15A22', '#0C2340'],
+    'College Station, TX': ['Texas A&M', '#500000', '#A7A7A7'],
+    'Bryan, TX': ['Texas A&M', '#500000', '#A7A7A7'],
+    'Houston, TX': ['UH', '#C8102E', '#76232F'],
+    'Denton, TX': ['UNT', '#00853E', '#005A2B'],
+    'Lubbock, TX': ['Texas Tech', '#CC0000', '#1B1B1B'],
+    'Waco, TX': ['Baylor', '#154734', '#FFB81C'],
+    'Arlington, TX': ['UT Arlington', '#0064B1', '#F58025'],
+    'Huntsville, TX': ['Sam Houston', '#F47920', '#1B1B1B'],
+    'Nacogdoches, TX': ['SFA', '#5F259F', '#3B1660'],
+    'El Paso, TX': ['UTEP', '#FF8200', '#041E42'],
+    'Edinburg, TX': ['UTRGV', '#F05023', '#646469'],
+    'Fort Worth, TX': ['TCU', '#4D1979', '#A3A9AC'],
+    'Dallas, TX': ['SMU', '#CC0035', '#354CA1'],
+    'Richardson, TX': ['UT Dallas', '#154734', '#E87500'],
+    'Corpus Christi, TX': ['TAMU-CC', '#0067C5', '#007F3E'],
+    'Kingsville, TX': ['TAMUK', '#0033A0', '#FFC72C'],
+    'Prairie View, TX': ['PVAMU', '#4F2D7F', '#FDB913'],
+    'Stephenville, TX': ['Tarleton', '#4F2D7F', '#1B1B1B'],
+    'Canyon, TX': ['West Texas A&M', '#450084', '#1B1B1B'],
+    'Commerce, TX': ['A&M-Commerce', '#002F5F', '#FFC72C'],
+  };
+  const schoolFor = (city) => SCHOOLS[normCity(city)] || null;
+  // style + class for anything tinted with a city's school colors
+  const schoolAttr = (city) => { const sc = schoolFor(city); return sc ? ` style="--sc1:${sc[1]};--sc2:${sc[2]}"` : ''; };
   // Cities that have open places, most places first
   function openCities() {
     const m = new Map();
@@ -317,7 +346,7 @@
     const media = photosHtml(l) || '<div class="lc-placeholder"><span>🏠</span><small>' + esc(l.complex) + '</small></div>';
     const move = shortDate(l.availableFrom);
     return `
-      <article class="card clickable lcard${l.incentive > 0 ? ' has-incentive' : ''}" id="l-${esc(l.id)}" data-listing="${esc(l.id)}" tabindex="0" aria-label="View details for ${esc(l.complex)}">
+      <article class="card clickable lcard${l.incentive > 0 ? ' has-incentive' : ''}${schoolFor(l.city) ? ' has-school' : ''}"${schoolAttr(l.city)} id="l-${esc(l.id)}" data-listing="${esc(l.id)}" tabindex="0" aria-label="View details for ${esc(l.complex)}">
         <div class="lc-media">
           ${media}
           ${l.incentive > 0 ? `<span class="lc-incentive">💵 ${money(l.incentive)} incentive</span>` : ''}
@@ -325,7 +354,7 @@
         <div class="lc-body">
           <div class="lc-price">${money(l.rent)}<small>/mo</small></div>
           <h3 class="lc-name">${esc(l.complex)}</h3>
-          ${openCities().length > 1 ? `<p class="lc-city">📍 ${esc(cityName(l.city))}</p>` : ''}
+          ${openCities().length > 1 ? `<p class="lc-city">📍 ${esc(cityName(l.city))}${schoolFor(l.city) ? ' · near ' + esc(schoolFor(l.city)[0]) : ''}</p>` : ''}
           <p class="lc-meta">${detailBits(l).map(esc).join(' · ')}</p>
           <p class="lc-dates">Move in <b>${esc(move)}</b>${l.leaseEnds ? ' · until ' + esc(fmtDate(l.leaseEnds)) : ''}</p>
           ${interestLine(l, 'interest-line')}
@@ -358,6 +387,7 @@
           <div class="detail-gallery">${photosHtml(l, { thumbs: true })}</div>
           <div class="detail-intro">
             <h1>${esc(l.complex)}</h1>
+            ${schoolFor(l.city) ? `<span class="school-badge"${schoolAttr(l.city)}><i></i>Near ${esc(schoolFor(l.city)[0])} · ${esc(cityName(l.city))}</span>` : ''}
             ${byLine(l, true)}
             <p class="detail-meta">${detailBits(l).map(esc).join(" · ")}</p>
           </div>
@@ -408,6 +438,11 @@
       (sel.closest('.dd') || sel).hidden = cs.length < 2 && !cur;
       const shown = cur || (cs.length === 1 ? cs[0].city : '');
       $('#board-title').textContent = shown ? 'Lease takeovers in ' + cityName(shown) : 'Lease takeovers';
+      const sc = shown && schoolFor(shown), bs = $('#board-school');
+      if (bs) {
+        bs.hidden = !sc;
+        if (sc) { bs.innerHTML = '<i></i>Near ' + esc(sc[0]); bs.style.setProperty('--sc1', sc[1]); bs.style.setProperty('--sc2', sc[2]); }
+      }
     }
     const cta = `<div class="alert-cta"><div><b>Don't see the right place?</b><span>Get a text or email the moment one fits your budget and move-in date. Free.</span></div><button type="button" class="btn btn-primary" data-open="waitlist-dialog" data-cta="board">Get alerts</button></div>`;
     const cards = list.map(card);
@@ -1254,8 +1289,8 @@
     const cs = openCities();
     const list = cs.length ? cs : [{ city: DEFAULT_CITY, n: 0 }];
     $('#city-list').innerHTML = list.map((c) =>
-      '<button type="button" class="city-opt" data-city="' + esc(c.city) + '"><span class="city-pin">📍</span>' +
-      '<span class="city-txt"><b>' + esc(c.city) + '</b><small>' + (c.city === DEFAULT_CITY ? 'Near Texas State' : 'Lease takeovers') + '</small></span>' +
+      '<button type="button" class="city-opt" data-city="' + esc(c.city) + '"' + schoolAttr(c.city) + '><span class="city-pin">' + (schoolFor(c.city) ? '<i class="school-dot"></i>' : '📍') + '</span>' +
+      '<span class="city-txt"><b>' + esc(c.city) + '</b><small>' + (schoolFor(c.city) ? 'Near ' + esc(schoolFor(c.city)[0]) : 'Lease takeovers') + '</small></span>' +
       '<span class="city-count">' + (c.n ? c.n + ' open' : '') + '</span></button>').join('');
   }
   function pickCity(city) {

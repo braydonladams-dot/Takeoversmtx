@@ -1669,3 +1669,18 @@ body.view-home .home { min-height: calc(100vh - 176px); min-height: calc(100svh 
   footer nav, .site-footer nav { margin-top: .45rem; row-gap: .4rem; }
   footer nav a, footer a { font-size: inherit !important; }
 }
+
+/* ---------- local school colors (names + colors only, no logos) ---------- */
+.lcard.has-school { position: relative; }
+.lcard.has-school::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; z-index: 2; border-radius: inherit;
+  border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: linear-gradient(90deg, var(--sc1), var(--sc1) 70%, var(--sc2)); }
+.school-badge { display: inline-flex; align-items: center; gap: .45rem; padding: .3rem .7rem .3rem .45rem; border-radius: 999px;
+  background: #fff; border: 1px solid var(--line); font-size: .8rem; font-weight: 700; color: var(--ink); width: fit-content; }
+.school-badge[hidden] { display: none; }
+.school-badge i, .school-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; flex: none;
+  background: linear-gradient(135deg, var(--sc1) 0 55%, var(--sc2) 55% 100%); box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--line); }
+.board-top { flex-wrap: wrap; }
+.board-top .school-badge { flex-basis: auto; margin-top: -.2rem; }
+.board-top .board-title + .school-badge { order: 3; }
+.detail-intro .school-badge { margin: .15rem 0 .6rem; }
+.city-opt .school-dot { width: 22px; height: 22px; }
