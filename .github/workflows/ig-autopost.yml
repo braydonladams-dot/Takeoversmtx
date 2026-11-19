@@ -1,0 +1,27 @@
+# Posts every paid $10 Instagram feature to @takeoverleases (its own post), within about 30 minutes of payment.
+# The script exits in seconds when nothing is waiting. Secrets: ADMIN_KEY, IG_TOKEN (repo settings -> secrets).
+name: Instagram auto-post
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: ig-autopost
+  cancel-in-progress: false
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node .github/scripts/ig-autopost.js
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: '17841475006168967'
+          CHROME: /usr/bin/google-chrome

@@ -2008,7 +2008,7 @@
     $('#sub-btn').textContent = j.trial ? (due ? 'Start trial · Pay ' + money(due) : 'Start free trial') : 'Restart · ' + money(due);
     const after = j.trial ? 'Free until ' + ends + ', then ' + monthly + '/month plus tax until you cancel.' : monthly + '/month plus tax until you cancel.';
     $('#sub-fine').textContent = (hasFeature ? 'The $10 feature is one time. ' : '') + after + ' Cancel anytime in your account, and marking your listing taken cancels it automatically.';
-    $('#sub-done-trial').textContent = (j.trial ? 'Your free trial runs until ' + ends + '.' : '') + (hasFeature ? " It'll also be in this week's Featured post on @takeoverleases." : '');
+    $('#sub-done-trial').textContent = (j.trial ? 'Your free trial runs until ' + ends + '.' : '') + (hasFeature ? " It'll also get its own post on @takeoverleases." : '');
     // Only offer the feature afterwards if they wanted it but it couldn't go in this cart
     const offerLater = !!opts.thenFeature && !hasFeature && !j.featured;
     $('#sub-next-feature').hidden = !offerLater;
