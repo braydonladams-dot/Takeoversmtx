@@ -904,8 +904,8 @@
       if (type === 'listing' && !editing) {
         btn.textContent = 'Finishing up…';
         const fw = await freeWeekCheck();
-        if (fw && !fw.freeWeek) {
-          const trialOpened = await startTrial('', { fromListing: true, thenFeature: !!data.wantsFeature, complex: data.complex });
+        if (fw) {
+          const trialOpened = await startTrial('', { fromListing: !fw.freeWeek, freeWeekFromListing: fw.freeWeek, thenFeature: !!data.wantsFeature, complex: data.complex });
           if (trialOpened) { form.reset(); clearPhotos(); return; }
         }
         if (fw && fw.freeWeek) freeWeek = fw;
@@ -923,7 +923,7 @@
         if (freeWeek) $('#free-week-end').textContent = freeWeek.trialEnd ? new Date(freeWeek.trialEnd * 1000).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'next week';
         celebrate(ok);
         // The $10 feature needs a card anyway: in the free week it goes in the same checkout as "keep it up after"
-        if (data.wantsFeature) setTimeout(() => (freeWeek ? startTrial('', { thenFeature: true, freeWeekFromListing: true }) : featurePay('', { fromListing: true })), 1600);
+        if (data.wantsFeature) setTimeout(() => featurePay('', { fromListing: true }), 1600);
       }
       if (type === 'waitlist') offerSave('#waitlist-dialog', data.email);
     } catch (e) {
@@ -1959,7 +1959,7 @@
     }
   });
   // ---------- $7.99/month listing: 7-day free trial, card up front ----------
-  var subState = null, subOpts = {}, subFreeWeek = false;
+  var subState = null, subOpts = {}, subFreeWeek = false, subEnds = '';
   // After a new listing: is it in the no-card free week (live now), or does this person need a card first?
   // null = no fee for them (grandfathered / signed out / couldn't tell).
   async function freeWeekCheck() {
@@ -2015,7 +2015,12 @@
     const hasFeature = !!j.feature;
     const fw = !!j.freeWeek && j.trial;
     subFreeWeek = fw;
-    if (fw) $('#sub-posted').hidden = true;
+    subEnds = ends;
+    if (fw) {
+      $('#sub-posted').textContent = subOpts.freeWeekFromListing ? "✓ You're listed! It's free until " + ends + ', no card needed.' : '✓ Free until ' + ends + ', no card needed.';
+      $('#sub-posted').hidden = false;
+    } else $('#sub-posted').textContent = '✓ Your listing is saved. Last step: start your free trial.';
+    $('#sub-skip').hidden = !fw;
     $('#sub-title').textContent = fw ? (hasFeature ? 'Get featured + keep it up' : 'Keep it up after your free week')
       : j.trial ? (hasFeature ? 'Your free trial + feature' : 'Start your 7-day free trial') : 'Put your listing back up';
     $('#sub-note').textContent = fw ? 'Free until ' + ends + ', then ' + monthly + '/mo' : j.trial ? '7-day free trial, then ' + monthly + '/mo' : 'Back on the board · ' + monthly + '/mo';
@@ -2033,8 +2038,9 @@
     $('#sub-btn').textContent = fw ? (due ? 'Pay ' + money(due) + ' · keep it up' : 'Add card · keep it up') : j.trial ? (due ? 'Start trial · Pay ' + money(due) : 'Start free trial') : 'Restart · ' + money(due);
     const after = j.trial ? 'Free until ' + ends + ', then ' + monthly + '/month plus tax until you cancel.' : monthly + '/month plus tax until you cancel.';
     $('#sub-fine').textContent = (hasFeature ? 'The $10 feature is one time. ' : '') + after + ' Cancel anytime in your account, and marking your listing taken cancels it automatically.';
-    $('#sub-done-title').textContent = fw ? "You're all set 🎉" : "You're listed! 🎉";
-    $('#sub-done-what').textContent = fw ? 'stays up after your free week.' : "will be on the board in a few minutes, and we'll email you your link.";
+    const newList = fw && subOpts.freeWeekFromListing;
+    $('#sub-done-title').textContent = fw && !newList ? "You're all set 🎉" : "You're listed! 🎉";
+    $('#sub-done-what').textContent = newList ? "will be on the board in a few minutes and stays up after your free week." : fw ? 'stays up after your free week.' : "will be on the board in a few minutes, and we'll email you your link.";
     $('#sub-done-trial').textContent = (fw ? 'Nothing is charged until ' + ends + '.' : j.trial ? 'Your free trial runs until ' + ends + '.' : '') + (hasFeature ? " It'll also get its own post on @takeoverleases." : '');
     // Only offer the feature afterwards if they wanted it but it couldn't go in this cart
     const offerLater = !!opts.thenFeature && !hasFeature && !j.featured;
@@ -2115,11 +2121,23 @@
     slideSteps($('.finder-body', d), d.querySelector('[data-step="pay"]'), d.querySelector('[data-step="done"]'), 1);
     setTimeout(() => celebrate(d.querySelector('[data-step="done"]')), 250);
   });
+  $('#sub-skip').addEventListener('click', () => {
+    track('freeweek/skip', 'Free week: skipped card');
+    const d = $('#sub-dialog');
+    const fromListing = !!subOpts.freeWeekFromListing;
+    $('#sub-done-title').textContent = fromListing ? "You're listed! 🎉" : 'No problem';
+    $('#sub-done-what').textContent = fromListing ? "will be on the board in a few minutes, and we'll email you your link." : 'stays up for the rest of your free week.';
+    $('#sub-done-trial').textContent = "It's free until " + (subEnds || 'next week') + ". We'll remind you before then, and you can add a card anytime from your account.";
+    $('#sub-next-feature').hidden = !subOpts.thenFeature;
+    $('#sub-done-btn').textContent = subOpts.thenFeature ? 'Skip for now' : 'Done';
+    slideSteps($('.finder-body', d), d.querySelector('[data-step="pay"]'), d.querySelector('[data-step="done"]'), 1);
+    setTimeout(() => celebrate(d.querySelector('[data-step="done"]')), 250);
+  });
   $('#sub-next-feature').addEventListener('click', () => featurePay(subState ? subState.listingId : '', { fromListing: false }));
   $('#sub-dialog').addEventListener('close', () => {
     const done = !$('#sub-dialog [data-step="done"]').hidden;
     if (subOpts.fromListing && !done) toast("Your listing is saved but won't go live until you add a card. You can finish from your account.", 7000);
-    if (subOpts.freeWeekFromListing && !done) toast("No problem. Your listing is still live free for 7 days. You can add the feature anytime from your account.", 7000);
+    if (subOpts.freeWeekFromListing && !done) toast("You're listed! It's free until " + (subEnds || 'next week') + '. Add a card anytime from your account.', 7000);
     if (done && view === 'me') loadMe();
     subOpts = {};
   });
