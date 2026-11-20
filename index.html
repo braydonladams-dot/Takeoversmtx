@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=1795113329">
+  <link rel="stylesheet" href="styles.css?v=1795218665">
   <script src="/preview.js"></script>
   <script data-goatcounter="https://takeoversmtx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -401,6 +401,14 @@
         <h2 id="listing-success-title">You're listed! 🎉</h2>
         <p class="cele-sub" id="listing-success-sub">Nice work. Your place will be on the board in a few minutes.</p>
       </div>
+      <div class="free-week" id="free-week" hidden>
+        <span class="fw-ic">🗓️</span>
+        <div>
+          <b>Free for 7 days, until <span id="free-week-end">next week</span></b>
+          <p>No card needed. Want it to stay up after that? Add a card now and nothing is charged until then. Or skip it, we'll remind you before your week ends.</p>
+          <button type="button" class="btn btn-outline btn-sm" id="free-week-card">Add a card (optional)</button>
+        </div>
+      </div>
       <ol class="next-steps">
         <li class="is-done"><span class="ns-dot">✓</span><div><b>Submitted</b><small>We've got your listing and photos.</small></div></li>
         <li><span class="ns-dot">2</span><div><b>Goes live on the board</b><small>We'll email your link from <b>Braydon from Takeover Leases</b>. Not in your inbox? Check spam or promotions.</small></div></li>
@@ -663,7 +671,7 @@
     </div>
   </dialog>
 
-  <!-- $7.99/month listing: 7-day free trial, card up front -->
+  <!-- $7.99/month listing: no-card free week, then add a card to keep it up (or card first for repeat listers) -->
   <dialog id="sub-dialog" class="dialog finder pay">
     <button type="button" class="icon-btn finder-close" data-close aria-label="Close">&times;</button>
     <div class="finder-body">
@@ -694,8 +702,8 @@
       <div class="finder-step finder-done" data-step="done" hidden>
         <div class="confetti" aria-hidden="true"></div>
         <div class="cele-badge" aria-hidden="true"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg></div>
-        <h2 class="finder-title">You're listed! 🎉</h2>
-        <p class="finder-hint"><b id="sub-done-listing">Your listing</b> will be on the board in a few minutes, and we'll email you your link. <span id="sub-done-trial"></span></p>
+        <h2 class="finder-title" id="sub-done-title">You're listed! 🎉</h2>
+        <p class="finder-hint"><b id="sub-done-listing">Your listing</b> <span id="sub-done-what">will be on the board in a few minutes, and we'll email you your link.</span> <span id="sub-done-trial"></span></p>
         <p class="si-fine">Share your link everywhere once it's up. Every share helps it get taken faster.</p>
         <button type="button" class="btn btn-feature btn-lg btn-block" id="sub-next-feature" hidden>⭐ Next: get featured on Instagram · $10</button>
         <button type="button" class="btn btn-primary btn-lg btn-block" data-close id="sub-done-btn">Done</button>
@@ -897,9 +905,9 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="config.js?v=1795113329"></script>
-  <script src="app.js?v=1795113329"></script>
-<script src="/topbar.js?v=1795113329" defer></script>
+  <script src="config.js?v=1795218665"></script>
+  <script src="app.js?v=1795218665"></script>
+<script src="/topbar.js?v=1795218665" defer></script>
   <datalist id="tx-cities"><option value="San Marcos, TX"><option value="Austin, TX"><option value="Round Rock, TX"><option value="Georgetown, TX"><option value="Pflugerville, TX"><option value="Cedar Park, TX"><option value="Kyle, TX"><option value="Buda, TX"><option value="New Braunfels, TX"><option value="Seguin, TX"><option value="San Antonio, TX"><option value="College Station, TX"><option value="Bryan, TX"><option value="Houston, TX"><option value="Huntsville, TX"><option value="Prairie View, TX"><option value="Dallas, TX"><option value="Denton, TX"><option value="Fort Worth, TX"><option value="Arlington, TX"><option value="Richardson, TX"><option value="Plano, TX"><option value="Waco, TX"><option value="Lubbock, TX"><option value="El Paso, TX"><option value="Corpus Christi, TX"><option value="Kingsville, TX"><option value="Edinburg, TX"><option value="Laredo, TX"><option value="Nacogdoches, TX"><option value="Stephenville, TX"><option value="Commerce, TX"><option value="Canyon, TX"><option value="Abilene, TX"><option value="San Angelo, TX"><option value="Beaumont, TX"><option value="Tyler, TX"><option value="Killeen, TX"><option value="Wichita Falls, TX"><option value="Odessa, TX"><option value="Midland, TX"></datalist>
 </body>
 </html>

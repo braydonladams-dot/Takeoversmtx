@@ -68,5 +68,10 @@
     "key": "villagesontelluride",
     "name": "The Villages on Telluride",
     "slug": "villages-on-telluride"
+  },
+  {
+    "key": "yugoaustinwaterloo",
+    "name": "Yugo Austin Waterloo",
+    "slug": "yugo-austin-waterloo"
   }
 ]

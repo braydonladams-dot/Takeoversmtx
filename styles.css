@@ -1738,3 +1738,9 @@ body.school-theme .dd-menu .dd-opt.sel, body.school-theme .dd-menu .dd-opt:hover
 body.school-theme .lc-incentive { box-shadow: 0 0 0 2px #fff; }
 /* the logo stays Takeover Leases blue */
 body.school-theme .brand span { background: linear-gradient(135deg, #2f5bea, #7c3aed) !important; color: #fff !important; }
+
+/* No-card free week note on the "You're listed" screen */
+.free-week { display: flex; gap: .9rem; align-items: flex-start; padding: 1.1rem; margin: 0 0 1rem; border-radius: 16px; border: 1.5px solid var(--line, #e2e8f0); background: var(--accent-soft, #eef4ff); animation: card-in .5s both; animation-delay: .2s; }
+.free-week .fw-ic { font-size: 1.5rem; line-height: 1; }
+.free-week b { display: block; margin-bottom: .25rem; }
+.free-week p { margin: 0 0 .7rem; font-size: .92rem; color: var(--muted, #64748b); line-height: 1.45; }
