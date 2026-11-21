@@ -55,6 +55,11 @@
     "slug": "retreat"
   },
   {
+    "key": "thompson",
+    "name": "The Thompson",
+    "slug": "thompson"
+  },
+  {
     "key": "union",
     "name": "Union San Marcos",
     "slug": "union"
