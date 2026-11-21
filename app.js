@@ -67,6 +67,7 @@
     if (msg) { err.textContent = msg; err.hidden = false; return; }
     err.hidden = true;
     const data = Object.fromEntries(new FormData(form).entries());
+    let reply = null;
     data.type = 'interest';
     const btn = $('button[type=submit]', form);
     btn.disabled = true;
@@ -814,6 +815,7 @@
     err.hidden = true;
 
     const data = Object.fromEntries(new FormData(form).entries());
+    let reply = null;
     data.type = type;
     if (type === 'feedback') data.page = location.pathname + location.hash;
     if (type === 'waitlist') {
@@ -890,23 +892,25 @@
       if (DEMO) {
         console.log('[demo] would submit', { ...data, photos: (data.photos || []).length + ' photo(s)' });
       } else {
-        // text/plain avoids a CORS preflight; Apps Script still reads the JSON body.
-        await fetch(API, {
+        // text/plain avoids a CORS preflight; Apps Script still reads the JSON body (and its reply allows any origin).
+        if (type === 'listing' && !editing) loadStripe().catch(() => {}); // warm up the card form while photos upload
+        const res = await fetch(API, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(data),
         });
+        reply = await res.json().catch(() => ({}));
       }
       track('submitted/' + type, 'Submitted: ' + type);
       // Monthly fee on? New listers get a no-card free week (live now). People who already had one add a card first.
       let freeWeek = null;
       if (type === 'listing' && !editing) {
-        btn.textContent = 'Finishing up…';
-        const fw = await freeWeekCheck();
-        if (fw) {
-          const trialOpened = await startTrial('', { fromListing: !fw.freeWeek, freeWeekFromListing: fw.freeWeek, thenFeature: !!data.wantsFeature, complex: data.complex });
-          if (trialOpened) { form.reset(); clearPhotos(); return; }
+        // The reply says if it's on the free week or needs a card first (older backends: ask separately)
+        const fw = reply && reply.id ? ((reply.freeWeek || reply.needsCard) ? reply : null) : await freeWeekCheck();
+        if (fw && session) {
+          form.reset(); clearPhotos();
+          const trialOpened = await startTrial(reply && reply.id ? reply.id : '', { fromListing: !fw.freeWeek, freeWeekFromListing: !!fw.freeWeek, thenFeature: !!data.wantsFeature, complex: data.complex, trialEnd: fw.trialEnd });
+          if (trialOpened) return;
         }
         if (fw && fw.freeWeek) freeWeek = fw;
       }
@@ -916,6 +920,8 @@
       form.hidden = true;
       const ok = $('.form-success', form.closest('dialog'));
       ok.hidden = false;
+      const formDlg = form.closest('dialog');
+      if (formDlg && !formDlg.open) formDlg.showModal(); // the checkout pop-up may have replaced it
       if (type === 'listing' && !editing) {
         const sub = $('#listing-success-sub');
         if (sub) sub.textContent = data.complex ? 'Nice work. Your place at ' + data.complex + ' will be on the board in a few minutes.' : 'Nice work. Your place will be on the board in a few minutes.';
@@ -1960,10 +1966,35 @@
   });
   // ---------- $7.99/month listing: 7-day free trial, card up front ----------
   var subState = null, subOpts = {}, subFreeWeek = false, subEnds = '';
+  // Show the card pop-up immediately (spinner in the cart) so "List it" never sits there waiting
+  function openSubLoading(opts) {
+    const d = $('#sub-dialog');
+    d.querySelectorAll('.finder-step').forEach((el) => (el.hidden = el.dataset.step !== 'pay'));
+    const ends = opts.trialEnd ? new Date(opts.trialEnd * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    $('#sub-posted').textContent = opts.freeWeekFromListing ? "✓ You're listed!" + (ends ? " It's free until " + ends + ', no card needed.' : '') : '✓ Your listing is saved. Last step: start your free trial.';
+    $('#sub-posted').hidden = false;
+    $('#sub-title').textContent = opts.freeWeekFromListing ? 'Keep it up after your free week' : 'Start your 7-day free trial';
+    $('#sub-listing').textContent = opts.complex || 'Your listing';
+    $('#sub-note').textContent = 'Setting up…';
+    $('#sub-due').textContent = '…';
+    $('#sub-cart-feature').hidden = !opts.thenFeature;
+    $('#sub-feature-add').hidden = true;
+    $('#sub-cart-tax').hidden = true;
+    $('#sub-skip').hidden = !opts.freeWeekFromListing;
+    $('#sub-element').innerHTML = '<div class="me-loading"><span class="spinner"></span> Loading secure checkout…</div>';
+    $('#sub-btn').disabled = true;
+    subErr('');
+    if (!d.open) {
+      [...document.querySelectorAll('dialog[open]')].filter((x) => x !== d).forEach((x) => x.close());
+      d.showModal();
+      track('trial/open', 'Trial pop-up opened');
+    }
+  }
   // After a new listing: is it in the no-card free week (live now), or does this person need a card first?
   // null = no fee for them (grandfathered / signed out / couldn't tell).
   async function freeWeekCheck() {
     if (!session || window.TAKEOVER_PREVIEW) return null;
+    if (opts.fromListing || opts.freeWeekFromListing) openSubLoading(opts);
     const ask = () => fetch(CFG.supabaseUrl + '/functions/v1/listing-subscribe', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
@@ -1986,6 +2017,7 @@
     // thenFeature: they picked the $10 Instagram feature, so it goes in the same checkout.
     const feat = opts.thenFeature ? { feature: true } : {};
     const reqBody = listingId ? { listingId, ...feat } : (window.TAKEOVER_PREVIEW && opts.fromListing ? { preview: true, complex: opts.complex || '', ...feat } : feat);
+    if (opts.fromListing || opts.freeWeekFromListing) openSubLoading(opts);
     const ask = () => fetch(CFG.supabaseUrl + '/functions/v1/listing-subscribe', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + session.access_token, apikey: CFG.supabaseKey, 'Content-Type': 'application/json' },
@@ -1999,6 +2031,7 @@
     }
     if (!j.ok) {
       // From the listing form, the caller shows "You're listed" (and the feature pop-up if they picked it).
+      if (d.open && (opts.fromListing || opts.freeWeekFromListing)) { subOpts = {}; d.close(); }
       if (j.error === 'not needed' || j.error === 'no listing') return false;
       toast("Couldn't start the trial. Try again from your account in a minute.", 6000);
       return false;
